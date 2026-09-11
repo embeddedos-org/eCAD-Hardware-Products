@@ -1,58 +1,58 @@
+# Pull Request
+
+## Closing issue
+
+<!--
+Required for human-authored pull requests. Replace #123 below with an issue in
+THIS repository. Cross-repository links and plain mentions do not satisfy policy.
+-->
+
+Fixes #123
+
+> Replace `#123` with the real issue number before requesting review.
+
 ## Summary
 
 <!-- Brief description of what this PR does. -->
 
+## Type of change
 
-## Type of Change
-
-<!-- Check all that apply -->
-
-- [ ] eat — New feature
-- [ ] ix — Bug fix
-- [ ] docs — Documentation only
-- [ ] style — Formatting, no code change
-- [ ] efactor — Code restructuring without behavior change
-- [ ] 	est — Add or fix tests
-- [ ] uild — Build system or dependency changes
-- [ ] ci — CI/CD pipeline changes
-- [ ] perf — Performance improvement
+- [ ] feat - New feature or design
+- [ ] fix - Bug fix or design correction
+- [ ] docs - Documentation only
+- [ ] refactor - Restructuring without behavior or design change
+- [ ] test - Add or fix tests or simulations
+- [ ] build - Build system or dependency change
+- [ ] ci - CI/CD pipeline change
+- [ ] perf - Performance or power-budget improvement
 
 ## Changes
 
-<!-- List each change made in this PR -->
+- Change 1
+- Change 2
 
-- 
-- 
+## Validation
 
-## Testing
+<!-- List commands, CAD checks, simulations, and physical checks actually run. -->
 
-<!-- How was this tested? Which test suites were run? -->
+- [ ] Affected Python tests or simulations pass
+- [ ] BOM, schematic, layout, datasheet, and power assumptions are consistent
+- [ ] Native CAD artifacts were reviewed with the appropriate tool, if changed
+- [ ] Unavailable hardware, fabrication, or specialist checks are identified
 
-- [ ] Unit tests pass (ctest --test-dir build --output-on-failure)
-- [ ] Integration tests pass
-- [ ] Manual testing performed
-- [ ] New tests added for new functionality
+## Pre-submission checklist
 
-## Pre-Submission Checklist
+- [ ] The affected design's maturity and compliance claims remain accurate
+- [ ] Units, references, nets, and part identifiers were checked
+- [ ] Generated artifacts and vendor files are intentionally included, if any
+- [ ] Documentation was updated for changed design behavior or interfaces
+- [ ] Commit messages follow the repository convention
+- [ ] The branch is based on the latest default branch
 
-- [ ] Code compiles without warnings (-Wall -Wextra -Werror for C)
-- [ ] All existing tests pass
-- [ ] New tests added for new functionality
-- [ ] Documentation updated if API changed
-- [ ] Commit messages follow <type>(<scope>): <description> convention
-- [ ] Branch is rebased on latest master
+## Screenshots / logs
 
-## Related Issues
+<!-- If applicable, add screenshots or relevant output. -->
 
-<!-- Reference related issues: Closes #XX, Fixes #YY -->
+## Additional notes
 
-
-## Screenshots / Logs
-
-<!-- If applicable, add screenshots or relevant log output -->
-
-
-## Additional Notes
-
-<!-- Any other context reviewers should know -->
-
+<!-- Include known limitations, unverified checks, and reviewer context. -->

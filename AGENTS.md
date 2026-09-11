@@ -1,98 +1,58 @@
-<!-- generated: eos-ai-scaffold -->
-# Agent Responsibilities
+# Repository Guidance for Agents
 
-Each role owns a slice of the work and does only that slice. Full briefs are in
-[.ai/](./.ai/). These are responsibilities, not a required agent count — one
-agent may hold several roles on a small change. Split when the roles need
-genuinely different context, not by default.
+## Scope and architecture
 
-One rule is structural rather than stylistic: **whoever implements does not
-approve.** Review is a separate role because self-review reliably misses the
-thing the implementer already believes is correct.
+eCAD-Hardware-Products is a collection of hardware and PCB designs organized by
+application domain. Each `*_CAD_Design/` directory is an independent design
+surface with its own maturity. Typical product lines contain datasheets, CSV
+bills of materials, Python power-budget simulations, and `hardware/pcb/`,
+`hardware/cad/`, or `hardware/antenna/` artifacts. Some designs contain KiCad
+schematics and layouts; many artifact directories are intentionally placeholders.
 
-## Planner — [.ai/planner.md](./.ai/planner.md)
+Read the affected domain README, product datasheet, and design notes before
+editing. Do not propagate a part, net, unit, power assumption, or maturity claim
+across product lines unless the checked-in sources establish that relationship.
+Follow the specialist role briefs in [`.ai/`](./.ai/) and the handoff protocol in
+[`HANDOFF.md`](./HANDOFF.md). The implementer must not act as the approving
+reviewer.
 
-- Understand the request.
-- Break work into tasks.
-- Assign work.
+## Validation
 
-## Architect — [.ai/architect.md](./.ai/architect.md)
+Use checks that match the changed artifact and report unavailable hardware or CAD
+tooling explicitly.
 
-- Design structure.
-- Choose patterns.
-- Own dependencies, scalability and maintainability.
+- For repository Python tests, run `python run_all_tests.py`; it invokes the
+  checked-in pytest suites under `tests/`.
+- For a power-budget change, run the affected product's
+  `simulation/power_budget_sim.py` as documented in [`README.md`](./README.md)
+  and compare its output with the datasheet and BOM assumptions.
+- For BOM changes, verify identifiers, quantities, units, sourcing fields, and
+  references against the affected schematic, layout, datasheet, and power model.
+- For KiCad or mechanical CAD changes, review the native artifact with the
+  appropriate installed tool and record any checks that could not be performed.
+- Documentation-only governance changes do not prove a hardware design, build,
+  simulation, fabrication package, or compliance claim.
 
-## Backend — [.ai/backend.md](./.ai/backend.md)
+The root CMake commands in [`CONTRIBUTING.md`](./CONTRIBUTING.md) do not map
+to a root `CMakeLists.txt` in the current tree. Do not report those commands as
+a successful repository build unless the missing build definition is reconciled.
 
-- APIs
-- Database
-- Business logic
+## Hardware change discipline
 
-## Frontend — [.ai/frontend.md](./.ai/frontend.md)
+Keep changes inside the affected domain and product line. Preserve units,
+reference designators, net names, layer-stack assumptions, and BOM-to-design
+traceability. Do not commit generated fabrication output, vendor libraries,
+large exports, credentials, or proprietary source material unless the repository
+already tracks that exact artifact and the change requires it.
 
-- UI
-- Components
-- Accessibility
+Treat design, prototype, pre-production, certification, safety, medical,
+defense, and regulatory statements as evidence-backed status claims. Never
+upgrade a maturity or compliance claim based only on a document edit or
+simulation result.
 
-## Testing — [.ai/testing.md](./.ai/testing.md)
-
-- Unit tests
-- Integration tests
-- Regression tests
-
-## Security — [.ai/security.md](./.ai/security.md)
-
-- Authentication and authorization
-- Validation
-- Secrets
-- Dependency review
-
-## Performance — [.ai/performance.md](./.ai/performance.md)
-
-- Profiling
-- Optimization
-- Scalability
-
-## Reviewer — [.ai/reviewer.md](./.ai/reviewer.md)
-
-- Final review
-- Verify requirements
-- Merge findings
-
-## Documentation — [.ai/docs.md](./.ai/docs.md)
-
-- README
-- API docs
-- Changelog
-- Migration and architecture notes
-
-## Release — [.ai/release.md](./.ai/release.md)
-
-- Release notes
-- Deployment preparation
-- Rollback guidance
-
----
-
-## Switching roles
-
-Switch when the task changes domain, when specialist knowledge is required,
-when independent review is required, or when the context has grown past what
-one agent can hold accurately. Every switch runs the protocol in
-[HANDOFF.md](./HANDOFF.md).
-
-## Finding work that is not yours
-
-You will. The rule is: **record it, do not absorb it, do not drop it.**
-
-| What you found | Do |
-|----------------|-----|
-| A defect unrelated to your task | Note it in [TASKS.md](./TASKS.md) and keep going. |
-| A defect your change would sit on top of | Stop; say it blocks you; propose fixing it as its own task. |
-| A security issue | Report immediately, whatever role you hold. This one never waits for a handoff. |
-| A design decision missing from the plan | Return to the architect rather than deciding it inside an implementation. |
-| Work that belongs to a role nobody assigned | Say so. An unowned task is how requirements go missing. |
-
-Silently fixing something outside your task makes the diff unreviewable.
-Silently ignoring it means nobody ever looks again. Neither is acceptable; the
-note is what makes the difference.
+Every human-authored pull request must use a GitHub-recognized closing keyword
+for an issue in this repository, for example `Fixes #123`. Cross-repository
+issues and plain issue mentions do not satisfy the linked-issue policy. Follow
+[`.github/PULL_REQUEST_TEMPLATE.md`](./.github/PULL_REQUEST_TEMPLATE.md), and
+keep the published Wiki snapshot in [`docs/wiki/`](./docs/wiki/) synchronized
+when Wiki content changes.
