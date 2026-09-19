@@ -43,6 +43,30 @@ def _limited(text: str) -> str:
     return data[:MAX_CAPTURE_BYTES].decode("utf-8", errors="replace") + "\n[output truncated]"
 
 
+def relative_input_path(root: Path, source: Path) -> Path:
+    """Return a contained lexical path, tolerating Windows 8.3 path aliases."""
+    resolved_root = root.resolve()
+    resolved_source = source.resolve()
+    relative = Path(
+        os.path.relpath(
+            os.path.abspath(str(source)),
+            os.path.abspath(str(root)),
+        )
+    )
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ValueError(f"adapter input escapes product root: {source}")
+    ancestor = resolved_source
+    for _part in relative.parts:
+        ancestor = ancestor.parent
+    try:
+        contained = os.path.samefile(ancestor, resolved_root)
+    except OSError:
+        contained = False
+    if not contained:
+        raise ValueError(f"adapter input escapes product root: {source}")
+    return relative
+
+
 def run_process(request: ProcessRequest) -> ProcessResult:
     """Run without a shell in a temporary workspace containing copied inputs."""
     if not request.argv:
@@ -53,23 +77,7 @@ def run_process(request: ProcessRequest) -> ProcessResult:
         input_relatives = set()
         for source in request.input_files:
             resolved = source.resolve()
-            relative = Path(
-                os.path.relpath(
-                    os.path.abspath(str(source)),
-                    os.path.abspath(str(request.input_root)),
-                )
-            )
-            if relative.is_absolute() or ".." in relative.parts:
-                raise ValueError(f"adapter input escapes product root: {source}")
-            ancestor = resolved
-            for _part in relative.parts:
-                ancestor = ancestor.parent
-            try:
-                contained = os.path.samefile(ancestor, root)
-            except OSError:
-                contained = False
-            if not contained:
-                raise ValueError(f"adapter input escapes product root: {source}")
+            relative = relative_input_path(request.input_root, source)
             if source.is_symlink():
                 raise ValueError(f"adapter inputs may not be symbolic links: {relative}")
             input_relatives.add(relative)

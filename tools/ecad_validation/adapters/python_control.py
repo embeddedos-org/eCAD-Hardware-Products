@@ -9,7 +9,7 @@ from pathlib import Path
 
 from ..models import ExecutionStatus, Verdict
 from .base import Adapter, AdapterRequest, AdapterResult, Capability
-from .process import ProcessRequest, run_process
+from .process import ProcessRequest, relative_input_path, run_process
 
 
 class PythonControlAdapter(Adapter):
@@ -36,11 +36,8 @@ class PythonControlAdapter(Adapter):
                 summary="Python model cannot be executed",
                 tool_version=capability.version,
             )
-        script = request.input_files[0].resolve()
-        try:
-            relative = script.relative_to(request.product_root.resolve()).as_posix()
-        except ValueError as exc:
-            raise ValueError(f"Python model escapes product root: {script}") from exc
+        script = request.input_files[0]
+        relative = relative_input_path(request.product_root, script).as_posix()
         process = run_process(
             ProcessRequest(
                 argv=[capability.executable or sys.executable, relative, *request.arguments],

@@ -5,7 +5,7 @@ from __future__ import annotations
 from ..models import ExecutionStatus, Verdict
 from .base import Adapter, AdapterRequest, AdapterResult, Capability
 from .capabilities import probe_executable
-from .process import ProcessRequest, run_process
+from .process import ProcessRequest, relative_input_path, run_process
 
 
 class KiCadAdapter(Adapter):
@@ -33,8 +33,8 @@ class KiCadAdapter(Adapter):
                 summary="KiCad board input is missing",
                 tool_version=capability.version,
             )
-        board = request.input_files[0].resolve()
-        relative = board.relative_to(request.product_root.resolve()).as_posix()
+        board = request.input_files[0]
+        relative = relative_input_path(request.product_root, board).as_posix()
         process = run_process(
             ProcessRequest(
                 argv=[

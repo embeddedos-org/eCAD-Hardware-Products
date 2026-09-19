@@ -5,7 +5,7 @@ from __future__ import annotations
 from ..models import ExecutionStatus, Verdict
 from .base import Adapter, AdapterRequest, AdapterResult, Capability
 from .capabilities import probe_executable
-from .process import ProcessRequest, run_process
+from .process import ProcessRequest, relative_input_path, run_process
 
 
 class NgspiceAdapter(Adapter):
@@ -33,8 +33,8 @@ class NgspiceAdapter(Adapter):
                 summary="SPICE netlist is missing",
                 tool_version=capability.version,
             )
-        netlist = request.input_files[0].resolve()
-        relative = netlist.relative_to(request.product_root.resolve()).as_posix()
+        netlist = request.input_files[0]
+        relative = relative_input_path(request.product_root, netlist).as_posix()
         process = run_process(
             ProcessRequest(
                 argv=[

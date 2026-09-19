@@ -10,6 +10,7 @@ from pathlib import Path
 from ..models import ExecutionStatus, Verdict
 from .base import Adapter, AdapterRequest, AdapterResult, Capability
 from .capabilities import probe_executable
+from .process import relative_input_path
 
 
 class HDLAdapter(Adapter):
@@ -47,16 +48,12 @@ class HDLAdapter(Adapter):
                 reason_code="RTL_INPUT_MISSING",
                 summary="RTL sources and testbench are missing",
             )
-        root = request.product_root.resolve()
         with tempfile.TemporaryDirectory(prefix="ecad-hdl-") as temporary:
             workspace = Path(temporary)
             relatives = []
             for source in request.input_files:
                 resolved = source.resolve()
-                try:
-                    relative = resolved.relative_to(root)
-                except ValueError as exc:
-                    raise ValueError(f"RTL input escapes product root: {source}") from exc
+                relative = relative_input_path(request.product_root, source)
                 if source.is_symlink():
                     raise ValueError(f"RTL input may not be a symbolic link: {relative}")
                 target = workspace / relative

@@ -291,7 +291,7 @@ def execute_cases(product: Path, gate: GateLevel, directory: str) -> List[CheckR
             if declared.is_symlink() or not candidate.is_file():
                 invalid_path = str(value)
                 break
-            input_files.append(candidate)
+            input_files.append(declared)
         if invalid_path is not None:
             results.append(
                 _blocked(

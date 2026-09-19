@@ -1016,6 +1016,7 @@ def apply_baseline(result: Result, baseline: dict[str, dict[str, str]]) -> Resul
         >>> apply_baseline(r, {"x": {"boom": "pre-existing"}}).ok
         True
     """
+    result.target = result.target.replace("\\", "/")
     accepted = baseline.get(result.target, {})
     if not accepted:
         return result
