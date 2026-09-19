@@ -76,7 +76,39 @@ python3 power_budget_sim.py
 ```
 
 Design docs reference the [EoSim](https://github.com/embeddedos-org/EoSim)
-digital-twin platform for hardware-in-the-loop testing.
+digital-twin platform for hardware-in-the-loop testing. Running one script alone
+does not establish that a product is validated.
+
+## Evidence-backed product validation
+
+The committed `tools/catalog/product_inventory.json` is the complete product
+execution set. The v1 contract schemas and policy requirements are documented in
+`docs/hardware-validation-contract-v1.md`.
+
+Discover inventory drift and inspect local tool capabilities:
+
+```bash
+python3 tools/validate_products.py discover
+python3 tools/validate_products.py capabilities
+```
+
+Execute V0-V4 for every inventoried product and write hash-bound receipts:
+
+```bash
+python3 tools/validate_products.py validate \
+  --all \
+  --output /tmp/ecad-validation \
+  --mode evidence
+python3 tools/validate_products.py verify-bundle \
+  /tmp/ecad-validation/bundle.json
+```
+
+`--mode evidence` succeeds when the selected inventory was executed and valid
+receipts were written. Individual products may still be honestly `FAIL`,
+`BLOCKED`, `INCONCLUSIVE`, or `NOT_RUN`. Use `--mode gate` for a release check;
+it succeeds only when every selected product has real `PASS` evidence for V0,
+V1, V2, V3, and V4. Historical baseline entries never waive a failed or missing
+requirement.
 
 ## License
 

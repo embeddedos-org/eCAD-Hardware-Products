@@ -1,0 +1,337 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://embeddedos.org/schemas/hardware-validation/v1/validation-receipt.schema.json",
+  "title": "eCAD Hardware Validation Receipt v1",
+  "description": "Reproducible V0-V4 results for one product and one exact input tree.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "contract_version",
+    "receipt_id",
+    "product",
+    "source",
+    "started_at",
+    "completed_at",
+    "tools",
+    "gates",
+    "overall_verdict",
+    "execution_complete",
+    "eligible_for_ebuild"
+  ],
+  "properties": {
+    "$schema": {"const": "https://embeddedos.org/schemas/hardware-validation/v1/validation-receipt.schema.json"},
+    "contract_version": {"$ref": "common.schema.json#/definitions/contractVersion"},
+    "receipt_id": {"$ref": "common.schema.json#/definitions/identifier"},
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path"],
+      "properties": {
+        "id": {"$ref": "common.schema.json#/definitions/identifier"},
+        "path": {"$ref": "common.schema.json#/definitions/relativePath"}
+      }
+    },
+    "source": {"$ref": "common.schema.json#/definitions/sourceRevision"},
+    "started_at": {"type": "string", "format": "date-time"},
+    "completed_at": {"type": "string", "format": "date-time"},
+    "tools": {
+      "type": "array",
+      "items": {"$ref": "common.schema.json#/definitions/tool"},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "gates": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {"$ref": "#/definitions/gateResult"},
+      "allOf": [
+        {"contains": {"properties": {"gate": {"const": "V0"}}, "required": ["gate"]}},
+        {"contains": {"properties": {"gate": {"const": "V1"}}, "required": ["gate"]}},
+        {"contains": {"properties": {"gate": {"const": "V2"}}, "required": ["gate"]}},
+        {"contains": {"properties": {"gate": {"const": "V3"}}, "required": ["gate"]}},
+        {"contains": {"properties": {"gate": {"const": "V4"}}, "required": ["gate"]}}
+      ]
+    },
+    "overall_verdict": {"enum": ["PASS", "FAIL", "NOT_RUN", "BLOCKED", "INCONCLUSIVE"]},
+    "execution_complete": {"type": "boolean"},
+    "eligible_for_ebuild": {"type": "boolean"}
+  },
+  "definitions": {
+    "checkResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_id",
+        "gate",
+        "domain",
+        "layer",
+        "tool_id",
+        "execution_status",
+        "verdict",
+        "reason_code",
+        "summary",
+        "required",
+        "requirement_ids",
+        "metrics",
+        "evidence",
+        "findings"
+      ],
+      "properties": {
+        "check_id": {"$ref": "common.schema.json#/definitions/identifier"},
+        "gate": {"$ref": "common.schema.json#/definitions/gate"},
+        "domain": {"$ref": "common.schema.json#/definitions/domain"},
+        "layer": {"$ref": "common.schema.json#/definitions/layer"},
+        "tool_id": {"$ref": "common.schema.json#/definitions/identifier"},
+        "execution_status": {"$ref": "common.schema.json#/definitions/executionStatus"},
+        "verdict": {"$ref": "common.schema.json#/definitions/verdict"},
+        "reason_code": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$"},
+        "summary": {"$ref": "common.schema.json#/definitions/nonEmptyString"},
+        "required": {"type": "boolean"},
+        "requirement_ids": {
+          "type": "array",
+          "items": {"$ref": "common.schema.json#/definitions/identifier"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "metrics": {"type": "object"},
+        "evidence": {
+          "type": "array",
+          "items": {"$ref": "common.schema.json#/definitions/evidenceReference"},
+          "uniqueItems": true
+        },
+        "findings": {
+          "type": "array",
+          "items": {"$ref": "common.schema.json#/definitions/nonEmptyString"},
+          "uniqueItems": true
+        },
+        "baseline_finding_id": {"$ref": "common.schema.json#/definitions/identifier"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"verdict": {"const": "PASS"}}},
+          "then": {
+            "properties": {
+              "execution_status": {"const": "completed"},
+              "evidence": {"minItems": 1}
+            },
+            "not": {"required": ["baseline_finding_id"]}
+          }
+        },
+        {
+          "if": {"properties": {"evidence": {"maxItems": 0}}},
+          "then": {"properties": {"verdict": {"const": "BLOCKED"}}}
+        },
+        {
+          "if": {"required": ["baseline_finding_id"]},
+          "then": {"properties": {"verdict": {"enum": ["FAIL", "BLOCKED"]}}}
+        },
+        {
+          "if": {"properties": {"execution_status": {"enum": ["skipped", "unavailable"]}}},
+          "then": {"properties": {"verdict": {"enum": ["NOT_RUN", "BLOCKED"]}}}
+        },
+        {
+          "if": {"properties": {"execution_status": {"enum": ["timed_out", "crashed"]}}},
+          "then": {"properties": {"verdict": {"enum": ["FAIL", "BLOCKED", "INCONCLUSIVE"]}}}
+        }
+      ]
+    },
+    "gateResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gate", "verdict", "checks"],
+      "properties": {
+        "gate": {"$ref": "common.schema.json#/definitions/gate"},
+        "verdict": {"$ref": "common.schema.json#/definitions/verdict"},
+        "checks": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/checkResult"},
+          "minItems": 1,
+          "contains": {"properties": {"required": {"const": true}}, "required": ["required"]}
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"verdict": {"const": "PASS"}}},
+          "then": {
+            "properties": {
+              "checks": {
+                "items": {
+                  "if": {"properties": {"required": {"const": true}}},
+                  "then": {"properties": {"verdict": {"const": "PASS"}}}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"gate": {"const": "V0"}}},
+          "then": {"properties": {"checks": {"items": {"properties": {"gate": {"const": "V0"}}}}}}
+        },
+        {
+          "if": {"properties": {"gate": {"const": "V1"}}},
+          "then": {"properties": {"checks": {"items": {"properties": {"gate": {"const": "V1"}}}}}}
+        },
+        {
+          "if": {"properties": {"gate": {"const": "V2"}}},
+          "then": {"properties": {"checks": {"items": {"properties": {"gate": {"const": "V2"}}}}}}
+        },
+        {
+          "if": {"properties": {"gate": {"const": "V3"}}},
+          "then": {"properties": {"checks": {"items": {"properties": {"gate": {"const": "V3"}}}}}}
+        },
+        {
+          "if": {"properties": {"gate": {"const": "V4"}}},
+          "then": {"properties": {"checks": {"items": {"properties": {"gate": {"const": "V4"}}}}}}
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"overall_verdict": {"const": "PASS"}}},
+      "then": {
+        "properties": {
+          "eligible_for_ebuild": {"const": true},
+          "execution_complete": {"const": true},
+          "gates": {"items": {"properties": {"verdict": {"const": "PASS"}}}}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"overall_verdict": {"enum": ["FAIL", "NOT_RUN", "BLOCKED", "INCONCLUSIVE"]}}},
+      "then": {"properties": {"eligible_for_ebuild": {"const": false}}}
+    },
+    {
+      "if": {"properties": {"eligible_for_ebuild": {"const": true}}},
+      "then": {"properties": {"overall_verdict": {"const": "PASS"}}}
+    },
+    {
+      "if": {"properties": {"execution_complete": {"const": true}}},
+      "then": {
+        "properties": {
+          "gates": {
+            "items": {
+              "properties": {
+                "checks": {
+                  "items": {
+                    "properties": {"execution_status": {"const": "completed"}}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gates": {
+            "contains": {
+              "type": "object",
+              "properties": {"verdict": {"const": "FAIL"}},
+              "required": ["verdict"]
+            }
+          }
+        }
+      },
+      "then": {"properties": {"overall_verdict": {"const": "FAIL"}}}
+    },
+    {
+      "if": {
+        "allOf": [
+          {
+            "properties": {
+              "gates": {
+                "not": {
+                  "contains": {
+                    "type": "object",
+                    "properties": {"verdict": {"const": "FAIL"}},
+                    "required": ["verdict"]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "gates": {
+                "contains": {
+                  "type": "object",
+                  "properties": {"verdict": {"enum": ["BLOCKED", "WARNING"]}},
+                  "required": ["verdict"]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "then": {"properties": {"overall_verdict": {"const": "BLOCKED"}}}
+    },
+    {
+      "if": {
+        "allOf": [
+          {
+            "properties": {
+              "gates": {
+                "not": {
+                  "contains": {
+                    "type": "object",
+                    "properties": {"verdict": {"enum": ["FAIL", "BLOCKED", "WARNING"]}},
+                    "required": ["verdict"]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "gates": {
+                "contains": {
+                  "type": "object",
+                  "properties": {"verdict": {"const": "INCONCLUSIVE"}},
+                  "required": ["verdict"]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "then": {"properties": {"overall_verdict": {"const": "INCONCLUSIVE"}}}
+    },
+    {
+      "if": {
+        "allOf": [
+          {
+            "properties": {
+              "gates": {
+                "not": {
+                  "contains": {
+                    "type": "object",
+                    "properties": {"verdict": {"enum": ["FAIL", "BLOCKED", "WARNING", "INCONCLUSIVE"]}},
+                    "required": ["verdict"]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "gates": {
+                "contains": {
+                  "type": "object",
+                  "properties": {"verdict": {"const": "NOT_RUN"}},
+                  "required": ["verdict"]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "then": {"properties": {"overall_verdict": {"const": "NOT_RUN"}}}
+    }
+  ]
+}

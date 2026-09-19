@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://embeddedos.org/schemas/hardware-validation/v1/requirements.schema.json",
+  "title": "eCAD Validation Requirements Catalog v1",
+  "description": "Normative, evidence-backed requirements that validation checks evaluate.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "contract_version", "catalog_id", "requirements", "provenance"],
+  "properties": {
+    "$schema": {"const": "https://embeddedos.org/schemas/hardware-validation/v1/requirements.schema.json"},
+    "contract_version": {"$ref": "common.schema.json#/definitions/contractVersion"},
+    "catalog_id": {"$ref": "common.schema.json#/definitions/identifier"},
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "requirement_id",
+          "title",
+          "statement",
+          "gate",
+          "domains",
+          "layers",
+          "required",
+          "acceptance_criteria",
+          "evidence_types"
+        ],
+        "properties": {
+          "requirement_id": {"$ref": "common.schema.json#/definitions/identifier"},
+          "title": {"$ref": "common.schema.json#/definitions/nonEmptyString"},
+          "statement": {"$ref": "common.schema.json#/definitions/nonEmptyString"},
+          "gate": {"$ref": "common.schema.json#/definitions/gate"},
+          "domains": {
+            "type": "array",
+            "items": {"$ref": "common.schema.json#/definitions/domain"},
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "layers": {
+            "type": "array",
+            "items": {"$ref": "common.schema.json#/definitions/layer"},
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "required": {"type": "boolean"},
+          "acceptance_criteria": {
+            "type": "array",
+            "items": {"$ref": "common.schema.json#/definitions/nonEmptyString"},
+            "minItems": 1
+          },
+          "evidence_types": {
+            "type": "array",
+            "items": {"$ref": "common.schema.json#/definitions/nonEmptyString"},
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "provenance": {"$ref": "common.schema.json#/definitions/provenance"}
+  }
+}

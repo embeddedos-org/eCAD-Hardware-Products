@@ -1,22 +1,21 @@
-name: CI — eCAD-Hardware-Products
+name: CI - eCAD-Hardware-Products
 
 on:
   push:
-    branches: [main, develop]
+    branches: [master, develop]
     tags: ["v*"]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
-  # ── Test Matrix ───────────────────────────────────────────────────────────
   test:
     name: Test (Python ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
         os: [ubuntu-22.04, macos-13, windows-2022]
-      fail-fast: false
 
     steps:
       - uses: actions/checkout@v4
@@ -26,12 +25,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
+          cache-dependency-path: tools/requirements.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-cov pytest-benchmark mypy ruff
+          python -m pip install -r tools/requirements.txt
+          python -m pip install pytest mypy ruff
 
       - name: Lint (ruff)
         run: ruff check . --select=E,F,W --ignore=E501
@@ -41,63 +41,53 @@ jobs:
         run: mypy . --ignore-missing-imports --no-strict-optional
         continue-on-error: true
 
-      - name: Run unit tests
-        run: |
-          python -m pytest tests/unit/ -v --tb=short \
-            --cov=. --cov-report=xml --cov-report=term-missing
+      - name: Run complete test suite
+        run: python run_all_tests.py --tb=short
 
-      - name: Run functional tests
-        run: python -m pytest tests/functional/ -v --tb=short
-        continue-on-error: false
-
-      - name: Run performance benchmarks
-        run: python -m pytest tests/performance/ -v --tb=short --benchmark-json=benchmark.json
-        continue-on-error: true
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        with:
-          files: coverage.xml
-          flags: ecad-py${{ matrix.python-version }}
-
-  # ── Build Python Package ──────────────────────────────────────────────────
-  build:
-    name: Build Python Package
+  validation-evidence:
+    name: Execute complete V0-V4 evidence run
     runs-on: ubuntu-22.04
-    needs: test
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-      - name: Build wheel
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tools/requirements.txt
+
+      - name: Install validation dependencies
         run: |
-          pip install build
-          python -m build
-      - name: Upload wheel
+          python -m pip install --upgrade pip
+          python -m pip install -r tools/requirements.txt
+
+      - name: Execute every inventoried product
+        run: >-
+          python tools/validate_products.py validate --all
+          --output validation-output --mode evidence
+
+      - name: Independently verify emitted bundle
+        run: >-
+          python tools/validate_products.py verify-bundle
+          validation-output/bundle.json
+
+      - name: Upload validation evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ecad-wheel
-          path: dist/*.whl
-          retention-days: 90
+          name: ecad-validation-${{ github.sha }}
+          path: validation-output/
+          if-no-files-found: error
 
-  # ── Release ───────────────────────────────────────────────────────────────
   release:
     name: Create GitHub Release
     runs-on: ubuntu-22.04
-    needs: [test, build]
+    needs: [test, validation-evidence]
     if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: softprops/action-gh-release@v2
         with:
-          python-version: "3.11"
-      - name: Build release package
-        run: |
-          pip install build
-          python -m build
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/*
           generate_release_notes: true

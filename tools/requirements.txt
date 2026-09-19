@@ -6,6 +6,9 @@
 # On a PEP 668 "externally managed" distribution (Ubuntu 24.04+, Debian 12+)
 # add --break-system-packages, or create a virtualenv first.
 
+# Validates the versioned hardware contract schemas and their negative cases.
+jsonschema>=4.18,<5
+
 # Parses the generated .kicad_pcb files without needing KiCad installed.
 # validate_products.py uses it to confirm the copper layer count matches the
 # datasheet and that Edge.Cuts carries real outline geometry.
@@ -42,6 +45,6 @@ numpy>=1.26
 # ~/.local/bin/openscad. If neither exists, enclosure rendering is reported as
 # a skip with the reason, never as a pass.
 #
-# KiCad itself is NOT required. kiutils parses the board files in pure Python.
-# Installing KiCad would additionally allow kicad-cli DRC and Gerber export,
-# which this repository does not yet run.
+# KiCad itself is not required for the structural V0-V2 parser checks because
+# kiutils reads board files in pure Python. Declared V3/V4 `kicad` cases do run
+# kicad-cli; if it is unavailable, the required case is reported as BLOCKED.

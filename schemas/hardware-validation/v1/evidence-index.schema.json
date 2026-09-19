@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://embeddedos.org/schemas/hardware-validation/v1/evidence-index.schema.json",
+  "title": "eCAD Validation Evidence Index v1",
+  "description": "Hash-bound index of evidence produced or consumed by a validation run.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "contract_version",
+    "product_id",
+    "receipt_sha256",
+    "generated_at",
+    "evidence"
+  ],
+  "properties": {
+    "$schema": {"const": "https://embeddedos.org/schemas/hardware-validation/v1/evidence-index.schema.json"},
+    "contract_version": {"$ref": "common.schema.json#/definitions/contractVersion"},
+    "product_id": {"$ref": "common.schema.json#/definitions/identifier"},
+    "receipt_sha256": {"$ref": "common.schema.json#/definitions/sha256"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "evidence": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence_id",
+          "path",
+          "sha256",
+          "media_type",
+          "size_bytes",
+          "check_id",
+          "requirement_ids",
+          "producer_tool_id",
+          "captured_at",
+          "provenance"
+        ],
+        "properties": {
+          "evidence_id": {"$ref": "common.schema.json#/definitions/identifier"},
+          "path": {"$ref": "common.schema.json#/definitions/relativePath"},
+          "sha256": {"$ref": "common.schema.json#/definitions/sha256"},
+          "media_type": {"$ref": "common.schema.json#/definitions/nonEmptyString"},
+          "size_bytes": {"type": "integer", "minimum": 0},
+          "check_id": {"$ref": "common.schema.json#/definitions/identifier"},
+          "requirement_ids": {
+            "type": "array",
+            "items": {"$ref": "common.schema.json#/definitions/identifier"},
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "producer_tool_id": {"$ref": "common.schema.json#/definitions/identifier"},
+          "captured_at": {"type": "string", "format": "date-time"},
+          "provenance": {"$ref": "common.schema.json#/definitions/provenance"}
+        }
+      }
+    }
+  }
+}
