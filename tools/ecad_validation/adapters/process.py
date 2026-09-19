@@ -53,10 +53,23 @@ def run_process(request: ProcessRequest) -> ProcessResult:
         input_relatives = set()
         for source in request.input_files:
             resolved = source.resolve()
+            relative = Path(
+                os.path.relpath(
+                    os.path.abspath(str(source)),
+                    os.path.abspath(str(request.input_root)),
+                )
+            )
+            if relative.is_absolute() or ".." in relative.parts:
+                raise ValueError(f"adapter input escapes product root: {source}")
+            ancestor = resolved
+            for _part in relative.parts:
+                ancestor = ancestor.parent
             try:
-                relative = resolved.relative_to(root)
-            except ValueError as exc:
-                raise ValueError(f"adapter input escapes product root: {source}") from exc
+                contained = os.path.samefile(ancestor, root)
+            except OSError:
+                contained = False
+            if not contained:
+                raise ValueError(f"adapter input escapes product root: {source}")
             if source.is_symlink():
                 raise ValueError(f"adapter inputs may not be symbolic links: {relative}")
             input_relatives.add(relative)
@@ -79,9 +92,15 @@ def run_process(request: ProcessRequest) -> ProcessResult:
             "LC_ALL": "C.UTF-8",
             "LANG": "C.UTF-8",
         }
+        for key in ("SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT"):
+            if key in os.environ:
+                environment[key] = os.environ[key]
         environment.update({str(key): str(value) for key, value in request.environment.items()})
         Path(environment["HOME"]).mkdir(parents=True, exist_ok=True)
         Path(environment["TMPDIR"]).mkdir(parents=True, exist_ok=True)
+        if os.name == "nt":
+            environment["TEMP"] = environment["TMPDIR"]
+            environment["TMP"] = environment["TMPDIR"]
         argv = [executable, *request.argv[1:]]
         try:
             completed = subprocess.run(

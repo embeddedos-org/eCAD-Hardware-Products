@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import math
 from pathlib import Path
 from typing import Dict, List, Mapping, Type
@@ -274,11 +275,17 @@ def execute_cases(product: Path, gate: GateLevel, directory: str) -> List[CheckR
         input_files = []
         invalid_path = None
         for value in input_values:
-            declared = product / str(value)
+            relative = Path(str(value))
+            declared = product / relative
             candidate = declared.resolve()
+            ancestor = candidate
+            for _part in relative.parts:
+                ancestor = ancestor.parent
             try:
-                candidate.relative_to(product.resolve())
-            except ValueError:
+                contained = os.path.samefile(ancestor, product.resolve())
+            except OSError:
+                contained = False
+            if not contained:
                 invalid_path = str(value)
                 break
             if declared.is_symlink() or not candidate.is_file():
