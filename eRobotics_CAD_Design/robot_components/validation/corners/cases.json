@@ -1,0 +1,19 @@
+{
+  "$schema": "https://embeddedos.org/schemas/hardware-validation/v1/validation-cases.schema.json",
+  "contract_version": "1.0.0",
+  "gate": "V4",
+  "cases": [
+    {
+      "id": "eservo200-rated-load-corner",
+      "adapter": "python_control",
+      "domain": "integrated_physics",
+      "inputs": ["simulation/power_budget_metrics.py"],
+      "timeout_seconds": 60,
+      "requirement_ids": ["ESERVO-PWR-002"],
+      "metric_limits": {
+        "total_electronics_w": {"maximum": 1.0},
+        "bus_current_a_48v": {"maximum": 5.0}
+      }
+    }
+  ]
+}
