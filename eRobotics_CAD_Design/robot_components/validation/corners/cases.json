@@ -7,12 +7,20 @@
       "id": "eservo200-rated-load-corner",
       "adapter": "python_control",
       "domain": "integrated_physics",
-      "inputs": ["simulation/power_budget_metrics.py"],
+      "inputs": [
+        "simulation/power_budget_metrics.py"
+      ],
       "timeout_seconds": 60,
-      "requirement_ids": ["ESERVO-PWR-002"],
+      "requirement_ids": [
+        "POLICY:V4-CORNER"
+      ],
       "metric_limits": {
-        "total_electronics_w": {"maximum": 1.0},
-        "bus_current_a_48v": {"maximum": 5.0}
+        "total_electronics_w": {
+          "maximum": 1.0
+        },
+        "bus_current_a_48v": {
+          "maximum": 5.0
+        }
       }
     }
   ]

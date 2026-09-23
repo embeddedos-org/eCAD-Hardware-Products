@@ -7,12 +7,22 @@
       "id": "eservo200-power-budget-reference",
       "adapter": "python_control",
       "domain": "system_design",
-      "inputs": ["simulation/power_budget_metrics.py"],
+      "inputs": [
+        "simulation/power_budget_metrics.py"
+      ],
       "timeout_seconds": 60,
-      "requirement_ids": ["ESERVO-PWR-001"],
+      "requirement_ids": [
+        "POLICY:V3-GOLDEN"
+      ],
       "expected_metrics": {
-        "total_electronics_w": {"value": 0.791, "absolute_tolerance": 0.001},
-        "bus_current_a_48v": {"value": 4.386, "absolute_tolerance": 0.01}
+        "total_electronics_w": {
+          "value": 0.791,
+          "absolute_tolerance": 0.001
+        },
+        "bus_current_a_48v": {
+          "value": 4.386,
+          "absolute_tolerance": 0.01
+        }
       }
     }
   ]
