@@ -1,0 +1,49 @@
+{
+  "$schema": "https://embeddedos.org/schemas/devboard-cad/v1/board-record.schema.json",
+  "contract_version": "1.0.0",
+  "board_id": "raspberry-pi:pico",
+  "manufacturer": "Raspberry Pi",
+  "family": "Raspberry Pi Pico",
+  "board": "Raspberry Pi Pico",
+  "part_number": "UNVERIFIED",
+  "revision": "unverified",
+  "mcu_soc": "UNVERIFIED",
+  "files": {
+    "schematic": {"available": null, "url": null, "verified_revision": null},
+    "pcb_source": {"available": null, "url": null, "verified_revision": null},
+    "gerbers": {"available": null, "url": null, "verified_revision": null},
+    "bom": {"available": null, "url": null, "verified_revision": null},
+    "pick_and_place": {"available": null, "url": null, "verified_revision": null},
+    "step": {"available": null, "url": null, "verified_revision": null},
+    "dxf": {"available": null, "url": null, "verified_revision": null},
+    "stl": {"available": null, "url": null, "verified_revision": null},
+    "kicad": {"available": null, "url": null, "verified_revision": null},
+    "eagle": {"available": null, "url": null, "verified_revision": null},
+    "altium": {"available": null, "url": null, "verified_revision": null},
+    "mechanical": {"available": null, "url": null, "verified_revision": null}
+  },
+  "licenses": {
+    "hardware_license": "UNVERIFIED",
+    "cad_license": null,
+    "schematic_license": null,
+    "pcb_license": null,
+    "mechanical_cad_license": null,
+    "redistribution_allowed": null,
+    "modification_allowed": null,
+    "commercial_use_allowed": null,
+    "attribution_required": null,
+    "license_url": null
+  },
+  "sources": {
+    "source_tier": "community",
+    "official_product_page": "https://www.raspberrypi.com/",
+    "official_cad_repository": null,
+    "official_github_repository": null,
+    "official_documentation": null,
+    "direct_cad_download": null,
+    "direct_schematic_download": null,
+    "direct_gerber_download": null
+  },
+  "record_status": "incomplete",
+  "notes": "Identity stub only. Per issue #28 section 10, part number, MCU, revision, per-format availability, and licensing must each be checked against official Raspberry Pi sources before being recorded. No availability claim is made by this record."
+}

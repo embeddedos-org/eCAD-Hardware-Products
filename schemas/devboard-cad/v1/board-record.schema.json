@@ -1,0 +1,117 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://embeddedos.org/schemas/devboard-cad/v1/board-record.schema.json",
+  "title": "eCAD Development Board CAD Record v1",
+  "description": "Board-by-board master record for third-party development-board CAD availability, per eCAD-Hardware-Products issue #28. Records exact board identity, official-source hierarchy, per-format CAD availability, licensing, and commercial-reuse status. Family-level claims are not permitted: every record binds one exact board and revision.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "contract_version",
+    "board_id",
+    "manufacturer",
+    "family",
+    "board",
+    "part_number",
+    "revision",
+    "mcu_soc",
+    "files",
+    "licenses",
+    "sources",
+    "record_status"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://embeddedos.org/schemas/devboard-cad/v1/board-record.schema.json"
+    },
+    "contract_version": {"const": "1.0.0"},
+    "board_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+    },
+    "manufacturer": {"$ref": "#/definitions/nonEmptyString"},
+    "family": {"$ref": "#/definitions/nonEmptyString"},
+    "board": {"$ref": "#/definitions/nonEmptyString"},
+    "part_number": {"$ref": "#/definitions/nonEmptyString"},
+    "revision": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Exact hardware revision this record was verified against, or 'unverified' when the revision could not be confirmed."
+    },
+    "mcu_soc": {"$ref": "#/definitions/nonEmptyString"},
+    "files": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schematic", "pcb_source", "gerbers", "bom", "mechanical"],
+      "properties": {
+        "schematic": {"$ref": "#/definitions/fileAvailability"},
+        "pcb_source": {"$ref": "#/definitions/fileAvailability"},
+        "gerbers": {"$ref": "#/definitions/fileAvailability"},
+        "bom": {"$ref": "#/definitions/fileAvailability"},
+        "pick_and_place": {"$ref": "#/definitions/fileAvailability"},
+        "step": {"$ref": "#/definitions/fileAvailability"},
+        "dxf": {"$ref": "#/definitions/fileAvailability"},
+        "stl": {"$ref": "#/definitions/fileAvailability"},
+        "kicad": {"$ref": "#/definitions/fileAvailability"},
+        "eagle": {"$ref": "#/definitions/fileAvailability"},
+        "altium": {"$ref": "#/definitions/fileAvailability"},
+        "mechanical": {"$ref": "#/definitions/fileAvailability"}
+      }
+    },
+    "licenses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hardware_license", "redistribution_allowed", "modification_allowed", "commercial_use_allowed"],
+      "properties": {
+        "hardware_license": {"$ref": "#/definitions/nonEmptyString"},
+        "cad_license": {"type": ["string", "null"]},
+        "schematic_license": {"type": ["string", "null"]},
+        "pcb_license": {"type": ["string", "null"]},
+        "mechanical_cad_license": {"type": ["string", "null"]},
+        "redistribution_allowed": {"type": ["boolean", "null"]},
+        "modification_allowed": {"type": ["boolean", "null"]},
+        "commercial_use_allowed": {"type": ["boolean", "null"]},
+        "attribution_required": {"type": ["boolean", "null"]},
+        "license_url": {"type": ["string", "null"], "format": "uri"}
+      }
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_tier", "official_product_page"],
+      "properties": {
+        "source_tier": {
+          "enum": ["manufacturer_official", "authorized_distributor", "community"]
+        },
+        "official_product_page": {"type": "string", "format": "uri"},
+        "official_cad_repository": {"type": ["string", "null"], "format": "uri"},
+        "official_github_repository": {"type": ["string", "null"], "format": "uri"},
+        "official_documentation": {"type": ["string", "null"], "format": "uri"},
+        "direct_cad_download": {"type": ["string", "null"], "format": "uri"},
+        "direct_schematic_download": {"type": ["string", "null"], "format": "uri"},
+        "direct_gerber_download": {"type": ["string", "null"], "format": "uri"}
+      }
+    },
+    "record_status": {
+      "enum": ["verified", "partial", "incomplete"]
+    },
+    "notes": {"type": "string"}
+  },
+  "definitions": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "fileAvailability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["available"],
+      "properties": {
+        "available": {"type": ["boolean", "null"]},
+        "url": {"type": ["string", "null"], "format": "uri"},
+        "verified_revision": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

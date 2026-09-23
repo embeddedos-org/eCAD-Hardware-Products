@@ -1,0 +1,29 @@
+# Requirements for eRobotics_CAD_Design/robot_components (eServo-200).
+# Values below are taken directly from product_datasheet.md sections
+# "Electrical Specifications - eServo-200" and the power_budget_sim.py model.
+# No new engineering claims are introduced here.
+requirements:
+  - requirement_id: ESERVO-PWR-001
+    title: Electronics power budget under 1 W excluding motor power
+    statement: Total electronics power from the power_budget_sim model shall be below 1.0 W.
+    gate: V3
+    domains: [system_design]
+    layers: [simulation, validation]
+    required: true
+    acceptance_criteria:
+      - model emits total_electronics_w below 1.0
+    evidence_types: [application/json]
+  - requirement_id: ESERVO-PWR-002
+    title: 48 V bus current within connector rating at rated load
+    statement: Input current at 200 W rated motor power and 0.95 efficiency shall be below 5.0 A.
+    gate: V4
+    domains: [system_design, integrated_physics]
+    layers: [simulation, validation]
+    required: true
+    acceptance_criteria:
+      - model emits bus_current_a_48v below 5.0
+    evidence_types: [application/json]
+provenance:
+  source_type: repository
+  source_path: eRobotics_CAD_Design/robot_components/product_datasheet.md
+  recorded_at: "2026-09-23T00:00:00Z"
