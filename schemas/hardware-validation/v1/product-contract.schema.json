@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://embeddedos.org/schemas/hardware-validation/v1/product-contract.schema.json",
+  "title": "eCAD Product Validation Contract v1",
+  "description": "Declares the validation scope and requirement set for one hardware product.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "contract_version",
+    "contract_id",
+    "product",
+    "validation_scope",
+    "requirements",
+    "provenance"
+  ],
+  "properties": {
+    "$schema": {"const": "https://embeddedos.org/schemas/hardware-validation/v1/product-contract.schema.json"},
+    "contract_version": {"$ref": "common.schema.json#/definitions/contractVersion"},
+    "contract_id": {"$ref": "common.schema.json#/definitions/identifier"},
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "path"],
+      "properties": {
+        "id": {"$ref": "common.schema.json#/definitions/identifier"},
+        "name": {"$ref": "common.schema.json#/definitions/nonEmptyString"},
+        "path": {"$ref": "common.schema.json#/definitions/relativePath"}
+      }
+    },
+    "validation_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gates", "domains", "layers"],
+      "properties": {
+        "gates": {
+          "type": "array",
+          "items": {"$ref": "common.schema.json#/definitions/gate"},
+          "minItems": 5,
+          "maxItems": 5,
+          "uniqueItems": true
+        },
+        "domains": {
+          "type": "array",
+          "items": {"$ref": "common.schema.json#/definitions/domain"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "layers": {
+          "type": "array",
+          "items": {"$ref": "common.schema.json#/definitions/layer"},
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["catalog", "requirement_ids"],
+      "properties": {
+        "catalog": {"$ref": "common.schema.json#/definitions/artifactReference"},
+        "requirement_ids": {
+          "type": "array",
+          "items": {"$ref": "common.schema.json#/definitions/identifier"},
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "baseline_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["finding_id", "requirement_id", "verdict", "reason", "evidence"],
+        "properties": {
+          "finding_id": {"$ref": "common.schema.json#/definitions/identifier"},
+          "requirement_id": {"$ref": "common.schema.json#/definitions/identifier"},
+          "verdict": {"enum": ["FAIL", "BLOCKED"]},
+          "reason": {"$ref": "common.schema.json#/definitions/nonEmptyString"},
+          "evidence": {
+            "type": "array",
+            "items": {"$ref": "common.schema.json#/definitions/evidenceReference"},
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        }
+      },
+      "uniqueItems": true
+    },
+    "provenance": {"$ref": "common.schema.json#/definitions/provenance"}
+  }
+}

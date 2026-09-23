@@ -1016,6 +1016,7 @@ def apply_baseline(result: Result, baseline: dict[str, dict[str, str]]) -> Resul
         >>> apply_baseline(r, {"x": {"boom": "pre-existing"}}).ok
         True
     """
+    result.target = result.target.replace("\\", "/")
     accepted = baseline.get(result.target, {})
     if not accepted:
         return result
@@ -1149,4 +1150,9 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    contract_commands = {"discover", "capabilities", "validate", "verify-bundle"}
+    if len(sys.argv) > 1 and sys.argv[1] in contract_commands:
+        from ecad_validation.cli import main as contract_main
+
+        sys.exit(contract_main(sys.argv[1:]))
     sys.exit(main())

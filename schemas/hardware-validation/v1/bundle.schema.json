@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://embeddedos.org/schemas/hardware-validation/v1/bundle.schema.json",
+  "title": "eCAD Validation Bundle v1",
+  "description": "Hash-bound set of contract, requirements, input manifest, receipt, and evidence index documents.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "contract_version",
+    "bundle_id",
+    "product_id",
+    "created_at",
+    "created_by",
+    "documents"
+  ],
+  "properties": {
+    "$schema": {"const": "https://embeddedos.org/schemas/hardware-validation/v1/bundle.schema.json"},
+    "contract_version": {"$ref": "common.schema.json#/definitions/contractVersion"},
+    "bundle_id": {"$ref": "common.schema.json#/definitions/identifier"},
+    "product_id": {"$ref": "common.schema.json#/definitions/identifier"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "created_by": {"$ref": "common.schema.json#/definitions/tool"},
+    "documents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["product_contract", "requirements", "product_manifest", "validation_receipt", "evidence_index"],
+      "properties": {
+        "product_contract": {"$ref": "common.schema.json#/definitions/artifactReference"},
+        "requirements": {"$ref": "common.schema.json#/definitions/artifactReference"},
+        "product_manifest": {"$ref": "common.schema.json#/definitions/artifactReference"},
+        "validation_receipt": {"$ref": "common.schema.json#/definitions/artifactReference"},
+        "evidence_index": {"$ref": "common.schema.json#/definitions/artifactReference"}
+      }
+    }
+  }
+}

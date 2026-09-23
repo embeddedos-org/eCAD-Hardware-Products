@@ -334,6 +334,20 @@ class TestProductDataValidates(unittest.TestCase):
             f"product data validation failed:\n{result.stdout}{result.stderr}",
         )
 
+    def test_baseline_keys_are_portable_across_path_separators(self):
+        outcome = validate_products.Result(
+            target="division\\product", failures=["known defect"]
+        )
+
+        validate_products.apply_baseline(
+            outcome,
+            {"division/product": {"known defect": "tracked historical defect"}},
+        )
+
+        self.assertTrue(outcome.ok)
+        self.assertEqual(outcome.target, "division/product")
+        self.assertEqual(len(outcome.known), 1)
+
     def test_validator_detects_a_broken_bom(self):
         """The validator must be able to fail; a check that cannot fail is not a check."""
         import tempfile

@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://embeddedos.org/schemas/hardware-validation/v1/repository-bundle.schema.json",
+  "title": "eCAD Repository Validation Bundle v1",
+  "description": "Hash-bound index of product receipts and shared evidence for one complete repository inventory.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "contract_version",
+    "source_commit",
+    "inventory_sha256",
+    "inventory",
+    "all_products_executed",
+    "receipts",
+    "summary",
+    "evidence_index"
+  ],
+  "properties": {
+    "$schema": {"const": "https://embeddedos.org/schemas/hardware-validation/v1/repository-bundle.schema.json"},
+    "contract_version": {"$ref": "common.schema.json#/definitions/contractVersion"},
+    "source_commit": {"type": "string", "pattern": "^[a-f0-9]{7,64}$"},
+    "inventory_sha256": {"$ref": "common.schema.json#/definitions/sha256"},
+    "inventory": {"$ref": "common.schema.json#/definitions/artifactReference"},
+    "all_products_executed": {
+      "type": "boolean",
+      "description": "True only when every inventoried product has a receipt containing exact V0-V4 gate coverage; it does not imply that every check completed or passed."
+    },
+    "receipts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "product_id",
+          "path",
+          "sha256",
+          "verdict",
+          "execution_complete",
+          "eligible_for_ebuild",
+          "bundle"
+        ],
+        "properties": {
+          "product_id": {"$ref": "common.schema.json#/definitions/identifier"},
+          "path": {"$ref": "common.schema.json#/definitions/relativePath"},
+          "sha256": {"$ref": "common.schema.json#/definitions/sha256"},
+          "verdict": {"enum": ["PASS", "FAIL", "NOT_RUN", "BLOCKED", "INCONCLUSIVE"]},
+          "execution_complete": {"type": "boolean"},
+          "eligible_for_ebuild": {"type": "boolean"},
+          "bundle": {"$ref": "common.schema.json#/definitions/artifactReference"}
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"verdict": {"const": "PASS"}}},
+            "then": {
+              "properties": {
+                "execution_complete": {"const": true},
+                "eligible_for_ebuild": {"const": true}
+              }
+            }
+          },
+          {
+            "if": {"properties": {"verdict": {"enum": ["FAIL", "NOT_RUN", "BLOCKED", "INCONCLUSIVE"]}}},
+            "then": {"properties": {"eligible_for_ebuild": {"const": false}}}
+          },
+          {
+            "if": {"properties": {"eligible_for_ebuild": {"const": true}}},
+            "then": {"properties": {"verdict": {"const": "PASS"}}}
+          }
+        ]
+      }
+    },
+    "summary": {"$ref": "common.schema.json#/definitions/artifactReference"},
+    "evidence_index": {"$ref": "common.schema.json#/definitions/artifactReference"}
+  }
+}

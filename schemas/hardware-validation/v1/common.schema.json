@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://embeddedos.org/schemas/hardware-validation/v1/common.schema.json",
+  "title": "eCAD Hardware Validation v1 Common Types",
+  "description": "Shared closed types for the eCAD hardware validation contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "contractVersion": {
+      "const": "1.0.0"
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:[\\\\/])(?!.*(^|/)\\.\\.(/|$))[^\\\\]+$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "gate": {
+      "enum": ["V0", "V1", "V2", "V3", "V4"]
+    },
+    "domain": {
+      "enum": [
+        "eda_circuit",
+        "physical_design",
+        "system_design",
+        "device_modeling",
+        "data_management",
+        "integrated_physics"
+      ]
+    },
+    "layer": {
+      "enum": ["design", "model", "simulation", "validation"]
+    },
+    "verdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "WARNING",
+        "NOT_RUN",
+        "BLOCKED",
+        "INCONCLUSIVE"
+      ]
+    },
+    "executionStatus": {
+      "enum": ["completed", "skipped", "unavailable", "timed_out", "crashed"]
+    },
+    "artifactReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "media_type", "size_bytes"],
+      "properties": {
+        "path": {"$ref": "#/definitions/relativePath"},
+        "sha256": {"$ref": "#/definitions/sha256"},
+        "media_type": {"$ref": "#/definitions/nonEmptyString"},
+        "size_bytes": {"type": "integer", "minimum": 0}
+      }
+    },
+    "evidenceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_id", "path", "sha256", "media_type", "size_bytes"],
+      "properties": {
+        "evidence_id": {"$ref": "#/definitions/identifier"},
+        "path": {"$ref": "#/definitions/relativePath"},
+        "sha256": {"$ref": "#/definitions/sha256"},
+        "media_type": {"$ref": "#/definitions/nonEmptyString"},
+        "size_bytes": {"type": "integer", "minimum": 0}
+      }
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool_id", "name", "version", "invocation", "settings"],
+      "properties": {
+        "tool_id": {"$ref": "#/definitions/identifier"},
+        "name": {"$ref": "#/definitions/nonEmptyString"},
+        "version": {"$ref": "#/definitions/nonEmptyString"},
+        "executable_sha256": {"$ref": "#/definitions/sha256"},
+        "invocation": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1
+        },
+        "settings": {"type": "object"}
+      }
+    },
+    "sourceRevision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit", "dirty", "input_sha256"],
+      "properties": {
+        "repository": {"$ref": "#/definitions/nonEmptyString"},
+        "commit": {"type": "string", "pattern": "^[a-f0-9]{7,64}$"},
+        "dirty": {"type": "boolean"},
+        "input_sha256": {"$ref": "#/definitions/sha256"}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_type", "recorded_at"],
+      "properties": {
+        "source_type": {"enum": ["repository", "generated", "external"]},
+        "source_path": {"$ref": "#/definitions/relativePath"},
+        "source_uri": {"type": "string", "format": "uri"},
+        "source_commit": {"type": "string", "pattern": "^[a-f0-9]{7,64}$"},
+        "generator_tool_id": {"$ref": "#/definitions/identifier"},
+        "recorded_at": {"type": "string", "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"source_type": {"const": "repository"}}},
+          "then": {"required": ["source_path", "source_commit"]}
+        },
+        {
+          "if": {"properties": {"source_type": {"const": "generated"}}},
+          "then": {"required": ["generator_tool_id"]}
+        },
+        {
+          "if": {"properties": {"source_type": {"const": "external"}}},
+          "then": {"required": ["source_uri"]}
+        }
+      ]
+    }
+  }
+}

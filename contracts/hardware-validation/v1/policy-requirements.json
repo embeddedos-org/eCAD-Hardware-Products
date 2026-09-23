@@ -1,0 +1,87 @@
+{
+  "$schema": "https://embeddedos.org/schemas/hardware-validation/v1/requirements.schema.json",
+  "contract_version": "1.0.0",
+  "catalog_id": "ecad-hardware-validation-policy-v1",
+  "requirements": [
+    {
+      "requirement_id": "POLICY:V0-SCHEMA",
+      "title": "Machine-checkable artifact contract",
+      "statement": "Every inventoried product must provide parseable, versioned, traceable design artifacts and required metadata without relying on a historical baseline waiver.",
+      "gate": "V0",
+      "domains": ["data_management", "system_design"],
+      "layers": ["design", "validation"],
+      "required": true,
+      "acceptance_criteria": [
+        "The product is present exactly once in the committed inventory.",
+        "Required artifacts parse and conform to their declared schemas.",
+        "Every reported input is bound to a SHA-256 digest."
+      ],
+      "evidence_types": ["application/json", "text/csv", "text/markdown"]
+    },
+    {
+      "requirement_id": "POLICY:V1-SANITY",
+      "title": "Executable sanity checks",
+      "statement": "Every applicable design or model must parse, compile, elaborate, or execute with finite values and an available declared tool capability.",
+      "gate": "V1",
+      "domains": ["eda_circuit", "system_design", "device_modeling", "data_management"],
+      "layers": ["design", "model", "simulation", "validation"],
+      "required": true,
+      "acceptance_criteria": [
+        "Required tools and versions are recorded.",
+        "Missing tools or models are BLOCKED rather than passed.",
+        "Successful checks contain direct evidence from the executed artifact."
+      ],
+      "evidence_types": ["application/json", "text/plain", "text/x-python"]
+    },
+    {
+      "requirement_id": "POLICY:V2-INVARIANTS",
+      "title": "Engineering invariants",
+      "statement": "Every product must satisfy its applicable structural, arithmetic, connectivity, geometry, interface, model, and cross-domain invariants.",
+      "gate": "V2",
+      "domains": ["eda_circuit", "physical_design", "system_design", "device_modeling", "data_management", "integrated_physics"],
+      "layers": ["design", "model", "simulation", "validation"],
+      "required": true,
+      "acceptance_criteria": [
+        "BOM arithmetic and reference identities reconcile.",
+        "CAD, netlist, board, and declared system relationships agree where applicable.",
+        "Every invariant links to evidence and a stable check identifier."
+      ],
+      "evidence_types": ["application/json", "application/octet-stream", "text/plain"]
+    },
+    {
+      "requirement_id": "POLICY:V3-GOLDEN",
+      "title": "Traceable golden/reference agreement",
+      "statement": "Every applicable model must reproduce a reviewed reference case using declared solver settings, provenance, metrics, and tolerances.",
+      "gate": "V3",
+      "domains": ["eda_circuit", "physical_design", "system_design", "device_modeling", "integrated_physics"],
+      "layers": ["model", "simulation", "validation"],
+      "required": true,
+      "acceptance_criteria": [
+        "The reference identity and provenance are recorded.",
+        "The deterministic adapter executes and emits finite metrics.",
+        "Every metric falls within its reviewed tolerance."
+      ],
+      "evidence_types": ["application/json", "text/plain"]
+    },
+    {
+      "requirement_id": "POLICY:V4-CORNER",
+      "title": "Reviewed corner coverage",
+      "statement": "Every product must execute its applicable reviewed boundary, load, timing, fault, and environmental cases with deterministic settings.",
+      "gate": "V4",
+      "domains": ["eda_circuit", "physical_design", "system_design", "device_modeling", "integrated_physics"],
+      "layers": ["model", "simulation", "validation"],
+      "required": true,
+      "acceptance_criteria": [
+        "Corner definitions identify their requirement and provenance.",
+        "Seeds, timesteps, solver settings, and limits are recorded where applicable.",
+        "Every required measured metric remains within the declared bounds."
+      ],
+      "evidence_types": ["application/json", "text/plain"]
+    }
+  ],
+  "provenance": {
+    "source_type": "external",
+    "source_uri": "https://github.com/embeddedos-org/eCAD-Hardware-Products/issues/27",
+    "recorded_at": "2026-09-19T07:00:00Z"
+  }
+}

@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-import sys
-import subprocess
+"""Run the complete checked-in pytest suite."""
 
-def main():
-    print("=== Running all production-ready tests via pytest ===")
-    result = subprocess.run(["pytest", "tests/unit", "tests/functional", "tests/performance", "tests/simulation", "-v"], capture_output=False)
-    sys.exit(result.returncode)
+import subprocess
+import sys
+from typing import Optional, Sequence
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    """Run every test below tests/ and return pytest's exit status."""
+    extra_args = list(sys.argv[1:] if argv is None else argv)
+    command = [sys.executable, "-m", "pytest", "tests", "-v", *extra_args]
+
+    print("=== Running complete test suite via pytest ===", flush=True)
+    return subprocess.run(command, check=False).returncode
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
