@@ -481,6 +481,7 @@ Verification (2026-09-29, macOS 26.6.2 arm64, Python 3.14.4, Icarus Verilog 13.0
 |----|------|-------|-------------|----------|
 | T-001 | Product data validation engine, generator, component library, taxonomy manifest, and 67 products | — | `validate_products.py --run` · `generate_products.py --check` · `unittest discover` | `132/132 targets passed`, `0 file(s) stale`, `Ran 76 tests ... OK` (2026-08-08) |
 | T-007 | CAD generation and tool-backed CAD validation for every catalog-managed product | — | `validate_products.py --run --render` | `132/132 targets passed`; 67 enclosures rendered by OpenSCAD 2021.01, 67 boards parsed by kiutils, 67 outlines parsed by ezdxf (2026-08-08) |
+| T-011 | Stop a hardware factory-test CLI from failing pytest collection | testing | reviewer | `eRadar360_CAD_Design/simulation/factory_test/eradar360_factory_test.py` matches `test_*.py`, but its eleven `test_*(demo: bool)` functions take a mode flag rather than fixtures, so pytest collected them and failed each with `fixture 'demo' not found` — 10 errors per run. Added `pytest.ini` with `testpaths = tests`. The script still runs directly: `--demo` completes with `Verdict: PASS — SHIP`. Result: 85 passed, 1741 subtests, 0 errors. |
 
 ---
 
