@@ -19,6 +19,13 @@ Exit codes:
     2 = Test setup error
 """
 
+# This module is a factory-test CLI, not a pytest suite. Its ten
+# subsystem checks are named test_* and take a `demo` argument, so pytest
+# collects them and then errors at setup with "fixture 'demo' not found"
+# — ten errors in a repository whose own tests all pass. __test__ tells
+# pytest to collect nothing here; it means nothing to the script itself.
+__test__ = False
+
 import argparse
 import json
 import os
