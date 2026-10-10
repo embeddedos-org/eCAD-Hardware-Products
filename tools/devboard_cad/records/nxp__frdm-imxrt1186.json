@@ -1,0 +1,71 @@
+{
+  "$schema": "https://embeddedos.org/schemas/devboard-cad/v1/board-record.schema.json",
+  "contract_version": "1.1.0",
+  "board_id": "nxp__frdm-imxrt1186",
+  "manufacturer": "NXP",
+  "family": "FRDM",
+  "board": "FRDM-IMXRT1186",
+  "part_number": "UNVERIFIED",
+  "revision": "unverified",
+  "mcu_soc": "NXP i.MX RT1186",
+  "hardware_revision": null,
+  "fpga": null,
+  "cpu_architecture": "Arm Cortex-M7 + Cortex-M33",
+  "product_status": "unknown",
+  "files": {
+    "schematic": {
+      "available": null,
+      "url": null,
+      "verified_revision": null,
+      "evidence": null
+    },
+    "pcb_source": {
+      "available": null,
+      "url": null,
+      "verified_revision": null,
+      "evidence": null
+    },
+    "gerbers": {
+      "available": null,
+      "url": null,
+      "verified_revision": null,
+      "evidence": null
+    },
+    "bom": {
+      "available": null,
+      "url": null,
+      "verified_revision": null,
+      "evidence": null
+    },
+    "mechanical": {
+      "available": null,
+      "url": null,
+      "verified_revision": null,
+      "evidence": null
+    }
+  },
+  "licenses": {
+    "hardware_license": "UNVERIFIED",
+    "cad_license": null,
+    "schematic_license": null,
+    "pcb_license": null,
+    "mechanical_cad_license": null,
+    "redistribution_allowed": null,
+    "modification_allowed": null,
+    "commercial_use_allowed": null,
+    "attribution_required": null,
+    "license_url": null
+  },
+  "sources": {
+    "source_tier": "community",
+    "official_product_page": "https://www.nxp.com/FRDM-IMXRT1186",
+    "official_cad_repository": null,
+    "official_github_repository": null,
+    "official_documentation": null,
+    "direct_cad_download": null,
+    "direct_schematic_download": null,
+    "direct_gerber_download": null
+  },
+  "record_status": "incomplete",
+  "notes": "Intake from the 2026-10-10 research sweep: 800 MHz Cortex-M7 + 300 MHz Cortex-M33, 2x Gigabit Ethernet (TSN switch) + 2x Fast Ethernet (EtherCAT or TSN, jumper-routed). The TSN bridging-model reference for the eNet lane (docs/tsn-ethercat-lane.md). No availability determined yet \u2014 all formats null per the tri-state contract. MCU is heterogeneous: 800 MHz Cortex-M7 (application) + 300 MHz Cortex-M33 (real-time/communications) with EdgeLock Secure Enclave; 2x GbE TSN switch + 2x Fast Ethernet EtherCAT/TSN (jumper-routed)."
+}

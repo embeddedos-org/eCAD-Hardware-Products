@@ -1,0 +1,71 @@
+{
+  "$schema": "https://embeddedos.org/schemas/devboard-cad/v1/board-record.schema.json",
+  "contract_version": "1.1.0",
+  "board_id": "lilygo__t-dongle-c5",
+  "manufacturer": "LILYGO",
+  "family": "T-Dongle",
+  "board": "T-Dongle-C5",
+  "part_number": "UNVERIFIED",
+  "revision": "unverified",
+  "mcu_soc": "Espressif ESP32-C5HR8",
+  "hardware_revision": null,
+  "fpga": null,
+  "cpu_architecture": "RISC-V",
+  "product_status": "unknown",
+  "files": {
+    "schematic": {
+      "available": null,
+      "url": null,
+      "verified_revision": null,
+      "evidence": null
+    },
+    "pcb_source": {
+      "available": null,
+      "url": null,
+      "verified_revision": null,
+      "evidence": null
+    },
+    "gerbers": {
+      "available": null,
+      "url": null,
+      "verified_revision": null,
+      "evidence": null
+    },
+    "bom": {
+      "available": null,
+      "url": null,
+      "verified_revision": null,
+      "evidence": null
+    },
+    "mechanical": {
+      "available": null,
+      "url": null,
+      "verified_revision": null,
+      "evidence": null
+    }
+  },
+  "licenses": {
+    "hardware_license": "UNVERIFIED",
+    "cad_license": null,
+    "schematic_license": null,
+    "pcb_license": null,
+    "mechanical_cad_license": null,
+    "redistribution_allowed": null,
+    "modification_allowed": null,
+    "commercial_use_allowed": null,
+    "attribution_required": null,
+    "license_url": null
+  },
+  "sources": {
+    "source_tier": "community",
+    "official_product_page": "https://lilygo.cc/products/t-dongle-c5",
+    "official_cad_repository": null,
+    "official_github_repository": null,
+    "official_documentation": null,
+    "direct_cad_download": null,
+    "direct_schematic_download": null,
+    "direct_gerber_download": null
+  },
+  "record_status": "incomplete",
+  "notes": "Intake from the 2026-10-10 research sweep: ESP32-C5 dual-band Wi-Fi 6 + BLE + 802.15.4, 16 MB flash / 8 MB PSRAM. No availability determined yet \u2014 all formats null per the tri-state contract."
+}
