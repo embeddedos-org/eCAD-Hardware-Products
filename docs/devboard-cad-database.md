@@ -187,7 +187,23 @@ still has that digest and every quote is still in it, so a vendor changing its t
 leaves the record as it was and reports the refusal. A statement can be limited to the files
 it covers: Raspberry Pi's MIT licence for the Raspberry Pi 5 covers the 3D model, so only
 `cad_license` and `mechanical_cad_license` are set and `hardware_license` says
-"MIT (3D model only)".
+"MIT (3D model only)". The mirror honours that scope file by file. Gerber and drill files
+need `pcb_license` and STEP, IGES, STL, VRML, OBJ and DXF models `mechanical_cad_license`,
+known by their content whatever their suffix. A native design document is known by its
+suffix: a schematic (`.sch`, `.kicad_sch`, `.SchDoc`, OrCAD `.dsn`) needs `schematic_license`,
+a board (`.brd`, `.kicad_pcb`, `.PcbDoc`) `pcb_license`, and SolidWorks, Fusion 360 and
+FreeCAD models `mechanical_cad_license`. Projects, libraries and rule files (`.kicad_pro`,
+`.kicad_sym`, `.kicad_mod`, `.lbr`, `.SchLib`, `.PcbLib`, `.PrjPcb`, Fritzing `.fzz`) belong to
+the whole design: they need `cad_license`, and a licence that leaves any kind of file out
+does not reach them, so the Raspberry Pi 5's would not copy a project file. A file outside
+the licence is not copied; it is listed in the board's `ATTRIBUTION.md` under "Not covered by
+the licence" and in the manifest's `excluded`. A record without the per-kind fields is
+covered as a whole by `cad_license`.
+
+A statement's `embedded` names a file that a KiCad 9 design embeds in itself, such as its
+drawing frame. KiCad stores it zstd-compressed, so the quotes are checked in the decoded
+file. zstd is in Python's standard library from 3.14; an older interpreter refuses such a
+statement rather than applying it unread.
 
 | Board | Licence | Read from |
 |---|---|---|
@@ -195,6 +211,15 @@ it covers: Raspberry Pi's MIT licence for the Raspberry Pi 5 covers the 3D model
 | `raspberry-pi:5` | MIT (3D model only) | `LICENSE.txt` in the STEP package |
 | `raspberry-pi:cmio` | BSD-3-Clause | `README.txt` in the design package, which carries the three clauses without naming them |
 | `raspberry-pi:pico` | Permission grant in 0BSD wording | the Pico documentation, which grants use, copying, modification and distribution "for any purpose, with or without fee"; the design package repeats it in `LICENSE.txt` |
+| 10 SparkFun boards | CC BY-SA 4.0 | the design file itself: "Released under the Creative Commons Attribution Share-Alike 4.0 License", on SparkFun's `CREATIVE_COMMONS` drawing frame placed on the schematic and board (Eagle) or as footprint text on the PCB (KiCad). Their READMEs point to a `LICENSE.md` that is not in the repository. |
+| `seeed-studio:oshw-xiao-debug-mate` | CC BY-SA 4.0 (schematic only) | the drawing frame `Seeed_SCH_Open_Source.kicad_wks`, embedded in the root sheet of the KiCad design linked from the official wiki page, prints "CC BY-SA 4.0" in the title block of all seven sheets. The board layout, the project file and the housing models carry no licence and are not copied. |
+| 11 BeagleBoard capes | CC BY 4.0 (9), CC BY-SA 4.0 (2) | the `LICENSE` file in each cape's folder of `beagleboard/capes`; each names its own copyright holder, so these statements are marked `notice` and the licence file goes into the board's `ATTRIBUTION.md` |
+
+`beagleboard/capes` holds thirteen capes in one repository, under two licences and several
+copyright holders, so it is recorded as one record per cape (`harvest_github.py harvest
+--path beaglebone/Load`): the record's `official_cad_repository` is the cape's folder at the
+pinned commit, and `mirror.py index` takes only that folder. The Servo and GamePup capes
+have no licence file and are not recorded.
 
 ## Mirror
 
@@ -215,8 +240,8 @@ still resolve.
 
 ```
 boards/cad/<vendor>/<board>/
-  ATTRIBUTION.md   manufacturer, licence, every file with its source and digest, and what
-                   was left out of archives
+  ATTRIBUTION.md   manufacturer, licence, every file with its source and digest, what was
+                   left out of archives, and what the licence does not cover
   cad/             the design in the manufacturer's layout: Eagle, KiCad, Altium, OrCAD and
                    Allegro sources, projects and libraries, Gerber and drill files, STEP,
                    IGES, STL, VRML and DXF models; archives unpacked to their CAD members
@@ -235,11 +260,15 @@ verbatim. `read_licenses.py --notices` collects it into
 `tools/devboard_cad/licence-notices.json`, from the repository's licence file at the commit
 the board's files are pinned to, or from the package member a statement was read from.
 `mirror.py build` refuses such a board without its text, and `check` fails if an
-`ATTRIBUTION.md` lacks it or the text no longer matches its digest.
+`ATTRIBUTION.md` lacks it or the text no longer matches its digest. A statement marked
+`notice` puts its licence file into `ATTRIBUTION.md` whatever the licence, for boards whose
+licence file names copyright holders other than the publisher.
 
 `mirror.py build` copies a file only when all of these hold:
 
-1. the board's licence allows redistribution;
+1. the board's licence allows redistribution and covers the file's kind (see the licence
+   statements above): a licence scoped to part of a design, such as the Raspberry Pi 5's 3D
+   model or the XIAO Debug Mate's schematic, leaves the other files out;
 2. the bytes are the verified bytes. A file the record names must have the SHA-256 in
    `evidence.sha256`. A file from the index must have its git blob ID at the pinned commit,
    the identifier git itself stores the file under, so it is the manufacturer's file

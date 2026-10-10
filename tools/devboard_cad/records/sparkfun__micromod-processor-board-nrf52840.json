@@ -213,16 +213,16 @@
     }
   },
   "licenses": {
-    "hardware_license": "UNVERIFIED",
-    "cad_license": null,
-    "schematic_license": null,
-    "pcb_license": null,
-    "mechanical_cad_license": null,
-    "redistribution_allowed": null,
-    "modification_allowed": null,
-    "commercial_use_allowed": null,
-    "attribution_required": null,
-    "license_url": null
+    "hardware_license": "CC BY-SA 4.0",
+    "cad_license": "CC BY-SA 4.0",
+    "schematic_license": "CC BY-SA 4.0",
+    "pcb_license": "CC BY-SA 4.0",
+    "mechanical_cad_license": "CC BY-SA 4.0",
+    "redistribution_allowed": true,
+    "modification_allowed": true,
+    "commercial_use_allowed": true,
+    "attribution_required": true,
+    "license_url": "https://github.com/sparkfun/MicroMod_Processor_Board-nRF52840/blob/7a1c2d0b182387b921881dc82a0847555e982bbf/Hardware/MicroMod_Processor_Board-nRF52840.sch"
   },
   "sources": {
     "source_tier": "manufacturer_official",
@@ -235,5 +235,5 @@
     "direct_gerber_download": null
   },
   "record_status": "verified",
-  "notes": "File candidates harvested from the manufacturer's official repository sparkfun/MicroMod_Processor_Board-nRF52840 pinned at 7a1c2d0b1823. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware."
+  "notes": "File candidates harvested from the manufacturer's official repository sparkfun/MicroMod_Processor_Board-nRF52840 pinned at 7a1c2d0b1823. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware. Hardware licence read from https://raw.githubusercontent.com/sparkfun/MicroMod_Processor_Board-nRF52840/7a1c2d0b182387b921881dc82a0847555e982bbf/Hardware/MicroMod_Processor_Board-nRF52840.sch: \"Released under the Creative Commons Attribution Share-Alike 4.0 License\"."
 }

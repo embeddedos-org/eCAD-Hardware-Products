@@ -1,5 +1,5 @@
 {
-  "purpose": "Licences a person read from a manufacturer's own package or page, for boards whose terms are not in a GitHub repository. read_licenses.py --statements applies one only when the source still has the reviewed SHA-256 and every quote is still in it. 'fields' and 'scope' limit a statement to the files it covers.",
+  "purpose": "Licences a person read from a manufacturer's own package or page, for boards whose terms are not in a GitHub repository. read_licenses.py --statements applies one only when the source still has the reviewed SHA-256 and every quote is still in it. 'fields' and 'scope' limit a statement to the files it covers. 'embedded' names a file a KiCad design embeds in itself, such as its drawing frame, and the quotes are checked in that file.",
   "statements": [
     {
       "board_id": "arduino:uno-rev3",
@@ -13,6 +13,170 @@
       ],
       "covers": "The CAD package linked from the UNO R3 documentation page: UNO-TH_Rev3e.brd and UNO-TH_Rev3e.sch. The separate content.arduino.cc/assets/UNO-TH_Rev3e.zip marks its files 'CC-SA-BY-NC' and is not used.",
       "read_at": "2026-10-09"
+    },
+    {
+      "board_id": "beagleboard:beaglebone-comms-cape",
+      "licence": "CC BY 4.0",
+      "source": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Comms/LICENSE",
+      "sha256": "e38276b364e6f4b1a82ecf3ca71c9ad852010f5ac87e7ae143b3e3a958297c0a",
+      "url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Comms/LICENSE",
+      "quotes": [
+        "CC-BY-4.0",
+        "Copyright (c) 2017 Aron Phillips, GHI Electronics",
+        "Attribution 4.0 International"
+      ],
+      "notice": true,
+      "covers": "Every file in beaglebone/Comms/ of beagleboard/capes at 5c7c21154fd4; the licence file sits beside them. Its copyright lines are kept in ATTRIBUTION.md.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "beagleboard:beaglebone-display18-cape",
+      "licence": "CC BY 4.0",
+      "source": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Display18/LICENSE",
+      "sha256": "e38276b364e6f4b1a82ecf3ca71c9ad852010f5ac87e7ae143b3e3a958297c0a",
+      "url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Display18/LICENSE",
+      "quotes": [
+        "CC-BY-4.0",
+        "Copyright (c) 2017 Aron Phillips, GHI Electronics",
+        "Attribution 4.0 International"
+      ],
+      "notice": true,
+      "covers": "Every file in beaglebone/Display18/ of beagleboard/capes at 5c7c21154fd4; the licence file sits beside them. Its copyright lines are kept in ATTRIBUTION.md.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "beagleboard:beaglebone-display70-cape",
+      "licence": "CC BY 4.0",
+      "source": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Display70/LICENSE",
+      "sha256": "e38276b364e6f4b1a82ecf3ca71c9ad852010f5ac87e7ae143b3e3a958297c0a",
+      "url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Display70/LICENSE",
+      "quotes": [
+        "CC-BY-4.0",
+        "Copyright (c) 2017 Aron Phillips, GHI Electronics",
+        "Attribution 4.0 International"
+      ],
+      "notice": true,
+      "covers": "Every file in beaglebone/Display70/ of beagleboard/capes at 5c7c21154fd4; the licence file sits beside them. Its copyright lines are kept in ATTRIBUTION.md.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "beagleboard:beaglebone-load-cape",
+      "licence": "CC BY 4.0",
+      "source": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Load/LICENSE",
+      "sha256": "e38276b364e6f4b1a82ecf3ca71c9ad852010f5ac87e7ae143b3e3a958297c0a",
+      "url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Load/LICENSE",
+      "quotes": [
+        "CC-BY-4.0",
+        "Copyright (c) 2017 Aron Phillips, GHI Electronics",
+        "Attribution 4.0 International"
+      ],
+      "notice": true,
+      "covers": "Every file in beaglebone/Load/ of beagleboard/capes at 5c7c21154fd4; the licence file sits beside them. Its copyright lines are kept in ATTRIBUTION.md.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "beagleboard:beaglebone-motor-cape",
+      "licence": "CC BY 4.0",
+      "source": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Motor/LICENSE",
+      "sha256": "e38276b364e6f4b1a82ecf3ca71c9ad852010f5ac87e7ae143b3e3a958297c0a",
+      "url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Motor/LICENSE",
+      "quotes": [
+        "CC-BY-4.0",
+        "Copyright (c) 2017 Aron Phillips, GHI Electronics",
+        "Attribution 4.0 International"
+      ],
+      "notice": true,
+      "covers": "Every file in beaglebone/Motor/ of beagleboard/capes at 5c7c21154fd4; the licence file sits beside them. Its copyright lines are kept in ATTRIBUTION.md.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "beagleboard:beaglebone-power-cape",
+      "licence": "CC BY 4.0",
+      "source": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Power/LICENSE",
+      "sha256": "e38276b364e6f4b1a82ecf3ca71c9ad852010f5ac87e7ae143b3e3a958297c0a",
+      "url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Power/LICENSE",
+      "quotes": [
+        "CC-BY-4.0",
+        "Copyright (c) 2017 Aron Phillips, GHI Electronics",
+        "Attribution 4.0 International"
+      ],
+      "notice": true,
+      "covers": "Every file in beaglebone/Power/ of beagleboard/capes at 5c7c21154fd4; the licence file sits beside them. Its copyright lines are kept in ATTRIBUTION.md.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "beagleboard:beaglebone-proto-cape",
+      "licence": "CC BY 4.0",
+      "source": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Proto/LICENSE",
+      "sha256": "e38276b364e6f4b1a82ecf3ca71c9ad852010f5ac87e7ae143b3e3a958297c0a",
+      "url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Proto/LICENSE",
+      "quotes": [
+        "CC-BY-4.0",
+        "Copyright (c) 2017 Aron Phillips, GHI Electronics",
+        "Attribution 4.0 International"
+      ],
+      "notice": true,
+      "covers": "Every file in beaglebone/Proto/ of beagleboard/capes at 5c7c21154fd4; the licence file sits beside them. Its copyright lines are kept in ATTRIBUTION.md.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "beagleboard:beaglebone-relay-cape",
+      "licence": "CC BY 4.0",
+      "source": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Relay/LICENSE",
+      "sha256": "e38276b364e6f4b1a82ecf3ca71c9ad852010f5ac87e7ae143b3e3a958297c0a",
+      "url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Relay/LICENSE",
+      "quotes": [
+        "CC-BY-4.0",
+        "Copyright (c) 2017 Aron Phillips, GHI Electronics",
+        "Attribution 4.0 International"
+      ],
+      "notice": true,
+      "covers": "Every file in beaglebone/Relay/ of beagleboard/capes at 5c7c21154fd4; the licence file sits beside them. Its copyright lines are kept in ATTRIBUTION.md.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "beagleboard:beaglebone-robotics-cape",
+      "licence": "CC BY 4.0",
+      "source": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Robotics/LICENSE.txt",
+      "sha256": "5fb16d056e622b22ca9ebadd0942a2643c8e7325b94e166b738f6458193fa6c1",
+      "url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Robotics/LICENSE.txt",
+      "quotes": [
+        "CC-BY-4.0",
+        "Copyright (c) 2016 James Strawson",
+        "Attribution 4.0 International"
+      ],
+      "notice": true,
+      "covers": "Every file in beaglebone/Robotics/ of beagleboard/capes at 5c7c21154fd4; the licence file sits beside them. Its copyright lines are kept in ATTRIBUTION.md.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "beagleboard:pocketbeagle-grove-cape",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/Grove/LICENSE",
+      "sha256": "749f19f0477e1ce88f5be48887b68c62b0bdff386aedc9d159359b88fbee350b",
+      "url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/Grove/LICENSE",
+      "quotes": [
+        "This work is licensed under the Creative Commons Attribution-Share Alike 4.0 International License.",
+        "Copyright (c) 2020, Seeed Technology Co.,Ltd"
+      ],
+      "notice": true,
+      "covers": "Every file in pocketbeagle/Grove/ of beagleboard/capes at 5c7c21154fd4; the licence file sits beside them. Its copyright lines are kept in ATTRIBUTION.md.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "beagleboard:pocketbeagle-techlab-cape",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab/LICENSE",
+      "sha256": "af1d39aa90def06c79bfaff445beb03ee5a3482ae9f058e7aa81c9ba936af6da",
+      "url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab/LICENSE",
+      "quotes": [
+        "Derived from BaconBits, which is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.",
+        "Copyright (c) 2019, GHI Electronics",
+        "Copyright (c) 2018, QWERTY Embedded Design, LLC"
+      ],
+      "notice": true,
+      "covers": "Every file in pocketbeagle/TechLab/ of beagleboard/capes at 5c7c21154fd4; the licence file sits beside them. Its copyright lines are kept in ATTRIBUTION.md. The design is derived from BaconBits under CC BY-SA 4.0, so share-alike applies to it.",
+      "read_at": "2026-10-10"
     },
     {
       "board_id": "raspberry-pi:5",
@@ -59,6 +223,145 @@
       ],
       "covers": "The designs listed above the grant: the Cadence Allegro design files (RP-008379-DS, which carries the same grant in its LICENSE.txt) and the STEP file (RP-008311-DS, byte-identical to Pico-R3-step.zip). Read from the source of the official documentation page, which answers automated clients with 403.",
       "read_at": "2026-10-09"
+    },
+    {
+      "board_id": "seeed-studio:oshw-xiao-debug-mate",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://files.seeedstudio.com/wiki/xiao_debug_mate/res/Seeed_Studio_XIAO_Debug_Mate_V1.0_SCH&PCB_20250926.zip",
+      "sha256": "9272e43de06319c4e8bff9e6134c5f01e1cdd976f0e8bb40c7157fe1e9e73eb5",
+      "member": "Debugger for Seeed Studio XIAO_V1.0_SCH&PCB_20250926/Debugger for Seeed Studio XIAO.kicad_sch",
+      "embedded": "Seeed_SCH_Open_Source.kicad_wks",
+      "url": "https://wiki.seeedstudio.com/getting_started_with_xiao_debug_mate/",
+      "quotes": [
+        "CC BY-SA 4.0",
+        "(tbtext \"CC BY-SA 4.0\""
+      ],
+      "fields": [
+        "schematic_license"
+      ],
+      "scope": "schematic only",
+      "covers": "The seven KiCad schematic sheets of Seeed's SCH&PCB package, linked from the official wiki page: the root sheet embeds Seeed's drawing frame Seeed_SCH_Open_Source.kicad_wks, which prints \"CC BY-SA 4.0\" in the title block of every sheet (as the schematic PDF in the repository, 4_Hardware/Seeed_Studio_XIAO_Debug_Mate_V1.0_SCH_20250926.pdf, shows on all seven pages). The board layout (.kicad_pcb) carries no title block or licence text, and the housing STEP and 3MF files carry none, so they are not covered.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "sparkfun:cellular-function-board-blues-wireless-notecarrier",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://raw.githubusercontent.com/sparkfun/SparkFun_Cellular_Function_Board_Blues_Wireless_Notecarrier/84d2f0ccf72ddc1ba9a89bfb4c95df8efd73631c/Hardware/SparkFun_MicroMod_Function_Board_Blues_Notecarrier.sch",
+      "sha256": "3b7ef67d2ebbb27ff937fb2d8f0d9c74f377a545d25c0c75242317e35ba5938d",
+      "url": "https://github.com/sparkfun/SparkFun_Cellular_Function_Board_Blues_Wireless_Notecarrier/blob/84d2f0ccf72ddc1ba9a89bfb4c95df8efd73631c/Hardware/SparkFun_MicroMod_Function_Board_Blues_Notecarrier.sch",
+      "quotes": [
+        "Released under the Creative Commons Attribution Share-Alike 4.0 License"
+      ],
+      "covers": "The board's Eagle design: the notice is SparkFun's CREATIVE_COMMONS drawing frame (SparkFun-Aesthetics library), placed on this schematic and on the matching .brd board. The repository's README points to a LICENSE.md that is not in it.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "sparkfun:micromod-function-ethernet-w5500",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://raw.githubusercontent.com/sparkfun/MicroMod_Function_Ethernet-W5500/6b66bf3d9790e4a96c8c1b94a1cd176725633be2/Hardware/MicroMod-Ethernet-Function-Board-W5500.sch",
+      "sha256": "a707b212cafdf13be34dc892f094268dd3ad318e51d32e7c17621b28782bebb7",
+      "url": "https://github.com/sparkfun/MicroMod_Function_Ethernet-W5500/blob/6b66bf3d9790e4a96c8c1b94a1cd176725633be2/Hardware/MicroMod-Ethernet-Function-Board-W5500.sch",
+      "quotes": [
+        "Released under the Creative Commons Attribution Share-Alike 4.0 License"
+      ],
+      "covers": "The board's Eagle design: the notice is SparkFun's CREATIVE_COMMONS drawing frame (SparkFun-Aesthetics library), placed on this schematic and on the matching .brd board. The repository's README points to a LICENSE.md that is not in it.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "sparkfun:micromod-processor-board-nrf52840",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://raw.githubusercontent.com/sparkfun/MicroMod_Processor_Board-nRF52840/7a1c2d0b182387b921881dc82a0847555e982bbf/Hardware/MicroMod_Processor_Board-nRF52840.sch",
+      "sha256": "1c3e3f3f1b23ff3592e8e44658422e061d166a8c1d9dcc3c334de148cafc67c6",
+      "url": "https://github.com/sparkfun/MicroMod_Processor_Board-nRF52840/blob/7a1c2d0b182387b921881dc82a0847555e982bbf/Hardware/MicroMod_Processor_Board-nRF52840.sch",
+      "quotes": [
+        "Released under the Creative Commons Attribution Share-Alike 4.0 License"
+      ],
+      "covers": "The board's Eagle design: the notice is SparkFun's CREATIVE_COMMONS drawing frame (SparkFun-Aesthetics library), placed on this schematic and on the matching .brd board. The repository's README points to a LICENSE.md that is not in it.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "sparkfun:micromod-single-pair-ethernet-function-board-adin1110",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://raw.githubusercontent.com/sparkfun/SparkFun_MicroMod_Single_Pair_Ethernet_Function_Board_ADIN1110/6ea9191b95b5100c3836d1a5e6079cef426b37b6/Hardware/SparkFun_MicroMod_Function_ADIN1110.sch",
+      "sha256": "ab06f951e7836d7db6f2846e2c437218a16e47b1d508a40f5448677b7387c85f",
+      "url": "https://github.com/sparkfun/SparkFun_MicroMod_Single_Pair_Ethernet_Function_Board_ADIN1110/blob/6ea9191b95b5100c3836d1a5e6079cef426b37b6/Hardware/SparkFun_MicroMod_Function_ADIN1110.sch",
+      "quotes": [
+        "Released under the Creative Commons Attribution Share-Alike 4.0 License"
+      ],
+      "covers": "The board's Eagle design: the notice is SparkFun's CREATIVE_COMMONS drawing frame (SparkFun-Aesthetics library), placed on this schematic and on the matching .brd board. The repository's README points to a LICENSE.md that is not in it.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "sparkfun:pro-micro-rp2350",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://raw.githubusercontent.com/sparkfun/SparkFun_Pro_Micro_RP2350/8d3bbac8c3b9e6e75fa5fe34d8421efa4c211f1f/Hardware/SparkFun_ProMicro_RP2350.sch",
+      "sha256": "a9dcdd9a48f11deeb2c9cda7ede9b17c9f0ee419c81f018aa9478bacb13dce06",
+      "url": "https://github.com/sparkfun/SparkFun_Pro_Micro_RP2350/blob/8d3bbac8c3b9e6e75fa5fe34d8421efa4c211f1f/Hardware/SparkFun_ProMicro_RP2350.sch",
+      "quotes": [
+        "Released under the Creative Commons Attribution Share-Alike 4.0 License"
+      ],
+      "covers": "The board's Eagle design: the notice is SparkFun's CREATIVE_COMMONS drawing frame (SparkFun-Aesthetics library), placed on this schematic and on the matching .brd board. The repository's README points to a LICENSE.md that is not in it.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "sparkfun:qwiic-6dof-bmi270",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://raw.githubusercontent.com/sparkfun/SparkFun_Qwiic_6DoF_BMI270/c8bb01b27e91e4985eb9d526cc59eb7421a08bbb/Hardware/Qwiic%201x1/SparkFun_Qwiic_6DoF_BMI270.sch",
+      "sha256": "4eb79f438eb1b3705b68f2b647d421efd7673366a354d5e6ff3ca9d788e97c72",
+      "url": "https://github.com/sparkfun/SparkFun_Qwiic_6DoF_BMI270/blob/c8bb01b27e91e4985eb9d526cc59eb7421a08bbb/Hardware/Qwiic%201x1/SparkFun_Qwiic_6DoF_BMI270.sch",
+      "quotes": [
+        "Released under the Creative Commons Attribution Share-Alike 4.0 License"
+      ],
+      "covers": "The board's Eagle design: the notice is SparkFun's CREATIVE_COMMONS drawing frame (SparkFun-Aesthetics library), placed on this schematic and on the matching .brd board. The repository's README points to a LICENSE.md that is not in it.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "sparkfun:qwiic-pocket-dev-board-esp32-c6",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://raw.githubusercontent.com/sparkfun/SparkFun_Qwiic_Pocket_Dev_Board_ESP32_C6/242b9740cadc2667aff62b3298838541b47ff371/Hardware/Qwiic_Pocket_Dev_ESP32_C6.sch",
+      "sha256": "af8cfff8ecc70d9ed70fdbfb1b89ac23312f39a6c9bdb047b9d8fee2b873b720",
+      "url": "https://github.com/sparkfun/SparkFun_Qwiic_Pocket_Dev_Board_ESP32_C6/blob/242b9740cadc2667aff62b3298838541b47ff371/Hardware/Qwiic_Pocket_Dev_ESP32_C6.sch",
+      "quotes": [
+        "Released under the Creative Commons Attribution Share-Alike 4.0 License"
+      ],
+      "covers": "The board's Eagle design: the notice is SparkFun's CREATIVE_COMMONS drawing frame (SparkFun-Aesthetics library), placed on this schematic and on the matching .brd board. The repository's README points to a LICENSE.md that is not in it.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "sparkfun:red-vision-touch-display-for-redboard",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://raw.githubusercontent.com/sparkfun/SparkFun_Red_Vision_Touch_Display_for_RedBoard/55d207429ee28a6960ceab4883a13edf81adeecc/Hardware/SparkFun_Red_Vision_Touch_Display_for_RedBoard.kicad_pcb",
+      "sha256": "a60926b98ecb6ab99955a2c8c138993ad06b8c40b16421912cde3ed8034fc0fb",
+      "url": "https://github.com/sparkfun/SparkFun_Red_Vision_Touch_Display_for_RedBoard/blob/55d207429ee28a6960ceab4883a13edf81adeecc/Hardware/SparkFun_Red_Vision_Touch_Display_for_RedBoard.kicad_pcb",
+      "quotes": [
+        "Released under the Creative Commons Attribution Share-Alike 4.0 License"
+      ],
+      "covers": "The board's KiCad design: the notice is footprint text placed on the PCB in this file.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "sparkfun:thing-plus-esp32-c5",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://raw.githubusercontent.com/sparkfun/SparkFun_Thing_Plus_ESP32-C5/54d6828b4ddf66997be65d3cfeeec9deda37174d/Hardware/SparkFun_Thing_Plus_ESP32_C5.kicad_pcb",
+      "sha256": "f3f75a3e18c32179596dfbb7513fc461987fbe23279e9736ff0d2e97ebdcca9e",
+      "url": "https://github.com/sparkfun/SparkFun_Thing_Plus_ESP32-C5/blob/54d6828b4ddf66997be65d3cfeeec9deda37174d/Hardware/SparkFun_Thing_Plus_ESP32_C5.kicad_pcb",
+      "quotes": [
+        "Released under the Creative Commons Attribution Share-Alike 4.0 License"
+      ],
+      "covers": "The board's KiCad design: the notice is footprint text placed on the PCB in this file.",
+      "read_at": "2026-10-10"
+    },
+    {
+      "board_id": "sparkfun:thing-plus-esp32-c6",
+      "licence": "CC BY-SA 4.0",
+      "source": "https://raw.githubusercontent.com/sparkfun/SparkFun_Thing_Plus_ESP32_C6/fb7352f770b885fa9d5767bd25a168b90a11d4e5/Hardware/Thing_Plus_ESP32_C6.sch",
+      "sha256": "aa89ff067b61ef02d747a9ca88cff40cca7d47c4d90ea35ce394b2ce9b2184c6",
+      "url": "https://github.com/sparkfun/SparkFun_Thing_Plus_ESP32_C6/blob/fb7352f770b885fa9d5767bd25a168b90a11d4e5/Hardware/Thing_Plus_ESP32_C6.sch",
+      "quotes": [
+        "Released under the Creative Commons Attribution Share-Alike 4.0 License"
+      ],
+      "covers": "The board's Eagle design: the notice is SparkFun's CREATIVE_COMMONS drawing frame (SparkFun-Aesthetics library), placed on this schematic and on the matching .brd board. The repository's README points to a LICENSE.md that is not in it.",
+      "read_at": "2026-10-10"
     }
   ]
 }

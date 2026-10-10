@@ -268,13 +268,18 @@ def build_files(repo: str, sha: str, found: Dict[str, List[str]],
 
 def build_record(board_id: str, repo: str, sha: str, meta: Dict[str, Any],
                  found: Dict[str, List[str]], identity: Dict[str, Any],
-                 claim_absence: bool = True) -> "OrderedDict[str, Any]":
+                 claim_absence: bool = True, folder: Optional[str] = None) -> "OrderedDict[str, Any]":
     revision = identity.get("revision", "unverified")
     if str(revision).strip().lower() in ("", "unverified"):
         every_path = sorted({p for paths in found.values() for p in paths})
         # The tree is exhaustive, so "no file names a revision" is a finding about the
         # manufacturer's design-file distribution, not an unfilled gap in this record.
         revision = infer_revision(every_path) or "not-stated"
+    # One repository can hold several boards, each in its own folder: the record is then
+    # that folder at the commit, and its repository link says so.
+    cad_repository = (f"{meta.get('html_url')}/tree/{sha}/{folder}" if folder
+                      else meta.get("html_url"))
+    where = f"{repo} pinned at {sha[:12]}" + (f", folder {folder}" if folder else "")
     spdx = (meta.get("license") or {}).get("spdx_id")
     license_name = spdx if spdx and spdx != "NOASSERTION" else "UNVERIFIED"
     record: "OrderedDict[str, Any]" = OrderedDict([
@@ -303,7 +308,7 @@ def build_record(board_id: str, repo: str, sha: str, meta: Dict[str, Any],
         ("sources", OrderedDict([
             ("source_tier", "manufacturer_official"),
             ("official_product_page", identity["official_product_page"]),
-            ("official_cad_repository", meta.get("html_url")),
+            ("official_cad_repository", cad_repository),
             ("official_github_repository", meta.get("html_url")),
             ("official_documentation", identity.get("official_documentation")),
             ("direct_cad_download", None),
@@ -312,7 +317,7 @@ def build_record(board_id: str, repo: str, sha: str, meta: Dict[str, Any],
         ])),
         ("record_status", "incomplete"),  # replaced below once files are known
         ("notes", f"File candidates harvested from the manufacturer's official repository "
-                  f"{repo} pinned at {sha[:12]}. Availability is decided by verify.py from "
+                  f"{where}. Availability is decided by verify.py from "
                   f"retrieved bytes, never from this index. Licensing is left unverified "
                   f"until the vendor's terms have been read; a GitHub SPDX tag describes the "
                   f"repository, not necessarily the hardware."),
@@ -330,9 +335,12 @@ def cmd_harvest(args: argparse.Namespace) -> int:
         "official_documentation": args.documentation,
     }
     sha, paths, meta = repo_index(args.repo, args.ref)
+    folder = args.path.strip("/") if args.path else None
+    if folder:
+        paths = [p for p in paths if p.startswith(folder + "/")]
     found = classify_paths(paths)
     record = build_record(args.board_id, args.repo, sha, meta, found, identity,
-                          claim_absence=not args.no_absence)
+                          claim_absence=not args.no_absence, folder=folder)
     out = Path(args.out) if args.out else (
         Path(args.root) / "tools" / "devboard_cad" / "records" /
         (args.board_id.replace(":", "__") + ".json"))
@@ -367,6 +375,8 @@ def build_parser() -> argparse.ArgumentParser:
                    choices=["active", "not_recommended", "discontinued", "unknown"])
     h.add_argument("--documentation", default=None)
     h.add_argument("--ref", default=None, help="branch or tag; default: the default branch")
+    h.add_argument("--path", default=None,
+                   help="the board's folder, when the repository holds several boards")
     h.add_argument("--no-absence", action="store_true",
                    help="do not emit available=false for formats missing from the index")
     h.add_argument("--out", default=None)

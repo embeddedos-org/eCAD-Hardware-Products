@@ -1,0 +1,224 @@
+{
+  "$schema": "https://embeddedos.org/schemas/devboard-cad/v1/board-record.schema.json",
+  "contract_version": "1.1.0",
+  "board_id": "beagleboard:pocketbeagle-techlab-cape",
+  "manufacturer": "BeagleBoard.org Foundation",
+  "family": "Capes",
+  "board": "PocketBeagle TechLab Cape",
+  "part_number": "UNVERIFIED",
+  "revision": "not-stated",
+  "mcu_soc": "not-applicable",
+  "hardware_revision": null,
+  "fpga": null,
+  "cpu_architecture": null,
+  "product_status": "unknown",
+  "files": {
+    "altium": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:23Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "bom": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:23Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "dxf": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:23Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "eagle": {
+      "available": true,
+      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab/eagle/TechLab_Cape.brd",
+      "verified_revision": null,
+      "evidence": {
+        "captured_at": "2026-10-09T18:53:13Z",
+        "producer_tool_id": "devboard-cad-verifier@0.1.0",
+        "http_status": 200,
+        "sha256": "aeff3fe93a3f6655dae8edd0f58661a3397fe8b1115030855fef76254a5d634b",
+        "size_bytes": 356833,
+        "media_type": "text/plain",
+        "detected_format": "eagle",
+        "verification_method": "http_get_magic"
+      }
+    },
+    "gerbers": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:23Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "kicad": {
+      "available": true,
+      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab/kicad/TechLab.kicad_pcb",
+      "verified_revision": null,
+      "evidence": {
+        "captured_at": "2026-10-09T18:53:13Z",
+        "producer_tool_id": "devboard-cad-verifier@0.1.0",
+        "http_status": 200,
+        "sha256": "a356b8f08b35b5ee4e9901181e4aa6ee1c02560c848de3a69679e6c7d26bcf61",
+        "size_bytes": 2822803,
+        "media_type": "text/plain",
+        "detected_format": "kicad",
+        "verification_method": "http_get_magic"
+      }
+    },
+    "mechanical": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:23Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "nc_drill": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:23Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "pcb_source": {
+      "available": true,
+      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab/kicad/TechLab.kicad_pcb",
+      "verified_revision": null,
+      "evidence": {
+        "captured_at": "2026-10-09T18:53:13Z",
+        "producer_tool_id": "devboard-cad-verifier@0.1.0",
+        "http_status": 200,
+        "sha256": "a356b8f08b35b5ee4e9901181e4aa6ee1c02560c848de3a69679e6c7d26bcf61",
+        "size_bytes": 2822803,
+        "media_type": "text/plain",
+        "detected_format": "kicad",
+        "verification_method": "http_get_magic"
+      }
+    },
+    "pick_and_place": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:23Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "schematic": {
+      "available": true,
+      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab/kicad/TechLab.kicad_sch",
+      "verified_revision": null,
+      "evidence": {
+        "captured_at": "2026-10-09T18:53:13Z",
+        "producer_tool_id": "devboard-cad-verifier@0.1.0",
+        "http_status": 200,
+        "sha256": "a0d8c449ead7833c4082abd94ea33b7a2d3278912e3c0cf780e1fa07ac2f3f6d",
+        "size_bytes": 1734,
+        "media_type": "text/plain",
+        "detected_format": "kicad",
+        "verification_method": "http_get_magic"
+      }
+    },
+    "step": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:23Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "stl": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:23Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "symbol_library": {
+      "available": true,
+      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab/kicad/TechLab-eagle-import.kicad_sym",
+      "verified_revision": null,
+      "evidence": {
+        "captured_at": "2026-10-09T18:53:15Z",
+        "producer_tool_id": "devboard-cad-verifier@0.1.0",
+        "http_status": 200,
+        "sha256": "0fb383c59c2cf2145a7cc5f39f6e63b005ab621bc6ec22daa91aecba3fc9e921",
+        "size_bytes": 348642,
+        "media_type": "text/plain",
+        "detected_format": "kicad",
+        "verification_method": "http_get_magic"
+      }
+    }
+  },
+  "licenses": {
+    "hardware_license": "CC BY-SA 4.0",
+    "cad_license": "CC BY-SA 4.0",
+    "schematic_license": "CC BY-SA 4.0",
+    "pcb_license": "CC BY-SA 4.0",
+    "mechanical_cad_license": "CC BY-SA 4.0",
+    "redistribution_allowed": true,
+    "modification_allowed": true,
+    "commercial_use_allowed": true,
+    "attribution_required": true,
+    "license_url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab/LICENSE"
+  },
+  "sources": {
+    "source_tier": "manufacturer_official",
+    "official_product_page": "https://www.beagleboard.org/boards",
+    "official_cad_repository": "https://github.com/beagleboard/capes/tree/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab",
+    "official_github_repository": "https://github.com/beagleboard/capes",
+    "official_documentation": null,
+    "direct_cad_download": null,
+    "direct_schematic_download": null,
+    "direct_gerber_download": null
+  },
+  "record_status": "partial",
+  "notes": "File candidates harvested from the manufacturer's official repository beagleboard/capes pinned at 5c7c21154fd4, folder pocketbeagle/TechLab. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware. Hardware licence read from https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab/LICENSE: \"Derived from BaconBits, which is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.\"."
+}

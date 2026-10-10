@@ -1,0 +1,206 @@
+{
+  "$schema": "https://embeddedos.org/schemas/devboard-cad/v1/board-record.schema.json",
+  "contract_version": "1.1.0",
+  "board_id": "beagleboard:beaglebone-relay-cape",
+  "manufacturer": "BeagleBoard.org Foundation",
+  "family": "Capes",
+  "board": "BeagleBone Relay Cape",
+  "part_number": "UNVERIFIED",
+  "revision": "not-stated",
+  "mcu_soc": "not-applicable",
+  "hardware_revision": null,
+  "fpga": null,
+  "cpu_architecture": null,
+  "product_status": "unknown",
+  "files": {
+    "altium": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:21Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "bom": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:21Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "dxf": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:21Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "eagle": {
+      "available": true,
+      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Relay/Relay_Cape.brd",
+      "verified_revision": null,
+      "evidence": {
+        "captured_at": "2026-10-09T18:53:01Z",
+        "producer_tool_id": "devboard-cad-verifier@0.1.0",
+        "http_status": 200,
+        "sha256": "bd870266871a92c50b27e2674b5df2d975d9577809d83cb696113557c43618a7",
+        "size_bytes": 102446,
+        "media_type": "text/plain",
+        "detected_format": "eagle",
+        "verification_method": "http_get_magic"
+      }
+    },
+    "gerbers": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:21Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "kicad": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:21Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "mechanical": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:21Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "nc_drill": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:21Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "pcb_source": {
+      "available": true,
+      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Relay/Relay_Cape.brd",
+      "verified_revision": null,
+      "evidence": {
+        "captured_at": "2026-10-09T18:53:01Z",
+        "producer_tool_id": "devboard-cad-verifier@0.1.0",
+        "http_status": 200,
+        "sha256": "bd870266871a92c50b27e2674b5df2d975d9577809d83cb696113557c43618a7",
+        "size_bytes": 102446,
+        "media_type": "text/plain",
+        "detected_format": "eagle",
+        "verification_method": "http_get_magic"
+      }
+    },
+    "pick_and_place": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:21Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "schematic": {
+      "available": true,
+      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Relay/Relay_Cape_sch.pdf",
+      "verified_revision": null,
+      "evidence": {
+        "captured_at": "2026-10-09T18:53:03Z",
+        "producer_tool_id": "devboard-cad-verifier@0.1.0",
+        "http_status": 200,
+        "sha256": "037be36656283cc45e850defb457b14008ee28b81a2825046fe16cbee4104da1",
+        "size_bytes": 117448,
+        "media_type": "application/octet-stream",
+        "detected_format": "pdf",
+        "verification_method": "http_get_magic"
+      }
+    },
+    "step": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:21Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    },
+    "stl": {
+      "available": false,
+      "url": null,
+      "verified_revision": null,
+      "evidence": {
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:21Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
+      }
+    }
+  },
+  "licenses": {
+    "hardware_license": "CC BY 4.0",
+    "cad_license": "CC BY 4.0",
+    "schematic_license": "CC BY 4.0",
+    "pcb_license": "CC BY 4.0",
+    "mechanical_cad_license": "CC BY 4.0",
+    "redistribution_allowed": true,
+    "modification_allowed": true,
+    "commercial_use_allowed": true,
+    "attribution_required": true,
+    "license_url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Relay/LICENSE"
+  },
+  "sources": {
+    "source_tier": "manufacturer_official",
+    "official_product_page": "https://www.beagleboard.org/boards",
+    "official_cad_repository": "https://github.com/beagleboard/capes/tree/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Relay",
+    "official_github_repository": "https://github.com/beagleboard/capes",
+    "official_documentation": null,
+    "direct_cad_download": null,
+    "direct_schematic_download": null,
+    "direct_gerber_download": null
+  },
+  "record_status": "partial",
+  "notes": "File candidates harvested from the manufacturer's official repository beagleboard/capes pinned at 5c7c21154fd4, folder beaglebone/Relay. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware. Hardware licence read from https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Relay/LICENSE: \"CC-BY-4.0\"."
+}

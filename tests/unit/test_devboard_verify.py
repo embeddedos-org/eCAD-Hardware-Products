@@ -15,6 +15,7 @@ infrastructure:
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import io
 import json
@@ -354,6 +355,19 @@ class TestGithubHarvester(unittest.TestCase):
         self.assertEqual(
             harvest._pick(["old/Board.kicad_pcb", "Board.kicad_pcb"], "pcb_source"),
             "Board.kicad_pcb")
+
+    def test_a_board_in_a_shared_repository_is_recorded_as_its_folder(self) -> None:
+        sha = "b" * 40
+        meta = {"html_url": "https://github.com/beagleboard/capes"}
+        identity = {"manufacturer": "BeagleBoard.org Foundation", "family": "Capes",
+                    "board": "BeagleBone Load Cape", "official_product_page": "https://www.beagleboard.org/boards"}
+        found = harvest.classify_paths(["beaglebone/Load/Load_Cape.brd", "beaglebone/Load/Load_Cape.sch"])
+        record = harvest.build_record("beagleboard:beaglebone-load-cape", "beagleboard/capes", sha, meta,
+                                      found, identity, folder="beaglebone/Load")
+        self.assertEqual(record["sources"]["official_cad_repository"],
+                         f"https://github.com/beagleboard/capes/tree/{sha}/beaglebone/Load")
+        self.assertIn("folder beaglebone/Load", record["notes"])
+        self.assertTrue(record["files"]["eagle"]["url"].endswith("/beaglebone/Load/Load_Cape.brd"))
 
     def test_absence_is_claimed_only_against_a_pinned_index(self) -> None:
         files = harvest.build_files("adafruit/X", "a" * 40, harvest.classify_paths(self.PATHS))
@@ -720,6 +734,63 @@ class TestLicenceStatements(unittest.TestCase):
         self.assertEqual(licenses["license_url"], "https://example.com/package.zip")
         self.assertFalse(licences.apply_statement(record, statement))
 
+    @staticmethod
+    def _kicad_with_embedded_frame(frame: bytes) -> bytes:
+        from compression import zstd  # type: ignore[import-not-found]
+        data = base64.b64encode(zstd.compress(frame)).decode("ascii")
+        wrapped = "\n\t\t\t\t".join(data[i:i + 76] for i in range(0, len(data), 76))
+        return ('(kicad_sch\n\t(version 20250114)\n\t(embedded_files\n\t\t(file\n'
+                '\t\t\t(name "Vendor_Open_Source.kicad_wks")\n\t\t\t(type worksheet)\n'
+                f'\t\t\t(data |{wrapped}|)\n\t\t)\n\t)\n)\n').encode("ascii")
+
+    @unittest.skipUnless(sys.version_info >= (3, 14), "compression.zstd is in the standard library from 3.14")
+    def test_a_quote_in_a_kicad_embedded_drawing_frame_is_found(self) -> None:
+        design = self._kicad_with_embedded_frame(b'(kicad_wks\n\t(tbtext "CC BY-SA 4.0"\n\t\t(name ""))\n)\n')
+        package = _zip({"board/main.kicad_sch": design})
+        statement = self._statement(package, licence="CC BY-SA 4.0", member="board/main.kicad_sch",
+                                    embedded="Vendor_Open_Source.kicad_wks", quotes=['(tbtext "CC BY-SA 4.0"'])
+        self.assertIsNone(licences.check_statement(statement, package))
+        self.assertIn("quote not found", licences.check_statement(dict(statement, quotes=["CC BY 4.0"]), package))
+        self.assertIn("no embedded file", licences.check_statement(dict(statement, embedded="Other.kicad_wks"),
+                                                                   package))
+
+    def test_an_embedded_file_is_refused_where_python_has_no_zstd(self) -> None:
+        from unittest import mock
+        design = b'(kicad_sch\n\t(embedded_files\n\t\t(file\n\t\t\t(name "Vendor_Open_Source.kicad_wks")\n' \
+                 b'\t\t\t(type worksheet)\n\t\t\t(data |KLUv/SAA|)\n\t\t)\n\t)\n)\n'
+        package = _zip({"board/main.kicad_sch": design})
+        statement = self._statement(package, licence="CC BY-SA 4.0", member="board/main.kicad_sch",
+                                    embedded="Vendor_Open_Source.kicad_wks", quotes=["CC BY-SA 4.0"])
+        with mock.patch.dict(sys.modules, {"compression": None, "compression.zstd": None}):
+            problem = licences.check_statement(statement, package)
+        self.assertIn("needs Python 3.14", problem)
+
+    def test_a_notice_from_an_embedded_file_keeps_that_file_not_the_design(self) -> None:
+        from unittest import mock
+        frame = "(kicad_wks\n\t(tbtext \"MIT\")\n\t(tbtext \"Copyright (c) 2026 Example Ltd\")\n)\n"
+        design = b"(kicad_sch (embedded_files (file (name \"Frame.kicad_wks\") (type worksheet) (data |AA|))))\n"
+        package = _zip({"board/main.kicad_sch": design})
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "tools/devboard_cad/records").mkdir(parents=True)
+            record = self._record()
+            record["files"] = {}
+            statement = self._statement(package, licence="MIT", member="board/main.kicad_sch",
+                                        embedded="Frame.kicad_wks", notice=True,
+                                        quotes=["Copyright (c) 2026 Example Ltd"])
+            with mock.patch.object(licences, "kicad_embedded_file", return_value=frame):
+                licences.apply_statement(record, statement)
+                (root / "tools/devboard_cad/records/example__board.json").write_text(json.dumps(record), encoding="utf-8")
+                (root / licences.STATEMENTS_PATH).write_text(json.dumps({"statements": [statement]}), encoding="utf-8")
+
+                class Fetch:
+                    def get(self, url):
+                        return FetchResult(url, 200, package, "application/zip", url, None)
+                written, missing = licences.write_notices(root, Fetch())
+            notices = json.loads((root / licences.NOTICES_PATH).read_text(encoding="utf-8"))["notices"]
+        self.assertEqual((written, missing), (1, []))
+        self.assertEqual(notices["example:board"]["text"], frame)
+
     def test_the_licence_file_is_read_at_the_pinned_commit(self) -> None:
         from unittest import mock
         commit = "a" * 40
@@ -734,6 +805,32 @@ class TestLicenceStatements(unittest.TestCase):
             url = licences.github_licence_url(record)
         self.assertEqual(url, f"https://raw.githubusercontent.com/v/r/{commit}/LICENSE")
         self.assertEqual(calls, [f"repos/v/r/contents?ref={commit}"])
+
+    def test_a_notice_statement_keeps_the_licence_file_whatever_the_licence(self) -> None:
+        text = b"CC-BY-4.0\n\nCopyright (c) 2017 Aron Phillips, GHI Electronics\n\nAttribution 4.0 International\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "tools/devboard_cad/records").mkdir(parents=True)
+            record = self._record()
+            record["board_id"] = "beagleboard:beaglebone-load-cape"
+            record["files"] = {}
+            statement = self._statement(text, member=None, licence="CC BY 4.0", notice=True,
+                                        board_id=record["board_id"], source="https://example.com/LICENSE",
+                                        quotes=["Copyright (c) 2017 Aron Phillips, GHI Electronics"])
+            licences.apply_statement(record, statement)
+            (root / "tools/devboard_cad/records/beagleboard__beaglebone-load-cape.json").write_text(
+                json.dumps(record), encoding="utf-8")
+            (root / licences.STATEMENTS_PATH).write_text(json.dumps({"statements": [statement]}), encoding="utf-8")
+
+            class Fetch:
+                def get(self, url):
+                    return FetchResult(url, 200, text, "text/plain", url, None)
+            written, missing = licences.write_notices(root, Fetch())
+            notices = json.loads((root / licences.NOTICES_PATH).read_text(encoding="utf-8"))["notices"]
+        self.assertEqual((written, missing), (1, []))
+        notice = notices["beagleboard:beaglebone-load-cape"]
+        self.assertEqual(notice["licence"], "CC BY 4.0")
+        self.assertIn("Aron Phillips, GHI Electronics", notice["text"])
 
     def test_committed_statements_name_settled_licences_and_existing_records(self) -> None:
         body = json.loads((REPO_ROOT / licences.STATEMENTS_PATH).read_text(encoding="utf-8"))

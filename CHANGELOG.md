@@ -36,6 +36,21 @@ has never run.
   (a grant in 0BSD wording). The Pico record gains Raspberry Pi's Cadence Allegro design
   package, and the UNO R3 record points at the CC BY-SA 4.0 package instead of the
   archive marked `CC-SA-BY-NC`.
+- Ten more SparkFun boards under CC BY-SA 4.0, read from the notice SparkFun places on the
+  design itself (the `CREATIVE_COMMONS` drawing frame on the Eagle schematic and board, or
+  footprint text on the KiCad PCB), and eleven BeagleBoard capes (CC BY 4.0 and CC BY-SA
+  4.0) from the licence file in each cape's folder. `beagleboard:capes`, one record for
+  thirteen capes under two licences, is replaced by one record per licensed cape:
+  `harvest_github.py harvest --path` records one folder of a shared repository, and
+  `mirror.py index` takes only that folder (issue #51).
+- The XIAO Debug Mate's KiCad schematic (seven sheets) under CC BY-SA 4.0, read from the
+  drawing frame Seeed embeds in the design. A licence statement can quote a file that a
+  KiCad design embeds in itself (`embedded`), and `mirror.py` copies only the files a
+  scoped licence covers, listing the rest in `ATTRIBUTION.md` under "Not covered by the
+  licence": here the board layout, the project file and the four housing models. Gerber,
+  drill and model files are matched to a licence by their content, and a scoped licence does
+  not reach project, library or rule files. `check` fails on a mirrored file its licence no
+  longer covers.
 - The digital domain (issue #27, plan §21 item 5): Verilog sources are read
   by a strict allow-list grammar (`tools/ecad_model/verilog.py`) into the
   engineering model, the adapter (`tools/ecad_model/domains/digital.py`)

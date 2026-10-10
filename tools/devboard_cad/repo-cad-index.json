@@ -5,7 +5,7 @@
   "adafruit:2-4-tft-featherwing": {
    "repository": "adafruit/Adafruit-2.4-TFT-FeatherWing-PCB",
    "commit": "7db81bbb064e1e703423beb6f8e4dbf9b7272879",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit 2.4in TFT FeatherWing V2.brd",
@@ -32,7 +32,7 @@
   "adafruit:3-5in-capacitive-touch-tft-featherwing": {
    "repository": "adafruit/Adafruit-3.5in-Capacitive-Touch-TFT-FeatherWing-PCB",
    "commit": "88d6f57cb721cbbae89b5a6fed1f939e1092c2d3",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit 3.5in 480x320 FeatherWing Capacitive.brd",
@@ -49,7 +49,7 @@
   "adafruit:3-5in-tft-featherwing": {
    "repository": "adafruit/Adafruit-3.5in-TFT-Featherwing-PCB",
    "commit": "824a68056b2b102a71621405b9bd683ddf38796b",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit 3.5in 480x320 FeatherWing Rev B.brd",
@@ -76,7 +76,7 @@
   "adafruit:7x15-charlieplex-led-featherwing": {
    "repository": "adafruit/Adafruit-7x15-CharliePlex-LED-FeatherWing",
    "commit": "b4883693227a02cd6affefb6ecc7a748b8150883",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit CharlieWing.brd",
@@ -93,7 +93,7 @@
   "adafruit:adalogger-featherwing": {
    "repository": "adafruit/Adafruit-Adalogger-FeatherWing-PCB",
    "commit": "28ea68d9ffa6d51690195bf295ecfa656ab45f18",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "adalogger featherwing.brd",
@@ -110,7 +110,7 @@
   "adafruit:adxl343-adt7410-sensor-featherwing": {
    "repository": "adafruit/Adafruit-ADXL343-ADT7410-Sensor-FeatherWing-PCB",
    "commit": "808e86d439341e5acc1c307a376ca220d96751ee",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ADXL343 ADT7410 FeatherWing.brd",
@@ -127,7 +127,7 @@
   "adafruit:airlift-featherwing": {
    "repository": "adafruit/Adafruit-AirLift-FeatherWing-PCB",
    "commit": "c8631c7eeed9f69f61403827fa0e0d247da1ea8e",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit AirLift FeatherWing rev B.brd",
@@ -154,7 +154,7 @@
   "adafruit:can-bus-featherwing": {
    "repository": "adafruit/Adafruit-CAN-Bus-FeatherWing-PCB",
    "commit": "263cd9f75ba8c8b48291bd6e62f8672c98619663",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit CAN Bus FeatherWing.brd",
@@ -171,7 +171,7 @@
   "adafruit:ch552-qt-py": {
    "repository": "adafruit/Adafruit-CH552-QT-Py-PCB",
    "commit": "475a3a83213fda98c1a530a84eb6e167cd187b4b",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit CH552 QT Py.brd",
@@ -188,7 +188,7 @@
   "adafruit:charger-bff": {
    "repository": "adafruit/Adafruit-Charger-BFF-PCB",
    "commit": "2acd339ac57539b236e1b072488f581ea56e3a4c",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit LIPoly Charger BFF rev C.brd",
@@ -215,7 +215,7 @@
   "adafruit:circuit-playground": {
    "repository": "adafruit/Adafruit-Circuit-Playground-PCB",
    "commit": "123fc8ded8a6c41de64b6e2ac4d6405f95199b43",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Circuit Playground.brd",
@@ -232,7 +232,7 @@
   "adafruit:circuit-playground-bluefruit": {
    "repository": "adafruit/Adafruit-Circuit-Playground-Bluefruit-PCB",
    "commit": "87ab89a043b8c01b602eeaf1bcf08474abe0336d",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Circuit Playground Bluefruit.brd",
@@ -249,7 +249,7 @@
   "adafruit:circuit-playground-express": {
    "repository": "adafruit/Adafruit-Circuit-Playground-Express-PCB",
    "commit": "2962c0cb972e031d070303bbeda3ed95a2098951",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Circuit Playground Express.brd",
@@ -266,7 +266,7 @@
   "adafruit:circuit-playground-tri-color-e-ink-gizmo": {
    "repository": "adafruit/Adafruit-Circuit-Playground-Tri-Color-E-Ink-Gizmo-PCB",
    "commit": "c7018c043310292976dcb720322e12d6d8e324fc",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Circuit Playground Tri-color E-Ink Gizmo.brd",
@@ -283,7 +283,7 @@
   "adafruit:clue": {
    "repository": "adafruit/Adafruit-CLUE-PCB",
    "commit": "ce323d9f40e63fbe0ae231c9287abce5d2070663",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit CLUE nRF52840 Express.brd",
@@ -300,7 +300,7 @@
   "adafruit:dc-stepper-motor-featherwing": {
    "repository": "adafruit/Adafruit-DC-Stepper-Motor-FeatherWing-PCB",
    "commit": "cae1ee442bd88638aac6427bd78f737aa0846a9e",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit DC+Stepper Wing.brd",
@@ -317,7 +317,7 @@
   "adafruit:dotstar-featherwing": {
    "repository": "adafruit/Adafruit-DotStar-FeatherWing-PCB",
    "commit": "5a438d765b2a9e4f756714c5385a355e00b80270",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit DotStar Wing.brd",
@@ -334,7 +334,7 @@
   "adafruit:ds3231-precision-rtc-featherwing": {
    "repository": "adafruit/Adafruit-DS3231-Precision-RTC-FeatherWing-PCB",
    "commit": "37c7ffb587c00e67d739baa078eb755f0976d15f",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit DS3231 RTC FeatherWing.brd",
@@ -351,7 +351,7 @@
   "adafruit:esp32-c6-feather": {
    "repository": "adafruit/Adafruit-ESP32-C6-Feather-PCB",
    "commit": "7376e394a3a889550e0092d7dbe3bea453b309b3",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather ESP32-C6.brd",
@@ -368,7 +368,7 @@
   "adafruit:esp32-feather-v2": {
    "repository": "adafruit/Adafruit-ESP32-Feather-V2-PCB",
    "commit": "cbde2c6658acb3c788616ceb13423b5d36305ef0",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ESP32 Feather V2.brd",
@@ -385,7 +385,7 @@
   "adafruit:esp32-s2-reverse-tft-feather": {
    "repository": "adafruit/Adafruit-ESP32-S2-Reverse-TFT-Feather-PCB",
    "commit": "ce3ce90565b9e49af0ebbd1c2e0abd300d2fd0d3",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather ESP32-S2 Reverse TFT.brd",
@@ -402,7 +402,7 @@
   "adafruit:esp32-s2-tft-feather": {
    "repository": "adafruit/Adafruit-ESP32-S2-TFT-Feather-PCB",
    "commit": "9e9f52790239a755241bfee62628dc8b3c713c63",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ESP32-S2 TFT Feather.brd",
@@ -419,7 +419,7 @@
   "adafruit:esp32-s3-reverse-tft-feather": {
    "repository": "adafruit/Adafruit-ESP32-S3-Reverse-TFT-Feather-PCB",
    "commit": "633459d74623227a18f7c4b1594db0840ba5592d",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ESP32-S3 Reverse TFT Feather.brd",
@@ -436,7 +436,7 @@
   "adafruit:esp32-s3-tft-feather": {
    "repository": "adafruit/Adafruit-ESP32-S3-TFT-Feather-PCB",
    "commit": "e2cfb6b5e5edb46688429b701eead7a78738b0f8",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ESP32-S3 TFT Feather.brd",
@@ -453,7 +453,7 @@
   "adafruit:ethernet-featherwing": {
    "repository": "adafruit/Adafruit-Ethernet-FeatherWing-PCB",
    "commit": "1f950d49ed57129f6c33656a3ac37ad7d21d757b",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Ethernet FeatherWing.brd",
@@ -470,7 +470,7 @@
   "adafruit:feather-328p": {
    "repository": "adafruit/Adafruit-Feather-328P-PCB",
    "commit": "62859c243921da2d1221681373356f1559855cbc",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather 328P.brd",
@@ -487,7 +487,7 @@
   "adafruit:feather-32u4-adalogger": {
    "repository": "adafruit/Adafruit-Feather-32u4-Adalogger-PCB",
    "commit": "c7e87d6e0feb5d3e048c3715038c0e4ce71cdfa0",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather 32u4 Adalogger.brd",
@@ -504,7 +504,7 @@
   "adafruit:feather-32u4-basic-proto": {
    "repository": "adafruit/Adafruit-Feather-32u4-Basic-Proto-PCB",
    "commit": "42d06b39d8afeb23881364d3a9fabe1cc80b6dd5",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather 32u4 Basic rev B.brd",
@@ -521,7 +521,7 @@
   "adafruit:feather-32u4-bluefruit-le": {
    "repository": "adafruit/Adafruit-Feather-32u4-Bluefruit-LE-PCB",
    "commit": "fab08d3f5f0755a29559b81ad54239b746906b56",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather 32u4 Bluefruit LE.brd",
@@ -538,7 +538,7 @@
   "adafruit:feather-32u4-fona": {
    "repository": "adafruit/Adafruit-Feather-32u4-FONA-PCB",
    "commit": "db45e3e1a5e53590cac33a1f3adc783d1e70ea01",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather 32u4 FONA.brd",
@@ -555,7 +555,7 @@
   "adafruit:feather-32u4-rfm-lora": {
    "repository": "adafruit/Adafruit-Feather-32u4-RFM-LoRa-PCB",
    "commit": "ace22faec73dda4b8dcfec16e1667551456689dd",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather 32u4 RFMxx.brd",
@@ -572,7 +572,7 @@
   "adafruit:feather-esp32-s2": {
    "repository": "adafruit/Adafruit-Feather-ESP32-S2-PCB",
    "commit": "4a6263861580257d42a889a1518133441d25f35d",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather ESP32-S2 Rev C.brd",
@@ -599,7 +599,7 @@
   "adafruit:feather-esp32-s3": {
    "repository": "adafruit/Adafruit-Feather-ESP32-S3-PCB",
    "commit": "2c95ed51a500d929fd6d8f519b895f0c4daeb982",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ESP32-S3 8MB No PSRAM.brd",
@@ -616,7 +616,7 @@
   "adafruit:feather-esp8266-huzzah": {
    "repository": "adafruit/Adafruit-Feather-ESP8266-HUZZAH-PCB",
    "commit": "957300988eee7d15d71649fd4e2cb023a6584acb",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ESP8266 Feather rev E.brd",
@@ -653,7 +653,7 @@
   "adafruit:feather-ice40": {
    "repository": "adafruit/Feather-ICE40-PCB",
    "commit": "d2a4cf7ad1d9c1139535624bacd64d180dd3e111",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "feather_ice40.kicad_pcb",
@@ -735,7 +735,7 @@
   "adafruit:feather-m0-adalogger": {
    "repository": "adafruit/Adafruit-Feather-M0-Adalogger-PCB",
    "commit": "0147a7204c11ae57fc42c5424d5c700bcca875b2",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather M0 Adalogger.brd",
@@ -752,7 +752,7 @@
   "adafruit:feather-m0-basic-proto": {
    "repository": "adafruit/Adafruit-Feather-M0-Basic-Proto-PCB",
    "commit": "1de541ff46165575234d826ae64be64a82e8bc93",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather M0 Basic rev C.brd",
@@ -769,7 +769,7 @@
   "adafruit:feather-m0-bluefruit-le": {
    "repository": "adafruit/Adafruit-Feather-M0-Bluefruit-LE-PCB",
    "commit": "b2e0b3f2930568da3471d6c42cb4919d573d3481",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather Zero BLE rev A.brd",
@@ -786,7 +786,7 @@
   "adafruit:feather-m0-express": {
    "repository": "adafruit/Adafruit-Feather-M0-Express-PCB",
    "commit": "5017ef41885371f8a26ba1b8ab9dd700bd7ce655",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather M0 Express.brd",
@@ -803,7 +803,7 @@
   "adafruit:feather-m0-rfm-lora": {
    "repository": "adafruit/Adafruit-Feather-M0-RFM-LoRa-PCB",
    "commit": "1b3616c9daf1cd0643bb7f6a98f4e3c71fe16c83",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather M0 RFMxx.brd",
@@ -820,7 +820,7 @@
   "adafruit:feather-m0-wifi-winc1500": {
    "repository": "adafruit/Adafruit-Feather-M0-WiFi-WINC1500-PCB",
    "commit": "20e781d8d7d0b31002f9d2a8eaef18429f983815",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather M0 WiFi.brd",
@@ -837,7 +837,7 @@
   "adafruit:feather-m4-can": {
    "repository": "adafruit/Adafruit-Feather-M4-CAN-PCB",
    "commit": "d82af0d26250cb47e0685715276474798bb79470",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather M4 Express CAN.brd",
@@ -854,7 +854,7 @@
   "adafruit:feather-m4-express": {
    "repository": "adafruit/Adafruit-Feather-M4-Express-PCB",
    "commit": "d98407a6071813bc35c39c6e88ca09c0c9ef6f18",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather M4 Express.brd",
@@ -871,7 +871,7 @@
   "adafruit:feather-nrf52840-sense": {
    "repository": "adafruit/Adafruit-Feather-nRF52840-Sense-PCB",
    "commit": "afeb0acb67e98c807cfdfbf7b5fe5e6e49490796",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather nRF52840 Sense Rev C.brd",
@@ -898,7 +898,7 @@
   "adafruit:feather-risc-v": {
    "repository": "adafruit/Feather-RISC-V-PCB",
    "commit": "d1b705eca6b0b992383a75706f3e1aeb1fdcd9a9",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "feather_five.kicad_pcb",
@@ -965,7 +965,7 @@
   "adafruit:feather-rp2040": {
    "repository": "adafruit/Adafruit-Feather-RP2040-PCB",
    "commit": "ea88166891ee0a1697a3899a5d55ab3722a2f125",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather RP2040 Original.brd",
@@ -1002,7 +1002,7 @@
   "adafruit:feather-rp2040-adalogger": {
    "repository": "adafruit/Adafruit-Feather-RP2040-Adalogger-PCB",
    "commit": "dbe392caf8440e8d806dbed88806003d40c765d7",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather RP2040 Adalogger.brd",
@@ -1019,7 +1019,7 @@
   "adafruit:feather-rp2040-dvi": {
    "repository": "adafruit/Adafruit-Feather-RP2040-DVI-PCB",
    "commit": "24f7c1cde8c7284bbd626f78e2b853be24d32ee6",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather RP2040 DVI.brd",
@@ -1036,7 +1036,7 @@
   "adafruit:feather-rp2040-rfm": {
    "repository": "adafruit/Adafruit-Feather-RP2040-RFM-PCB",
    "commit": "e7c663f0e25d1f043d91e50bf284a5c97b28cdc5",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather RP2040 RFM.brd",
@@ -1053,7 +1053,7 @@
   "adafruit:feather-rp2040-scorpio": {
    "repository": "adafruit/Adafruit-Feather-RP2040-SCORPIO-PCB",
    "commit": "e724d4d8524af681a166bce0f3d29dee50b44cb1",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather RP2040 Scorpio.brd",
@@ -1070,7 +1070,7 @@
   "adafruit:feather-rp2040-thinkink": {
    "repository": "adafruit/Adafruit-Feather-RP2040-ThinkInk",
    "commit": "d58fe34ce514708b82d5a25def954bce635c4c8f",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather RP2040 ThinkInk.brd",
@@ -1087,7 +1087,7 @@
   "adafruit:feather-rp2040-usb-host": {
    "repository": "adafruit/Adafruit-Feather-RP2040-USB-Host-PCB",
    "commit": "872f24e8be5948ba2ae3d12925d18a2a8b4b8adc",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather RP2040 USB Host.brd",
@@ -1104,7 +1104,7 @@
   "adafruit:feather-rp2350": {
    "repository": "adafruit/Adafruit-Feather-RP2350-PCB",
    "commit": "d7bc5cb6c16f071e01ae1cf790ee2142d376ee41",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather RP2350.brd",
@@ -1121,7 +1121,7 @@
   "adafruit:feather-stm32f405-express": {
    "repository": "adafruit/Adafruit-Feather-STM32F405-Express-PCB",
    "commit": "f10cfb45e79fb9163b55f375cafa664dbac05268",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather STM32F405 Express.brd",
@@ -1138,7 +1138,7 @@
   "adafruit:featherwing-proto-doubler-tripler-and-quad": {
    "repository": "adafruit/Adafruit-FeatherWing-Proto-Doubler-Tripler-and-Quad",
    "commit": "738c479a5a08af69c7864ff1053404e821fcd700",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "DoubleWing.brd",
@@ -1195,7 +1195,7 @@
   "adafruit:floppy-featherwing": {
    "repository": "adafruit/Adafruit_Floppy_FeatherWing_PCB",
    "commit": "8793e86222bd62b1ee243e07e97a8de9ff6a7e7e",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Floppy FeatherWing.brd",
@@ -1212,7 +1212,7 @@
   "adafruit:funhouse": {
    "repository": "adafruit/Adafruit-FunHouse-PCB",
    "commit": "4d8cb249c480c1fc4cf6891359cfbdf1c264d2a9",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit FunHouse.brd",
@@ -1229,7 +1229,7 @@
   "adafruit:grand-central": {
    "repository": "adafruit/Adafruit-Grand-Central-PCB",
    "commit": "9e59fe3cd1ea37aa6caaf5780fa80956e6ccd74b",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Grand Central M4 Express rev B.brd",
@@ -1246,7 +1246,7 @@
   "adafruit:grove-and-stemma-qt-featherwing": {
    "repository": "adafruit/Adafruit-Grove-and-Stemma-QT-FeatherWing-PCB",
    "commit": "2815cb84b56f4e79c573aa0c641fadef878a512f",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Grove and STEMMA QT FeatherWing.brd",
@@ -1263,7 +1263,7 @@
   "adafruit:huzzah32-esp32-feather": {
    "repository": "adafruit/Adafruit-HUZZAH32-ESP32-Feather-PCB",
    "commit": "e23514c6f9e124a60f9d1de6567c791561b43e73",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit HUZZAH32 ESP32 Feather.brd",
@@ -1280,7 +1280,7 @@
   "adafruit:ism330dhcx-lis3mdl-featherwing": {
    "repository": "adafruit/Adafruit-ISM330DHCX-LIS3MDL-FeatherWing-PCB",
    "commit": "bd7f6d63e4edaed3d9089f1c9197f40e5a437c67",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ISM330DHCX + LIS3MDL FeatherWing.brd",
@@ -1297,7 +1297,7 @@
   "adafruit:itsybitsy-32u4": {
    "repository": "adafruit/Adafruit-ItsyBitsy-32u4-PCB",
    "commit": "b48fb1454afa84d1d83d4641d6c31fb49d360222",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Itsy Bitsy 32u4 3V.brd",
@@ -1324,7 +1324,7 @@
   "adafruit:itsybitsy-esp32": {
    "repository": "adafruit/Adafruit-ItsyBitsy-ESP32-PCB",
    "commit": "552bf913248863c3a8e1e96671081113e4072478",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ItsyBitsy ESP32.brd",
@@ -1341,7 +1341,7 @@
   "adafruit:itsybitsy-m0": {
    "repository": "adafruit/Adafruit-ItsyBitsy-M0-PCB",
    "commit": "faa92dda428868c7042f9ee04685ffdc70849725",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ItsyBitsy M0.brd",
@@ -1358,7 +1358,7 @@
   "adafruit:itsybitsy-m4-express": {
    "repository": "adafruit/Adafruit-ItsyBitsy-M4-Express-PCB",
    "commit": "77ccac24a6eb36fca6f780fd45511d039f0e574f",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ItsyBitsy M4.brd",
@@ -1375,7 +1375,7 @@
   "adafruit:itsybitsy-nrf52840-express": {
    "repository": "adafruit/Adafruit-ItsyBitsy-nRF52840-Express-PCB",
    "commit": "3a3a478c8059b5ab06fbf25c2583ac7d3a8ca3eb",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ItsyBitsy nRF52840 Express.brd",
@@ -1392,7 +1392,7 @@
   "adafruit:itsybitsy-rp2040": {
    "repository": "adafruit/Adafruit-ItsyBitsy-RP2040-PCB",
    "commit": "b12f7b3f1ebf71c53b30fb2f254b85aeb1e6d6f4",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit ItsyBitsy RP2040.brd",
@@ -1409,7 +1409,7 @@
   "adafruit:joy-featherwing": {
    "repository": "adafruit/Adafruit-Joy-Featherwing-PCB",
    "commit": "45f843d490a5968f4642ff970e8e867918c80b8d",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Joypad FeatherWing rev C.brd",
@@ -1426,7 +1426,7 @@
   "adafruit:led-backpack-featherwing": {
    "repository": "adafruit/Adafruit-LED-Backpack-FeatherWing-PCB",
    "commit": "50dc43b6c03adafa21683995f62efb6e825bba12",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "16x8 mono LED FeatherWing rev A.brd",
@@ -1463,7 +1463,7 @@
   "adafruit:lsm6dsox-lis3mdl": {
    "repository": "adafruit/Adafruit-LSM6DSOX-LIS3MDL-PCB",
    "commit": "5e6b23348bc0b392c68f590d13ea71fd63684273",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit LIS3MDL + LSM6DSOX FeatherWing.brd",
@@ -1490,7 +1490,7 @@
   "adafruit:macropad-rp2040": {
    "repository": "adafruit/Adafruit-MacroPad-RP2040-PCB",
    "commit": "fdd7f2cb3bc2b3c7a9c0765780387647ea872141",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit MacroPad 2040 rev D.brd",
@@ -1517,7 +1517,7 @@
   "adafruit:matrixportal-m4": {
    "repository": "adafruit/Adafruit-MatrixPortal-M4-PCB",
    "commit": "200f94f83a08dd23e0b6cb51ff53554e0a123f94",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit MatrixPortal M4.brd",
@@ -1534,7 +1534,7 @@
   "adafruit:matrixportal-s3": {
    "repository": "adafruit/Adafruit-MatrixPortal-S3-PCB",
    "commit": "1ff841b511d7dc153ae8d4c0b148d33cb3b2ba85",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit MatrixPortal S3.brd",
@@ -1551,7 +1551,7 @@
   "adafruit:metro-328": {
    "repository": "adafruit/Adafruit-METRO-328-PCB",
    "commit": "1d635d70533c446c925ec77240370cfee4fba7ad",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Metro Mini 328 V2 - STEMMA QT.brd",
@@ -1608,7 +1608,7 @@
   "adafruit:metro-esp32-s2": {
    "repository": "adafruit/Adafruit-Metro-ESP32-S2-PCB",
    "commit": "42dac1c66d3001a97ef5565b1fea2e842364df32",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Metro ESP32-S2 rev C.brd",
@@ -1635,7 +1635,7 @@
   "adafruit:metro-esp32-s3": {
    "repository": "adafruit/Adafruit-Metro-ESP32-S3-PCB",
    "commit": "4ae86649879d3e6c4b93b258ce9f9d0889f40ad2",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Metro ESP32-S3 Rev A.brd",
@@ -1662,7 +1662,7 @@
   "adafruit:metro-m0-express": {
    "repository": "adafruit/Adafruit-Metro-M0-Express-PCB",
    "commit": "6cdfd4d238f82ee87c0b3b3b91f90878fcc6a125",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Metro M0 Express.brd",
@@ -1679,7 +1679,7 @@
   "adafruit:metro-m4-express": {
    "repository": "adafruit/Adafruit-Metro-M4-Express-PCB",
    "commit": "4aafb2ac645c0d93eed7e4fd6cb71c8eef1a3ac6",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Metro M4 Express.brd",
@@ -1696,7 +1696,7 @@
   "adafruit:metro-m4-express-airlift": {
    "repository": "adafruit/Adafruit-Metro-M4-Express-AirLift-PCB",
    "commit": "502637b33ce97a9a3048938506316001ef6dcd72",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Metro M4 Express AirLift.brd",
@@ -1713,7 +1713,7 @@
   "adafruit:metro-m7-with-airlift": {
    "repository": "adafruit/Adafruit-Metro-M7-with-AirLift-PCB",
    "commit": "a3c861b5d9f21f124cc4e0cc4034f511857c55a1",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Metro M7 iMX RT1011 with AirLift.brd",
@@ -1730,7 +1730,7 @@
   "adafruit:metro-m7-with-microsd": {
    "repository": "adafruit/Adafruit-Metro-M7-with-microSD-PCB",
    "commit": "d7e0bc2ff4d5b9304a915f01442e9cbdc6535e0e",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Metro M7 with microSD.brd",
@@ -1747,7 +1747,7 @@
   "adafruit:metro-rp2040": {
    "repository": "adafruit/Adafruit-Metro-RP2040-PCB",
    "commit": "9fe571ea428c5c2bc1b7593dadf61e8ef804f480",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Metro RP2040.brd",
@@ -1764,7 +1764,7 @@
   "adafruit:metro-rp2350": {
    "repository": "adafruit/Adafruit-Metro-RP2350-PCB",
    "commit": "d8e135da6ee3383372035fb6ac2bb9387eec1233",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Metro RP2350.brd",
@@ -1781,7 +1781,7 @@
   "adafruit:midi-featherwing": {
    "repository": "adafruit/Adafruit-MIDI-FeatherWing-PCB",
    "commit": "d060360d31ba77963443121e71bae136c882a788",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit MIDI FeatherWing.brd",
@@ -1798,7 +1798,7 @@
   "adafruit:mini-tft-with-joystick-featherwing": {
    "repository": "adafruit/Adafruit-Mini-TFT-with-Joystick-Featherwing-PCB",
    "commit": "0521054d17cd04841d5a3ae2a54e3c76e21c9264",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Mini TFT Wing.brd",
@@ -1815,7 +1815,7 @@
   "adafruit:music-maker-featherwing": {
    "repository": "adafruit/Adafruit-Music-Maker-FeatherWing-PCB",
    "commit": "8721087a4720070e3c38f449119976e4316446ef",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit VS1053 Amp FeatherWing.brd",
@@ -1842,7 +1842,7 @@
   "adafruit:neo-trinkey": {
    "repository": "adafruit/Adafruit-Neo-Trinkey-PCB",
    "commit": "65c1e5f1d3c088cec327f7b2b0489bb7e085eed8",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Neo Trinkey.brd",
@@ -1859,7 +1859,7 @@
   "adafruit:neokey-featherwing": {
    "repository": "adafruit/Adafruit-NeoKey-FeatherWing-PCB",
    "commit": "b80f2ae0778319e608a03a650e2590eef8f501f6",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit NeoKey FeatherWing.brd",
@@ -1876,7 +1876,7 @@
   "adafruit:neokey-trinkey": {
    "repository": "adafruit/Adafruit-NeoKey-Trinkey-PCB",
    "commit": "c6a77bea3980cbdd7b0163c4f5c0aa1f4dfe51e6",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit NeoKey Trinkey.brd",
@@ -1893,7 +1893,7 @@
   "adafruit:neopixel-featherwing": {
    "repository": "adafruit/Adafruit-NeoPixel-FeatherWing-PCB",
    "commit": "3b80152edf1808446eab953d2f7a7b06b433c199",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit NeoPixel FeatherWing.brd",
@@ -1910,7 +1910,7 @@
   "adafruit:neopxl8-pcbs": {
    "repository": "adafruit/Adafruit-NeoPXL8-PCBs",
    "commit": "1aa9e3e82c5872db786e047b8eb1b8fadaa7e802",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit NeoPXL8 Friend.brd",
@@ -1947,7 +1947,7 @@
   "adafruit:neotrellis-4x4": {
    "repository": "adafruit/Adafruit-NeoTrellis-4x4-PCB",
    "commit": "d9c12effecfbaab5c55e2c96186188166340862a",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit NeoTrellis 4x4.brd",
@@ -1964,7 +1964,7 @@
   "adafruit:neotrellis-m4-pcb-and-enclosure": {
    "repository": "adafruit/Adafruit-NeoTrellis-M4-PCB-and-Enclosure",
    "commit": "3e6e7d4f37c7df0f40a096f67ab64dfadd4c15db",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit NeoTrellis M4.brd",
@@ -1981,7 +1981,7 @@
   "adafruit:nrf52-bluefruit-feather": {
    "repository": "adafruit/Adafruit-nRF52-Bluefruit-Feather-PCB",
    "commit": "20cfdfdcf656a3c3dd9d07e3db91b0f1ac79b31a",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit nRF52 Bluefruit Feather rev G.brd",
@@ -2028,7 +2028,7 @@
   "adafruit:oled-featherwing": {
    "repository": "adafruit/Adafruit-OLED-FeatherWing-PCB",
    "commit": "179eb83875ab86c49a6b2d771e95099a55d8984b",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit 128x64 OLED FeatherWing.brd",
@@ -2055,7 +2055,7 @@
   "adafruit:pixel-trinkey": {
    "repository": "adafruit/Adafruit-Pixel-Trinkey-PCB",
    "commit": "3331f2f048f8ea2769698f96f35f18969f4f3619",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Pixel Trinkey.brd",
@@ -2072,7 +2072,7 @@
   "adafruit:power-relay-featherwing": {
    "repository": "adafruit/Adafruit-Power-Relay-FeatherWing-PCB",
    "commit": "f975014d53db224ea030fcb11ea0412fb34c8d45",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit PowerRelay Wing.brd",
@@ -2089,7 +2089,7 @@
   "adafruit:prop-maker-featherwing": {
    "repository": "adafruit/Adafruit-Prop-Maker-FeatherWing-PCB",
    "commit": "f0e322ee15e06fe7810d9ec08f992a1b2fbe9bc2",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Prop Maker FeatherWing.brd",
@@ -2106,7 +2106,7 @@
   "adafruit:proximity-trinkey": {
    "repository": "adafruit/Adafruit-Proximity-Trinkey-PCB",
    "commit": "6e99b157c7857fc71afc03e713dce83d44b6d750",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Proximity Trinkey.brd",
@@ -2123,7 +2123,7 @@
   "adafruit:pwm-servo-featherwing": {
    "repository": "adafruit/Adafruit-PWM-Servo-FeatherWing-PCB",
    "commit": "27159a48d60d27e7c5c494b73bcd510fc03b58e1",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "PWMServo Featherwing rev B.brd",
@@ -2140,7 +2140,7 @@
   "adafruit:pybadge": {
    "repository": "adafruit/Adafruit-PyBadge-PCB",
    "commit": "992e322d5b4b0b9a2b60a809ba2ebaa2b0cfe090",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit PyBadge.brd",
@@ -2157,7 +2157,7 @@
   "adafruit:pyportal": {
    "repository": "adafruit/Adafruit-PyPortal-PCB",
    "commit": "90d9aa7ba3f892fd4adb31815c99ede26c10757c",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit PyPortal Pynt.brd",
@@ -2194,7 +2194,7 @@
   "adafruit:qt-py": {
    "repository": "adafruit/Adafruit-QT-Py-PCB",
    "commit": "a8caed9ad5f2670c662f0b0a68af62cceb3cec96",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit QT Py.brd",
@@ -2211,7 +2211,7 @@
   "adafruit:qt-py-ch32v203": {
    "repository": "adafruit/Adafruit-QT-Py-CH32V203-PCB",
    "commit": "c5c1580d9823d2f8923778530339179531d024f6",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit QT Py CH32V203.brd",
@@ -2228,7 +2228,7 @@
   "adafruit:qt-py-esp32-c3": {
    "repository": "adafruit/Adafruit-QT-Py-ESP32-C3-PCB",
    "commit": "8618fb52d806fb184ec5807490db0a9b084ffa9c",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit QT Py ESP32-C3.brd",
@@ -2250,7 +2250,7 @@
   "adafruit:qt-py-esp32-pico": {
    "repository": "adafruit/Adafruit-QT-Py-ESP32-Pico-PCB",
    "commit": "f45b12704ccbb7180d89db28e1af7bd861124133",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit QT Py ESP32 Pico.brd",
@@ -2267,7 +2267,7 @@
   "adafruit:qt-py-esp32-s2": {
    "repository": "adafruit/Adafruit-QT-Py-ESP32-S2-PCB",
    "commit": "7df4eac2c0b9a73ba966766ae6027b0a4d8a6901",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit QT Py ESP32-S2 Rev C.brd",
@@ -2304,7 +2304,7 @@
   "adafruit:qt-py-esp32-s3": {
    "repository": "adafruit/Adafruit-QT-Py-ESP32-S3-PCB",
    "commit": "333b35f9c77338d69816e542e7c6aa4db271d432",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit QT Py ESP32-S3.brd",
@@ -2321,7 +2321,7 @@
   "adafruit:qt-py-rp2040": {
    "repository": "adafruit/Adafruit-QT-Py-RP2040-PCB",
    "commit": "5b6ebd1661fd5250b4f60bdba14d5c475259b7f4",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit QT Py RP2040.brd",
@@ -2338,7 +2338,7 @@
   "adafruit:radio-featherwing": {
    "repository": "adafruit/Adafruit-Radio-FeatherWing-PCB",
    "commit": "926b55164daad155e05ebe8ca3a02365bc07a40c",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Radio FeatherWing.brd",
@@ -2355,7 +2355,7 @@
   "adafruit:relay-featherwing-pcbs": {
    "repository": "adafruit/Adafruit-Relay-FeatherWing-PCBs",
    "commit": "130d79e53912a8a22dc273c521f96e74ea0b280d",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Latching Relay FeatherWing.brd",
@@ -2382,7 +2382,7 @@
   "adafruit:rgb-matrix-featherwing": {
    "repository": "adafruit/Adafruit-RGB-Matrix-FeatherWing-PCB",
    "commit": "2c0839c80106b13e97aa733f85a1e7a78c5cbac7",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit RGB Matrix FeatherWing nRF52.brd",
@@ -2409,7 +2409,7 @@
   "adafruit:rotary-trinkey": {
    "repository": "adafruit/Adafruit-Rotary-Trinkey-PCB",
    "commit": "b93b2aeaabbfbfd231eec6c88afc6694d4581410",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Rotary Trinkey.brd",
@@ -2426,7 +2426,7 @@
   "adafruit:rp2040-can-bus-feather": {
    "repository": "adafruit/Adafruit-RP2040-CAN-Bus-Feather-PCB",
    "commit": "499de161e9d106e530be5ba1aa09a756c38a31ba",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit RP2040 CAN Bus Feather.brd",
@@ -2443,7 +2443,7 @@
   "adafruit:rp2040-prop-maker-feather": {
    "repository": "adafruit/Adafruit-RP2040-Prop-Maker-Feather-PCB",
    "commit": "408fa9a40c0a01a3a65497ef42a29e0b08fe711e",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather RP2040 Prop-Maker.brd",
@@ -2460,7 +2460,7 @@
   "adafruit:sht4x-trinkey": {
    "repository": "adafruit/Adafruit-SHT4x-Trinkey-PCB",
    "commit": "56dc3b26c14a202ee8db53184b9ac5c2ba787e03",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit SHT4x Trinkey.brd",
@@ -2477,7 +2477,7 @@
   "adafruit:slider-trinkey": {
    "repository": "adafruit/Adafruit-Slider-Trinkey-PCB",
    "commit": "77c27c2c1ccb6c2714d88b02618fdd5bbb70acdd",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Slider Trinkey.brd",
@@ -2494,7 +2494,7 @@
   "adafruit:teensy-3-x-feather-adapter": {
    "repository": "adafruit/Adafruit-Teensy-3.x-Feather-Adapter-PCB",
    "commit": "e5267e93a24939f5f07c1e0ae2910dcc9821bb35",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Feather Teensy3 Adapter Original.brd",
@@ -2521,7 +2521,7 @@
   "adafruit:terminal-block-bff": {
    "repository": "adafruit/Adafruit-Terminal-Block-BFF-PCB",
    "commit": "6e2c47d43d37a4911910750956fb27c9459b2a57",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Terminal Block BFF.brd",
@@ -2538,7 +2538,7 @@
   "adafruit:terminal-block-featherwing": {
    "repository": "adafruit/Adafruit-Terminal-Block-FeatherWing-PCB",
    "commit": "b5c7edd20f00010be64d25145d6ee1dacd28b083",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Terminal FeatherWing.brd",
@@ -2555,7 +2555,7 @@
   "adafruit:tft-gizmo": {
    "repository": "adafruit/Adafruit-TFT-Gizmo-PCB",
    "commit": "dc9a7479381c01421a630a93f891c7142f4dfde0",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Circuit Playground TFT Gizmo.brd",
@@ -2572,7 +2572,7 @@
   "adafruit:trinkey-qt2040": {
    "repository": "adafruit/Adafruit-Trinkey-QT2040-PCB",
    "commit": "496bdd10c670077e7107143e42b4fef8e3da07bb",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit QT2040 Trinkey.brd",
@@ -2589,7 +2589,7 @@
   "adafruit:trrs-trinkey": {
    "repository": "adafruit/Adafruit-TRRS-Trinkey-PCB",
    "commit": "d244f5b5658d5cd1b1bf62de57265185179cdf0f",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit TRRS Trinkey.brd",
@@ -2606,7 +2606,7 @@
   "adafruit:ultimate-gps-featherwing": {
    "repository": "adafruit/Adafruit-Ultimate-GPS-FeatherWing-PCB",
    "commit": "1b15a4f782c555903c0cfd7174d0616d2e128887",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit Ultimate GPS FeatherWing.brd",
@@ -2623,7 +2623,7 @@
   "adafruit:usb-host-featherwing": {
    "repository": "adafruit/Adafruit-USB-Host-FeatherWing-PCB",
    "commit": "7011deb5316121374db87580ad3b03f22d8f676d",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit USB Host FeatherWing.brd",
@@ -2640,7 +2640,7 @@
   "adafruit:wiced-wifi-feather": {
    "repository": "adafruit/Adafruit-WICED-WiFi-Feather-PCB",
    "commit": "f2c70ce49ef3df7f60be3a6a30fa39ff34a9dde3",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Adafruit WICED WiFi Feather.brd",
@@ -2657,7 +2657,7 @@
   "beagleboard:beaglebone-ai": {
    "repository": "beagleboard/beaglebone-ai",
    "commit": "819b6268c33ed85f1030205eea24a68261d30681",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "HW/BeagleBone-AI-RevA2/BeagleBone AI_RevA2_PCB_200527.brd",
@@ -3709,7 +3709,7 @@
   "beagleboard:beaglebone-ai-64": {
    "repository": "beagleboard/beaglebone-ai-64",
    "commit": "7313ca3cca8a7035bd077dc51d4a9b3a40e4c1a3",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "hw/BeagleBone_AI-64_Rev_B1_3D_220826.stp",
@@ -3731,7 +3731,7 @@
   "beagleboard:beaglebone-blue-jadonk": {
    "repository": "beagleboard/beaglebone-blue-jadonk",
    "commit": "adfac644088d6d321c32132e07b94a06b522573c",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "EAGLE/BeagleBone_Blue.brd",
@@ -3810,10 +3810,61 @@
     }
    ]
   },
+  "beagleboard:beaglebone-comms-cape": {
+   "repository": "beagleboard/capes",
+   "commit": "5c7c21154fd4a9155f0ca0754398c54ce858e37a",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "beaglebone/Comms/Comms_Cape.brd",
+     "blob": "3651698ce0906546ef28fd9e54c051252a09b99f",
+     "size": 157986
+    },
+    {
+     "path": "beaglebone/Comms/Comms_Cape.sch",
+     "blob": "bc381a34773d32c3b0b9f78df4183ee01f9ea3d1",
+     "size": 963575
+    }
+   ]
+  },
+  "beagleboard:beaglebone-display18-cape": {
+   "repository": "beagleboard/capes",
+   "commit": "5c7c21154fd4a9155f0ca0754398c54ce858e37a",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "beaglebone/Display18/Display18_Cape.brd",
+     "blob": "9d20dd8347b8d45b05d1a8e1e306e6e64a2df16e",
+     "size": 104317
+    },
+    {
+     "path": "beaglebone/Display18/Display18_Cape.sch",
+     "blob": "d82ccde44f9b3176df07099bb02d7e663f9d546c",
+     "size": 1012746
+    }
+   ]
+  },
+  "beagleboard:beaglebone-display70-cape": {
+   "repository": "beagleboard/capes",
+   "commit": "5c7c21154fd4a9155f0ca0754398c54ce858e37a",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "beaglebone/Display70/Display70_Cape.brd",
+     "blob": "e8f3199144ec7cc1ff01b4524ee59787a3143ad8",
+     "size": 192841
+    },
+    {
+     "path": "beaglebone/Display70/Display70_Cape.sch",
+     "blob": "7eb147c475d58da2dfd00ee5c97bfa6651f72c92",
+     "size": 1231470
+    }
+   ]
+  },
   "beagleboard:beaglebone-ftdi-to-jst": {
    "repository": "beagleboard/beaglebone-ftdi-to-jst",
    "commit": "f5118d9c14871e92a1ff6186fdc710c654eee371",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "beaglebone-ftdi-to-jst.kicad_pcb",
@@ -3852,10 +3903,182 @@
     }
    ]
   },
+  "beagleboard:beaglebone-load-cape": {
+   "repository": "beagleboard/capes",
+   "commit": "5c7c21154fd4a9155f0ca0754398c54ce858e37a",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "beaglebone/Load/Load_Cape.brd",
+     "blob": "919d079c7496212e0b52264e2d0af708d37ca735",
+     "size": 162372
+    },
+    {
+     "path": "beaglebone/Load/Load_Cape.sch",
+     "blob": "5562d35916cd4e19dffdbf4e4b27d66f47aeb1b6",
+     "size": 615833
+    }
+   ]
+  },
+  "beagleboard:beaglebone-motor-cape": {
+   "repository": "beagleboard/capes",
+   "commit": "5c7c21154fd4a9155f0ca0754398c54ce858e37a",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "beaglebone/Motor/Motor_Cape.brd",
+     "blob": "f7154a04131680f64ba63da085e884974725da41",
+     "size": 196490
+    },
+    {
+     "path": "beaglebone/Motor/Motor_Cape.sch",
+     "blob": "a9d5402fbb10385b55300ab4ae95bcdcb96a36e1",
+     "size": 1007820
+    }
+   ]
+  },
+  "beagleboard:beaglebone-power-cape": {
+   "repository": "beagleboard/capes",
+   "commit": "5c7c21154fd4a9155f0ca0754398c54ce858e37a",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "beaglebone/Power/Power_Cape.brd",
+     "blob": "cd4beb5bcd6dcb83da2f3a6136e3173c01a69978",
+     "size": 131691
+    },
+    {
+     "path": "beaglebone/Power/Power_Cape.sch",
+     "blob": "433dfba9f117bd1f0e92e551ffa065693e776f9d",
+     "size": 1253130
+    }
+   ]
+  },
+  "beagleboard:beaglebone-proto-cape": {
+   "repository": "beagleboard/capes",
+   "commit": "5c7c21154fd4a9155f0ca0754398c54ce858e37a",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "beaglebone/Proto/Proto_Cape.brd",
+     "blob": "8a7742a479c7481861aa9201a2118400d1354953",
+     "size": 141808
+    },
+    {
+     "path": "beaglebone/Proto/Proto_Cape.sch",
+     "blob": "a614f7ddbf1d70785771cc211a03ab9aec1cab9c",
+     "size": 598049
+    }
+   ]
+  },
+  "beagleboard:beaglebone-relay-cape": {
+   "repository": "beagleboard/capes",
+   "commit": "5c7c21154fd4a9155f0ca0754398c54ce858e37a",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "beaglebone/Relay/Relay_Cape.brd",
+     "blob": "40d96b40b0cfb799ab0093c4e457beba0d912bf6",
+     "size": 102446
+    },
+    {
+     "path": "beaglebone/Relay/Relay_Cape.sch",
+     "blob": "d587e580ec214fe44c5498a61818905a29d354e9",
+     "size": 969830
+    }
+   ]
+  },
+  "beagleboard:beaglebone-robotics-cape": {
+   "repository": "beagleboard/capes",
+   "commit": "5c7c21154fd4a9155f0ca0754398c54ce858e37a",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "beaglebone/Robotics/EAGLE/Robotics_Cape.brd",
+     "blob": "cb9557f0b70ee3c52517d6148342c61e4d6cb6e3",
+     "size": 284098
+    },
+    {
+     "path": "beaglebone/Robotics/EAGLE/Robotics_Cape.sch",
+     "blob": "a4adafde5078e0031c5b8638b0b83981e66d69ca",
+     "size": 733184
+    },
+    {
+     "path": "beaglebone/Robotics/EAGLE/Strawson_Eagle_Lib.lbr",
+     "blob": "aa2251f2ff07a747b30109b8d7a5fb9061a55cbb",
+     "size": 785908
+    },
+    {
+     "path": "beaglebone/Robotics/MFG/SD-101D Part List.txt",
+     "blob": "0301c045725a5c54614f354d6b894095bae92466",
+     "size": 13986
+    },
+    {
+     "path": "beaglebone/Robotics/MFG/SD-101D Robotics Cape.bcream.ger",
+     "blob": "7754c8cde49e386ac9a91ac8248a8f21c9a59067",
+     "size": 95
+    },
+    {
+     "path": "beaglebone/Robotics/MFG/SD-101D Robotics Cape.boardoutline.ger",
+     "blob": "c189012d8a3f35972c9cf68af3d5a3fddf76ecad",
+     "size": 21855
+    },
+    {
+     "path": "beaglebone/Robotics/MFG/SD-101D Robotics Cape.bottomlayer.ger",
+     "blob": "2455b4a068b181ad6ef784d2f71962c1f1a347ba",
+     "size": 111884
+    },
+    {
+     "path": "beaglebone/Robotics/MFG/SD-101D Robotics Cape.bottomsilkscreen.ger",
+     "blob": "7754c8cde49e386ac9a91ac8248a8f21c9a59067",
+     "size": 95
+    },
+    {
+     "path": "beaglebone/Robotics/MFG/SD-101D Robotics Cape.bottomsoldermask.ger",
+     "blob": "243fe00fa87a8c418ae117f62475e49ef95afc04",
+     "size": 3189
+    },
+    {
+     "path": "beaglebone/Robotics/MFG/SD-101D Robotics Cape.drills.xln",
+     "blob": "10a176185f63845723c07488c391acb51caacb1a",
+     "size": 3774
+    },
+    {
+     "path": "beaglebone/Robotics/MFG/SD-101D Robotics Cape.tcream.ger",
+     "blob": "89d4cdb23ddd325dabda2e5521d08710b2d94f3a",
+     "size": 13286
+    },
+    {
+     "path": "beaglebone/Robotics/MFG/SD-101D Robotics Cape.toplayer.ger",
+     "blob": "5000a4ac18532111178c63927116f63cd25faa78",
+     "size": 99352
+    },
+    {
+     "path": "beaglebone/Robotics/MFG/SD-101D Robotics Cape.topsilkscreen.ger",
+     "blob": "358ae75f12165306303e4c8afe5b05312368f022",
+     "size": 178703
+    },
+    {
+     "path": "beaglebone/Robotics/MFG/SD-101D Robotics Cape.topsoldermask.ger",
+     "blob": "c8957f0f783ce07b90b04e0e404c3657e1ae794b",
+     "size": 15246
+    },
+    {
+     "path": "beaglebone/Robotics/models/SD-101D Robotics Cape 3D Model.SLDPRT",
+     "blob": "663ee217f46cd568db187750df0315e28ae82b2f",
+     "size": 2296956
+    },
+    {
+     "path": "beaglebone/Robotics/models/SD-101D Robotics Cape 3D Model.STEP",
+     "blob": "06b8eeb901d0956d11ef65d3b9d24febf6798ff1",
+     "size": 5904122
+    }
+   ]
+  },
   "beagleboard:beagleconnect-freedom": {
    "repository": "beagleboard/beagleconnect-freedom",
    "commit": "3f99c08de7d81991f95eb2c23f30798a129ffdcf",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "case/mechanical design/BeagleConnect Gateway_BaseBoard v0.2_20210823.stp",
@@ -4247,7 +4470,7 @@
   "beagleboard:beagleplay": {
    "repository": "beagleboard/beagleplay",
    "commit": "7a59a98ae27dc4fd9e2bd8975ff90cdb44a366ea",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Design/20230215_beagleplayv022_10.brd",
@@ -4529,7 +4752,7 @@
   "beagleboard:beaglev-ahead": {
    "repository": "beagleboard/beaglev-ahead",
    "commit": "6b56e2d69485c375c5912eaa2791f79f1d089c07",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "design/BEAGLEV-AHEAD_V10.DSN",
@@ -4756,7 +4979,7 @@
   "beagleboard:beaglev-fire": {
    "repository": "beagleboard/beaglev-fire",
    "commit": "cdbd4b6892cebc5eab2d73c5a098b73aa0c2612c",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "design/BeagleV-FIRE_REV-A_230911.DSN",
@@ -4898,7 +5121,7 @@
   "beagleboard:beagley-ai": {
    "repository": "beagleboard/beagley-ai",
    "commit": "d1c9f8b76c17c0b629341b79bd4286dbeebb1e3e",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "3D/BeagleY-AI-3D.zip",
@@ -5075,7 +5298,7 @@
   "beagleboard:pocketbeagle": {
    "repository": "beagleboard/pocketbeagle",
    "commit": "d793a63f48dd3041e333362d5ec870377d255f89",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "EAGLE/PocketBeagle.brd",
@@ -5462,7 +5685,7 @@
   "beagleboard:pocketbeagle-2": {
    "repository": "beagleboard/pocketbeagle-2",
    "commit": "be5f0a4a84b8279968722a813887cf7cae3e22ff",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "design/POCKETBEAGLE2 V10_241220.DSN",
@@ -5501,10 +5724,74 @@
     }
    ]
   },
+  "beagleboard:pocketbeagle-grove-cape": {
+   "repository": "beagleboard/capes",
+   "commit": "5c7c21154fd4a9155f0ca0754398c54ce858e37a",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "pocketbeagle/Grove/Grove_Cape.DSN",
+     "blob": "697ef79ed07f77731936571235d9af66844b2218",
+     "size": 1858048
+    },
+    {
+     "path": "pocketbeagle/Grove/Grove_Cape.brd",
+     "blob": "17ec9f25052339629ac02d618c5681de0dcc68fb",
+     "size": 5896248
+    }
+   ]
+  },
+  "beagleboard:pocketbeagle-techlab-cape": {
+   "repository": "beagleboard/capes",
+   "commit": "5c7c21154fd4a9155f0ca0754398c54ce858e37a",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "pocketbeagle/TechLab/eagle/TechLab_Cape.brd",
+     "blob": "134b8242d59a69cd41eee8059fb1722843697332",
+     "size": 356833
+    },
+    {
+     "path": "pocketbeagle/TechLab/eagle/TechLab_Cape.sch",
+     "blob": "5ec71b129ccb10511e77109f09a614b56b907c82",
+     "size": 401025
+    },
+    {
+     "path": "pocketbeagle/TechLab/kicad/TechLab-eagle-import.kicad_sym",
+     "blob": "a5cb7172744e2af2caddbd764fdddf50983999ec",
+     "size": 348642
+    },
+    {
+     "path": "pocketbeagle/TechLab/kicad/TechLab.kicad_pcb",
+     "blob": "b10442ea2a8b53e03d3f9e3e6f59dcc0670b42ca",
+     "size": 2822803
+    },
+    {
+     "path": "pocketbeagle/TechLab/kicad/TechLab.kicad_pro",
+     "blob": "a5b6e691a6d6ed3b14a1f2cf48dd21db6c203fd1",
+     "size": 19421
+    },
+    {
+     "path": "pocketbeagle/TechLab/kicad/TechLab.kicad_sch",
+     "blob": "99e2c42bcfbbf1cdd3e4834965502c1e5724d953",
+     "size": 1734
+    },
+    {
+     "path": "pocketbeagle/TechLab/kicad/TechLab_Page1.kicad_sch",
+     "blob": "cf3296c5a3630c4ee66877f2fc1a5233f29138f1",
+     "size": 309874
+    },
+    {
+     "path": "pocketbeagle/TechLab/kicad/TechLab_Page2.kicad_sch",
+     "blob": "24243434e87b6ea1b981f2e0305965e180fcbb4d",
+     "size": 287341
+    }
+   ]
+  },
   "m5stack:m5": {
    "repository": "m5stack/M5_Hardware",
    "commit": "a240115c94b19ecf647f229c47fa9a8ce46ccdc4",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Common/Atomic_Type_A/Footprints/Atomic_Type_A.PcbDoc",
@@ -7271,13 +7558,13 @@
   "microbit-foundation:microbit-v2": {
    "repository": "microbit-foundation/microbit-v2-hardware",
    "commit": "17aae03003b4fd3686d18aca5ad175c420d29a20",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": []
   },
   "radxa:hw": {
    "repository": "radxa/hw-design",
    "commit": "d1fdb2be2045bdc7488c0989382c62b63100fad6",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "rockpi_n10/AD/ROCK-PI-N10-PCB-V1.3.PrjPcb/dalang-v1.3_20211125.PcbDoc",
@@ -7369,7 +7656,7 @@
   "radxa:oshw": {
    "repository": "radxa/oshw",
    "commit": "788eeb051d01400a959d5243f0adb3a1bd3ebe03",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "rock2_square_baseboard/00.Schmatic/ORCAD16.2/RADXA_ROCK2_SQUARE_VER1.DSN",
@@ -7436,7 +7723,7 @@
   "robotis-git:xelnetwork": {
    "repository": "ROBOTIS-GIT/XelNetwork_Hardware",
    "commit": "bf6f45a90c175428961625bdb07929d9b5adb9a6",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "commXEL-W/CAD/commxel_w-revc-기구도(bottom).dxf",
@@ -7543,7 +7830,7 @@
   "seeed-studio:oshw-wioterminal": {
    "repository": "Seeed-Studio/OSHW-WioTerminal",
    "commit": "c9192a3c7aeb40c7d3c09e5397f0a531f2847d0c",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "02 Gerber Files/wio terminal.GBL",
@@ -7647,10 +7934,47 @@
     }
    ]
   },
+  "seeed-studio:oshw-xiao-debug-mate": {
+   "repository": "Seeed-Studio/OSHW-XIAO-Debug-Mate",
+   "commit": "51769f4dcb8829d95728eb34c37da2b4a58948bc",
+   "indexed_at": "2026-10-10T17:43:01Z",
+   "files": [
+    {
+     "path": "1_Libraries/SdFat_-_Adafruit_Fork/doc/html.zip",
+     "blob": "ee7cbc2112ce47913e31f8a748c2a52b38d8472c",
+     "size": 2604051
+    },
+    {
+     "path": "1_Libraries/SdFat_-_Adafruit_Fork/extras/USB_Host_Shield/USB_Host_Shield_2.0.zip",
+     "blob": "72b3069c450eb76bf9498010a7660e802acaff77",
+     "size": 476902
+    },
+    {
+     "path": "3_Product_housing/Debugger Keycap; FDM, ABS, L16.8W6.4H5, Green, Support-Removed and Deburred.stp",
+     "blob": "910c20129e7862a7516a0937e53a455658776c23",
+     "size": 48915
+    },
+    {
+     "path": "3_Product_housing/Debugger Lower Housing; FDM, ABS, L100 x W58 x H12.2, Black, Remove Supports and Deburr.stp",
+     "blob": "284652430689365f930fe408dbba5d08589e2fc6",
+     "size": 657230
+    },
+    {
+     "path": "3_Product_housing/Debugger Screen Mounting Block; FDM, ABS, L57.5W47.5H6.4, Black, Deburred.stp",
+     "blob": "aeef68799f70e62ebfaecf7d37b644168f86ddf4",
+     "size": 340568
+    },
+    {
+     "path": "3_Product_housing/Debugger Upper Housing; FDM, ABS, L100 x W57 x H11 mm, Black, Remove Supports and Deburr.stp",
+     "blob": "53f2a60c164e3ffe41e5a55134d6062187b9368c",
+     "size": 714803
+    }
+   ]
+  },
   "seeed-studio:oshw-xiao-series": {
    "repository": "Seeed-Studio/OSHW-XIAO-Series",
    "commit": "cc7f3bbfc69f20061e533304b160bedcf377844a",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Seeed Studio XIAO Series Library/Seeed_Studio_XIAO_Series.kicad_sym",
@@ -7917,13 +8241,13 @@
   "sipeed:keyboard": {
    "repository": "sipeed/sipeed_keyboard",
    "commit": "b44a21395547ef1fc77846720362666dca1337a8",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": []
   },
   "sparkfun:air-velocity-sensor-fs3000-qwiic": {
    "repository": "sparkfun/SparkFun_Air_Velocity_Sensor_FS3000_Qwiic",
    "commit": "a79ea391757d5452738816461a08b6070625e795",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/FS3000.lbr",
@@ -8015,7 +8339,7 @@
   "sparkfun:artemis": {
    "repository": "sparkfun/SparkFun_Artemis",
    "commit": "e1d026549109ea02264e977fc1f7b8d49bcfdfe9",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Documents/Artemis Production Model V1.step",
@@ -8112,7 +8436,7 @@
   "sparkfun:artemisdevkit": {
    "repository": "sparkfun/ArtemisDevKit",
    "commit": "4d5afc951a0887709fc2ba3bf365e2c71c42151a",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "hardware/ArtemisDevKit.brd",
@@ -8191,10 +8515,92 @@
     }
    ]
   },
+  "sparkfun:cellular-function-board-blues-wireless-notecarrier": {
+   "repository": "sparkfun/SparkFun_Cellular_Function_Board_Blues_Wireless_Notecarrier",
+   "commit": "84d2f0ccf72ddc1ba9a89bfb4c95df8efd73631c",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_Board_Blues_Notecarrier-Panel.GBL",
+     "blob": "f11aabc1ba7467072f8aff4955bf74ac3fdac4be",
+     "size": 1300474
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_Board_Blues_Notecarrier-Panel.GBO",
+     "blob": "71a08e2ad18f656c27807aceccdd36d235832957",
+     "size": 1506018
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_Board_Blues_Notecarrier-Panel.GBP",
+     "blob": "c4e40b89b426ae43d1a1561429f1e5b350a2e450",
+     "size": 148
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_Board_Blues_Notecarrier-Panel.GBS",
+     "blob": "34b7cc5d6f370044dfb4bd3016aeba747590c938",
+     "size": 189681
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_Board_Blues_Notecarrier-Panel.GKO",
+     "blob": "e856de3a08ef19ead913424164fb99676d07f5ba",
+     "size": 874326
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_Board_Blues_Notecarrier-Panel.GTL",
+     "blob": "45c135274b30a9cea7f8fb81bf4bb856f5f5519d",
+     "size": 3098553
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_Board_Blues_Notecarrier-Panel.GTO",
+     "blob": "b9a1b4ef444e568224313efa2cb266fb6e39aca0",
+     "size": 884871
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_Board_Blues_Notecarrier-Panel.GTP",
+     "blob": "6fe5f954091941fd052ef8048f750e76cc542b12",
+     "size": 436916
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_Board_Blues_Notecarrier-Panel.GTS",
+     "blob": "d48c93f37adecc9cd9226c63c4f58cf50c8ba561",
+     "size": 509472
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_Board_Blues_Notecarrier-Panel.brd",
+     "blob": "4869d24c9639d03db75da91710b83680324fc0a3",
+     "size": 1158592
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_Board_Blues_Notecarrier-Panel.zip",
+     "blob": "d31252454f36bb1c8596ecb5a5ac8b0535e1bf45",
+     "size": 1781516
+    },
+    {
+     "path": "Hardware/SparkFun_MicroMod_Function_Board_Blues_Notecarrier.brd",
+     "blob": "5663eb695e2dc8d10c8404c6960b2e95906a8fd3",
+     "size": 458228
+    },
+    {
+     "path": "Hardware/SparkFun_MicroMod_Function_Board_Blues_Notecarrier.lbr",
+     "blob": "13b7036d7a26c936382489f305f506752a958a91",
+     "size": 37644
+    },
+    {
+     "path": "Hardware/SparkFun_MicroMod_Function_Board_Blues_Notecarrier.sch",
+     "blob": "4becb6d3ad889e169142ec93da2ed63cd6b798fe",
+     "size": 1230439
+    },
+    {
+     "path": "Hardware/notehub.lbr",
+     "blob": "98ce1490e75ffe6b8a2b76f9bfed8be334966418",
+     "size": 212487
+    }
+   ]
+  },
   "sparkfun:clock-generator-5p49v60": {
    "repository": "sparkfun/SparkFun_Clock_Generator_5P49V60",
    "commit": "db6ed5e8fffad32bd32b92c52802b5a30320cb70",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_Clock_Generator_5PV49V60.brd",
@@ -8271,7 +8677,7 @@
   "sparkfun:differential-i2c-breakout-pca9615-qwiic": {
    "repository": "sparkfun/SparkFun_Differential_I2C_Breakout_PCA9615_Qwiic",
    "commit": "49600312278fdb7ca43ea27716a2875781affc55",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_Differential_I2C_Breakout_PCA9615_Qwiic.brd",
@@ -8293,7 +8699,7 @@
   "sparkfun:digi-xbee-regulated-qwiic": {
    "repository": "sparkfun/SparkFun_Digi_XBee_Regulated_Qwiic",
    "commit": "0e25ebd7364daae9f0bd36c49f88e7d2f2435074",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_Digi_XBee_Regulated_Qwiic.brd",
@@ -8390,7 +8796,7 @@
   "sparkfun:digital-temperature-sensor-breakout-as6212-qwiic": {
    "repository": "sparkfun/SparkFun_Digital_Temperature_Sensor_Breakout_AS6212_Qwiic",
    "commit": "31cb105d70fa07023cc52af5751763bbcf8a5098",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/Sparkfun_AS6212_Qwiic-Panel.brd",
@@ -8422,7 +8828,7 @@
   "sparkfun:edge": {
    "repository": "sparkfun/SparkFun_Edge",
    "commit": "9efcf61f287932238491e4a1fd18f7a280a244c0",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/SparkFun_TensorFlow_Ambiq_Apollo3-Panel.GBL",
@@ -8579,7 +8985,7 @@
   "sparkfun:environmental-sensor-breakout-bme680": {
    "repository": "sparkfun/SparkFun_Environmental_Sensor_Breakout_BME680",
    "commit": "ff6f1f269c195a209b036d0325c8b94deaeae1ab",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Qwiic Environmental BME680.brd",
@@ -8656,7 +9062,7 @@
   "sparkfun:esp32-s2-thing-plus": {
    "repository": "sparkfun/ESP32-S2_Thing_Plus",
    "commit": "49a7c05da8a254010d7022d4b9586dff2c6bbb9a",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/ESP32-S2_Thing_Plus.brd",
@@ -8688,7 +9094,7 @@
   "sparkfun:esp32-thing-plus": {
    "repository": "sparkfun/ESP32_Thing_Plus",
    "commit": "ed6d941070fa7756af6d2e24bdcfed8e27b2734a",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/ESP32_Thing_Plus.brd",
@@ -8710,7 +9116,7 @@
   "sparkfun:esp32-thing-plus-u-fl": {
    "repository": "sparkfun/ESP32_Thing_Plus_U.FL",
    "commit": "cc74046280c1cc5f410adf89ca029a7923f55154",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/ESP32_Thing_Plus_UFL.brd",
@@ -8742,7 +9148,7 @@
   "sparkfun:high-precision-temperature-sensor-tmp117-qwiic": {
    "repository": "sparkfun/SparkFun_High_Precision_Temperature_Sensor_TMP117_Qwiic",
    "commit": "aa763eaee71d9245e5c31daa6883f6f5c6186f16",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Sparkfun_TMP117_Qwiic.brd",
@@ -8759,7 +9165,7 @@
   "sparkfun:hstx-pth-breakout": {
    "repository": "sparkfun/SparkFun_HSTX_PTH_Breakout",
    "commit": "48e2aab291a360cfd6449c322a052e6c15edda3d",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_HSTX_PTH_Breakout.kicad_pcb",
@@ -8781,7 +9187,7 @@
   "sparkfun:hstx-to-dvi-breakout": {
    "repository": "sparkfun/SparkFun_HSTX_to_DVI_Breakout",
    "commit": "817bf5a05a6e77e48831d0f24c5156b6fa9f822b",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_HSTX_to_DVI_Breakout.kicad_pcb",
@@ -8803,7 +9209,7 @@
   "sparkfun:humidity-sensor-shtc3": {
    "repository": "sparkfun/SparkFun_Humidity_Sensor_SHTC3",
    "commit": "89ecc1a11c2d0c3bbd8bc6224095ddf24aff0d09",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Jig/SHTC3 Breakout-BottomJig.brd",
@@ -8900,7 +9306,7 @@
   "sparkfun:iot-redboard-esp32": {
    "repository": "sparkfun/SparkFun_IoT_RedBoard-ESP32",
    "commit": "72e78f98fb28f84d8589f292696660ac3f8c1259",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "hardware/Production/SparkFun_IoT_RedBoard-ESP32-Panel.GBL",
@@ -9072,7 +9478,7 @@
   "sparkfun:iot-redboard-rp2350": {
    "repository": "sparkfun/SparkFun_IoT_RedBoard-RP2350",
    "commit": "46926c417395f6b195cc8077b2b0012884b60475",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/SparkFun_IoT_RedBoard-RP2350_panelized.GBL",
@@ -9184,7 +9590,7 @@
   "sparkfun:lumenati-4-pack": {
    "repository": "sparkfun/Lumenati_4-pack",
    "commit": "20f09e72a070a05e63a345e0f908985e3df78dd2",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Lumenati_4-pack.kicad_pcb",
@@ -9216,7 +9622,7 @@
   "sparkfun:lumenati-8-pack": {
    "repository": "sparkfun/Lumenati_8-pack",
    "commit": "c36a2900370b3197a14fd952f291a7600583cced",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Lumenati_8-pack.kicad_pcb",
@@ -9248,7 +9654,7 @@
   "sparkfun:micromod-artemis-processor": {
    "repository": "sparkfun/MicroMod_Artemis_Processor",
    "commit": "f3e16866c81b140543ed791169d8974c673a9ff8",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/MicroMod-Artemis-ProcessorBoard.brd",
@@ -9355,7 +9761,7 @@
   "sparkfun:micromod-asset-tracker": {
    "repository": "sparkfun/MicroMod_Asset_Tracker",
    "commit": "d0f4731a7c3d8cb791db75c5734e7c261e82f5de",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/MicroMod_Asset_Tracker.brd",
@@ -9462,7 +9868,7 @@
   "sparkfun:micromod-asset-tracker-update-tool": {
    "repository": "sparkfun/MicroMod_Asset_Tracker_Update_Tool",
    "commit": "1da02c805c6ca93b8c6c91f639babe04baff3c45",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/MicroMod_Asset_Tracker_Firmware_Update_Tool.brd",
@@ -9544,7 +9950,7 @@
   "sparkfun:micromod-atp-carrier": {
    "repository": "sparkfun/MicroMod_ATP_Carrier_Board",
    "commit": "9750d65ca0fdd4164fbac93a9b1ebcec7b615f11",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/MicroMod_ATP_CarrierBoard.brd",
@@ -9626,7 +10032,7 @@
   "sparkfun:micromod-atp-carrier-board-promo-constellation": {
    "repository": "sparkfun/MicroMod_ATP_Carrier_Board_Promo_Constellation",
    "commit": "1051add80007fcb66cafabd7a748cae69efc4dcb",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/MicroMod_ATP_Constellation.GBL",
@@ -9763,7 +10169,7 @@
   "sparkfun:micromod-data-logging-carrier": {
    "repository": "sparkfun/MicroMod_Data_Logging_Carrier",
    "commit": "6fe06a666a75f88c87da4ac8711085090e21e1c0",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/MicroMod-Datalogging-CarrierBoard.brd",
@@ -9855,7 +10261,7 @@
   "sparkfun:micromod-environmental-sensor-function": {
    "repository": "sparkfun/MicroMod_Environmental_Sensor_Function_Board",
    "commit": "c6f51f267769d986756010689eedf3f9f950f0a3",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/MicroMod_Environmental.brd",
@@ -9934,10 +10340,37 @@
     }
    ]
   },
+  "sparkfun:micromod-function-ethernet-w5500": {
+   "repository": "sparkfun/MicroMod_Function_Ethernet-W5500",
+   "commit": "6b66bf3d9790e4a96c8c1b94a1cd176725633be2",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "Hardware/MicroMod-Ethernet-Function-Board-W5500.brd",
+     "blob": "21bbbf24cb9dc7d80776271fd408ea8f23f34de2",
+     "size": 390937
+    },
+    {
+     "path": "Hardware/MicroMod-Ethernet-Function-Board-W5500.sch",
+     "blob": "daf957bc36953fe503854673c0fe7fc2fcb4e659",
+     "size": 1054430
+    },
+    {
+     "path": "Hardware/Production/MicroMod-Ethernet-Function-Board-Panel-W5500.brd",
+     "blob": "cdf9a23f029101187f5d5bed1890618dd3d1a5b8",
+     "size": 1197925
+    },
+    {
+     "path": "Hardware/Production/MicroMod-Ethernet-Function-Board-W5500-Panel.zip",
+     "blob": "71d5a96e9ac2552618bb27af1411f2eccc3f3d5f",
+     "size": 1238347
+    }
+   ]
+  },
   "sparkfun:micromod-function-lora-1w": {
    "repository": "sparkfun/MicroMod_Function_LoRa_1W",
    "commit": "fb2274d8bc2ca06e6c730d7efaf8bbe07b7a18f2",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/MicroMod-LoRa-1W-Function-Board.brd",
@@ -10019,7 +10452,7 @@
   "sparkfun:micromod-gnss-f9p-carrier": {
    "repository": "sparkfun/MicroMod_GNSS_F9P_Carrier_Board",
    "commit": "2b6502c6f013c03bbc9fe09d61b52ae71362f4d5",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/F9P_Carrier_Board.brd",
@@ -10101,7 +10534,7 @@
   "sparkfun:micromod-gnss-function-board-zed-f9p": {
    "repository": "sparkfun/SparkFun_MicroMod_GNSS_Function_Board_ZED-F9P",
    "commit": "94a722c73ff60fc51fbbeb90fb310be2ef446c7c",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_MicroMod_GNSS_Function_Board_ZED-F9P.brd",
@@ -10203,7 +10636,7 @@
   "sparkfun:micromod-lte-gnss-function-board-u-blox-sara-r5": {
    "repository": "sparkfun/SparkFun_MicroMod_LTE_GNSS_Function_Board_u-blox_SARA-R5",
    "commit": "03c140076301289bb70f1c39d53b693328f720d9",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/SparkFun_MicroMod_Function_SARA-R5-Panel.GBL",
@@ -10315,7 +10748,7 @@
   "sparkfun:micromod-main-board-double": {
    "repository": "sparkfun/SparkFun_MicroMod_Main_Board_Double",
    "commit": "78a13d44dbfcab0c000adbd0bd60dc79cd5eecfb",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_Main_Board_Double_v22.brd",
@@ -10402,7 +10835,7 @@
   "sparkfun:micromod-main-board-single": {
    "repository": "sparkfun/SparkFun_MicroMod_Main_Board_Single",
    "commit": "37b0a2d5c3d4cd9e55b0dee6b308041d89bfa151",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_Main_Board_Single_v21.brd",
@@ -10484,7 +10917,7 @@
   "sparkfun:micromod-mikrobus-carrier": {
    "repository": "sparkfun/MicroMod_mikroBUS_Carrier_Board",
    "commit": "bec0ae0f5fe851c17d7908eec0cb7a815700d743",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/MM_MikroBUS_Carrier.GBL",
@@ -10628,10 +11061,112 @@
     }
    ]
   },
+  "sparkfun:micromod-processor-board-nrf52840": {
+   "repository": "sparkfun/MicroMod_Processor_Board-nRF52840",
+   "commit": "7a1c2d0b182387b921881dc82a0847555e982bbf",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "Hardware/MicroMod_Processor_Board-nRF52840.brd",
+     "blob": "99ad3516ae54309b46701bc7f607b371f173e716",
+     "size": 220208
+    },
+    {
+     "path": "Hardware/MicroMod_Processor_Board-nRF52840.sch",
+     "blob": "6628008d03430831d09e5704298378d9b6d3feff",
+     "size": 914054
+    },
+    {
+     "path": "Hardware/MicroMod_Processor_Board-nRF52840.zip",
+     "blob": "03fe91c71bb1266b75c62f11bb9e457d296d87db",
+     "size": 167100
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.GBL",
+     "blob": "b4fb964fa5fcb3e1c38b04e7b409ef6f13ed8768",
+     "size": 1316054
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.GBO",
+     "blob": "2af61061a93f1e3f5c460154e677b689d49ac60b",
+     "size": 1582017
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.GBP",
+     "blob": "5528f69c7bfc952e709bee87a76288313f513e42",
+     "size": 3883
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.GBS",
+     "blob": "b0512331ee11a5b934fe6c35a5c4805bcd8f0445",
+     "size": 79645
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.GKO",
+     "blob": "6a70082973f41d096a383618876d807f8c6e20f6",
+     "size": 1112575
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.GL2",
+     "blob": "bc602c7a9368b4725ba085821bf522a60e34baa6",
+     "size": 1386449
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.GL3",
+     "blob": "85037b43b2d946579b102616699079a07ab579e4",
+     "size": 1260913
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.GTL",
+     "blob": "113d4c6ad1ca95279370a0d71fd0ea5301880966",
+     "size": 2483651
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.GTO",
+     "blob": "db534405db187146f6b81d07f202056d41680197",
+     "size": 567483
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.GTP",
+     "blob": "b2536a4e5060a595a53642286e42522567b3668c",
+     "size": 33316
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.GTS",
+     "blob": "c7e9b3a70d85f177ab2b1d1ba3717131e5341b57",
+     "size": 90111
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.TXT",
+     "blob": "e3c223369e4a249fd83672e73f8c7fc130562e9b",
+     "size": 28350
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.brd",
+     "blob": "e283c761936bc188f8ef665087ad0a1fd9f15d6a",
+     "size": 1618363
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-Panel.zip",
+     "blob": "a8d785be2788b62ab1c91300e91d9b844d62b467",
+     "size": 2066795
+    },
+    {
+     "path": "Hardware/Production/MicroMod_Processor_Board-nRF52840-PanelizerSettings.txt",
+     "blob": "cd41e9ca59033c8b4bb953fa2e934a783e35e68a",
+     "size": 50
+    },
+    {
+     "path": "Hardware/nrf52840.lbr",
+     "blob": "a849cc3924ee6a210403dbf24ea78a3b51d52ff0",
+     "size": 46799
+    }
+   ]
+  },
   "sparkfun:micromod-processor-board-samd51": {
    "repository": "sparkfun/MicroMod_Processor_Board-SAMD51",
    "commit": "7c85c41de81b93d6da49c199ea8284b18e1392d6",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/MicroMod_SAMD51.brd",
@@ -10720,10 +11255,112 @@
     }
    ]
   },
+  "sparkfun:micromod-single-pair-ethernet-function-board-adin1110": {
+   "repository": "sparkfun/SparkFun_MicroMod_Single_Pair_Ethernet_Function_Board_ADIN1110",
+   "commit": "6ea9191b95b5100c3836d1a5e6079cef426b37b6",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "Hardware/ADIN1110.lbr",
+     "blob": "1839b2b8c0a1728c357acac6bca010cd69f12bb7",
+     "size": 54291
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.GBL",
+     "blob": "3dd0eb00c77b26f779fdbb1dd327c933884541bf",
+     "size": 913469
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.GBO",
+     "blob": "07788b639369283de37b3ef1d6f273e2e172a89e",
+     "size": 2668620
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.GBP",
+     "blob": "c4e40b89b426ae43d1a1561429f1e5b350a2e450",
+     "size": 148
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.GBS",
+     "blob": "449e577570015a2009087d199380fdabc2d16cc7",
+     "size": 208744
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.GKO",
+     "blob": "114f2ee2d2be1725594c1daf2e06bae8c8d98f4f",
+     "size": 538755
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.GL2",
+     "blob": "7d0691257e3322e79e2ed7b86bdb64773e6c84ba",
+     "size": 293219
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.GL3",
+     "blob": "537aa7e7d1359d91b53b967c764209b133758c0e",
+     "size": 436350
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.GTL",
+     "blob": "7083c873000450d074e268b825f26d2294dc4302",
+     "size": 2042205
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.GTO",
+     "blob": "34d864df107ebe8da1dd3efe17d50f15dc7fc66f",
+     "size": 2153270
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.GTP",
+     "blob": "376a072fd5cf354d65b6d2a3bc5ef474a3cb5c69",
+     "size": 347173
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.GTS",
+     "blob": "e779fd65aca8b65f8e2051695680069f5007e729",
+     "size": 352422
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.TXT",
+     "blob": "7c1bd92ff80e1a412ada50b44ac9a9e15d92432d",
+     "size": 11549
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.brd",
+     "blob": "5faa40224af4948366fadb9ef82a6cdf3ee220b0",
+     "size": 1243352
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-Panel_v12.zip",
+     "blob": "c75ee73b46a1b8cfb94af1730b2f1301bf50ebd8",
+     "size": 2546868
+    },
+    {
+     "path": "Hardware/Production/SparkFun_MicroMod_Function_ADIN1110-PanelizerSettings.txt",
+     "blob": "f5d1f44ce708acd55ed738433cb9423885ff09fc",
+     "size": 52
+    },
+    {
+     "path": "Hardware/SparkFun_MicroMod_Function_ADIN1110.brd",
+     "blob": "061c49f929e85023c5054a108e08b4b2219bf9ba",
+     "size": 545918
+    },
+    {
+     "path": "Hardware/SparkFun_MicroMod_Function_ADIN1110.sch",
+     "blob": "dabc7f4d3eed52e13a26c422563dcbcf52814645",
+     "size": 1352525
+    },
+    {
+     "path": "Hardware/temp_logos.lbr",
+     "blob": "574219815dd3f702daa22a2e7d204cd548f71738",
+     "size": 270020
+    }
+   ]
+  },
   "sparkfun:micromod-sno-processor": {
    "repository": "sparkfun/MicroMod_Sno_Processor_Board",
    "commit": "23703439faf33492c482908494c0df1fb727838e",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/MicroMod_Sno_Processor.brd",
@@ -10820,7 +11457,7 @@
   "sparkfun:micromod-weather-carrier": {
    "repository": "sparkfun/MicroMod_Weather_Carrier_Board",
    "commit": "783ea26e825d8d55e11cf3bcc9c7440dcd065f48",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/MicroMod_Weather_Carrier.brd",
@@ -10902,7 +11539,7 @@
   "sparkfun:particulate-matter-sensor-breakout-bmv080": {
    "repository": "sparkfun/SparkFun_Particulate_Matter_Sensor_Breakout_BMV080",
    "commit": "9b743ece12fa7d6a445bf179f87f604dbc85621a",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Enclosure/Demo_Mounting_Board/Alphanumeric_Dimensional_Mounting.FCStd",
@@ -11659,7 +12296,7 @@
   "sparkfun:photodetector-breakout-max30101-qwiic": {
    "repository": "sparkfun/SparkFun_Photodetector_Breakout_MAX30101_Qwiic",
    "commit": "854e0efe4b5f3f37585929201035b5f90c2cb1bc",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/SparkFun_MAX30101_Qwiic-Panel.GBL",
@@ -11736,7 +12373,7 @@
   "sparkfun:photon-redboard": {
    "repository": "sparkfun/Photon_RedBoard",
    "commit": "8e485f0be0293cbc62fda797383e6d976ed5edbf",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/sparkfun-photon-redboard.brd",
@@ -11763,7 +12400,7 @@
   "sparkfun:pro-micro": {
    "repository": "sparkfun/Pro_Micro",
    "commit": "df836f3bf2955c4f1199a852f618d2ac80866d47",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/v13/SparkFun_Pro_Micro.brd",
@@ -11845,7 +12482,7 @@
   "sparkfun:pro-micro-esp32c3": {
    "repository": "sparkfun/SparkFun_Pro_Micro-ESP32C3",
    "commit": "b302fbc429a90b87865145877b96f189ad4d5460",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_Dev_ESP32_C3_MINI.brd",
@@ -11927,7 +12564,7 @@
   "sparkfun:pro-micro-rp2040": {
    "repository": "sparkfun/SparkFun_Pro_Micro-RP2040",
    "commit": "6d461a6c0654f616d3c3a9033668a68160f70fcb",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/SparkFun_ProMicro-RP2040-Panel.GBL",
@@ -12021,10 +12658,112 @@
     }
    ]
   },
+  "sparkfun:pro-micro-rp2350": {
+   "repository": "sparkfun/SparkFun_Pro_Micro_RP2350",
+   "commit": "8d3bbac8c3b9e6e75fa5fe34d8421efa4c211f1f",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "Hardware/RP2350A.lbr",
+     "blob": "8d5bb0082c0929ee99f1657187cabb9d63bf449c",
+     "size": 40582
+    },
+    {
+     "path": "Hardware/SparkFun_ProMicro_RP2350.brd",
+     "blob": "88f2dcda6a89c7533d3180a06418b506b0a3a1d4",
+     "size": 379030
+    },
+    {
+     "path": "Hardware/SparkFun_ProMicro_RP2350.sch",
+     "blob": "aacaa1f44dc22957ddffb982b76eee891c6b144d",
+     "size": 1469586
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.GBL",
+     "blob": "69be902a2f62cbac3e4378682d54396ace26d260",
+     "size": 7476861
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.GBO",
+     "blob": "b945424fe38c0c1b9e395e1f4967715891edca26",
+     "size": 6153832
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.GBP",
+     "blob": "cdb87fb8a40a37510c270a79e1ae84f3043cd7d4",
+     "size": 14276
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.GBS",
+     "blob": "8dbcdcd3301a434c5172d233a135bb71f7fa5aea",
+     "size": 922096
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.GKO",
+     "blob": "1a732eeff6a806a1add79c4e7a72898bf6d9bce7",
+     "size": 612096
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.GL2",
+     "blob": "6efeb96b5d3e823e3c9f4d92d4b75eaa33b988fb",
+     "size": 3042166
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.GL3",
+     "blob": "66763e1030d64d1b797b2dac68101ee39416c5c6",
+     "size": 3212198
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.GTL",
+     "blob": "4e9d67e5789fd9acc1d446105b5e41ff737e0315",
+     "size": 6660229
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.GTO",
+     "blob": "ac9c19143f8572b2decd5660e92c43a807314e7a",
+     "size": 2927066
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.GTP",
+     "blob": "ceb5f41819e335d0a83fd00f1b6e272dd5dc40b9",
+     "size": 276932
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.GTS",
+     "blob": "10e4c21e297be7d16971dd159aa2b306d49345f0",
+     "size": 894986
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.TXT",
+     "blob": "be246f21d8554f663e823a6e66e0053a6e2ae0ee",
+     "size": 57776
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.brd",
+     "blob": "0f1bab75e7fc024c608a86a97a384e890b32306b",
+     "size": 3012681
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-Panel.zip",
+     "blob": "539c1e1e7a3359c9de478fbce6b5769d7ecb888b",
+     "size": 5667895
+    },
+    {
+     "path": "Production/SparkFun_ProMicro_RP2350-PanelizerSettings.txt",
+     "blob": "6cf110f3db86e4c2993edc0d831c526156f851a0",
+     "size": 54
+    },
+    {
+     "path": "docs/assets/board_files/SparkFun_ProMicro_RP2350.zip",
+     "blob": "fccc1430184606d900b1e156d4da42bb9abc113b",
+     "size": 271794
+    }
+   ]
+  },
   "sparkfun:qwiic-12-bit-adc-4-channel-ads1015": {
    "repository": "sparkfun/SparkFun_Qwiic_12_Bit_ADC_-_4_Channel_ADS1015",
    "commit": "55cca07b538b2c613d5f3e2119e8593b06a65cd0",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_Qwiic_12_Bit_ADC_-_4_Channel_ADS1015.brd",
@@ -12041,7 +12780,7 @@
   "sparkfun:qwiic-5v-boost-ap3012k": {
    "repository": "sparkfun/SparkFun_Qwiic_5V_Boost_AP3012K",
    "commit": "2150213414cbaf2031fed3081900049d023473f1",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_Qwiic_5V_Boost_AP3012K.kicad_pcb",
@@ -12070,10 +12809,182 @@
     }
    ]
   },
+  "sparkfun:qwiic-6dof-bmi270": {
+   "repository": "sparkfun/SparkFun_Qwiic_6DoF_BMI270",
+   "commit": "c8bb01b27e91e4985eb9d526cc59eb7421a08bbb",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "Hardware/BMI270.lbr",
+     "blob": "1f4de96fc6c093994c8ab492e05f992658dcb12f",
+     "size": 20813
+    },
+    {
+     "path": "Hardware/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270.brd",
+     "blob": "e0903d75854d91aa6b8a1f1d7ff5dff59d1573cf",
+     "size": 235065
+    },
+    {
+     "path": "Hardware/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270.sch",
+     "blob": "2ad3c35f7c0891c8255eb5c07c1542a73a32c468",
+     "size": 1070754
+    },
+    {
+     "path": "Hardware/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270.brd",
+     "blob": "52a9e379c4a370867d1872c5fb58c1bc06afd1a6",
+     "size": 152388
+    },
+    {
+     "path": "Hardware/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270.sch",
+     "blob": "9897269326b21e55a43161a7cf5a589d64a0304f",
+     "size": 1017206
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-Panel.GBL",
+     "blob": "6bef8f0df9bf05239b0f4348e38fe2ec95683253",
+     "size": 1726093
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-Panel.GBO",
+     "blob": "0f5947c4b66336d3d18ae18a1225d0ce9ac1fea7",
+     "size": 4928317
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-Panel.GBP",
+     "blob": "c4e40b89b426ae43d1a1561429f1e5b350a2e450",
+     "size": 148
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-Panel.GBS",
+     "blob": "92939dc3de77cc75c26fc25f4caecd887d07d719",
+     "size": 209872
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-Panel.GKO",
+     "blob": "78948752450867652aabb79289ddde49a5212872",
+     "size": 619953
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-Panel.GTL",
+     "blob": "71351ebf33255ae5e230465447c917224f0cd2a2",
+     "size": 2293195
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-Panel.GTO",
+     "blob": "cbd80aa9ab15b20b8daf9aa77edc06c9062a767c",
+     "size": 3566529
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-Panel.GTP",
+     "blob": "6a07c84eb746223f5d8c05fe16dfd19d397411a6",
+     "size": 315952
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-Panel.GTS",
+     "blob": "e74962139afaccf96a87ac975baaae83117e1a11",
+     "size": 222154
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-Panel.TXT",
+     "blob": "a1df0d87b90f47268596346cc57f958386dc121e",
+     "size": 21440
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-Panel.brd",
+     "blob": "2a52fedf9f760285c973bbac1a58b202f82b26ea",
+     "size": 1209788
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-Panel.zip",
+     "blob": "bdc046e2ee5b6da3383e595ccd9bb2df396fff41",
+     "size": 2720906
+    },
+    {
+     "path": "Production/Qwiic 1x1/SparkFun_Qwiic_6DoF_BMI270-PanelizerSettings.txt",
+     "blob": "0d94bbc8ee06b2e2d5fc091765b6b1114f06613e",
+     "size": 52
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-Panel.GBL",
+     "blob": "59e8683218c9fa78694e042249ed910e51a3bdad",
+     "size": 2356773
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-Panel.GBO",
+     "blob": "fcd0d8dff5cd5f1c8ed1900f84b127fc8f46e3ea",
+     "size": 6500480
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-Panel.GBP",
+     "blob": "c4e40b89b426ae43d1a1561429f1e5b350a2e450",
+     "size": 148
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-Panel.GBS",
+     "blob": "53953080be0af60b00c716922ffebaea0a584e8d",
+     "size": 507923
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-Panel.GKO",
+     "blob": "a55bb3bfd5eca7ea3037e4b28fea47a95a1f5b35",
+     "size": 530414
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-Panel.GTL",
+     "blob": "486d93a8e92bec85ab8e1721651ffd7b7c7397e3",
+     "size": 3041972
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-Panel.GTO",
+     "blob": "5d0bc8ca0bab7173b8b5794d0aba1c9740c2667a",
+     "size": 2623147
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-Panel.GTP",
+     "blob": "a58f3cf061cbf72d307b5fbc452c1762562564cf",
+     "size": 619898
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-Panel.GTS",
+     "blob": "49533aa4ac37690b66f2aad950fbd03ca1d35218",
+     "size": 461353
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-Panel.TXT",
+     "blob": "18e9ebb9d3cc4cdf80b4f9402e73df754be66e49",
+     "size": 21198
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-Panel.brd",
+     "blob": "1b92ac083b3ed58103bde2e5a27e5f65033149b4",
+     "size": 1996449
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-Panel.zip",
+     "blob": "0e8d32ed01f2e29fb802934d920f59ba2bc40790",
+     "size": 3104355
+    },
+    {
+     "path": "Production/Qwiic Micro/SparkFun_Qwiic_6DoF_BMI270-PanelizerSettings.txt",
+     "blob": "740b8d96f41646c8c713b4405659981e61e7ef8f",
+     "size": 52
+    },
+    {
+     "path": "docs/assets/BoardFiles/SparkFun_Qwiic_6DoF_BMI270-EagleFiles.zip",
+     "blob": "ea5386757bc6d1103a88d44b27ed4215066491c1",
+     "size": 202901
+    },
+    {
+     "path": "docs/assets/BoardFiles/SparkFun_Qwiic_6DoF_Micro_BMI270-EagleFiles.zip",
+     "blob": "8dfa115e3ad64f2a66edf6f3920febe1fed90de8",
+     "size": 184869
+    }
+   ]
+  },
   "sparkfun:qwiic-adc-ads1219": {
    "repository": "sparkfun/SparkFun_Qwiic_ADC_ADS1219",
    "commit": "de0f42821a29a3d36fa2ad246ed3274344f4e731",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Qwiic_ADC_ADS1219.kicad_pcb",
@@ -12100,7 +13011,7 @@
   "sparkfun:qwiic-adxl313": {
    "repository": "sparkfun/SparkFun_Qwiic_ADXL313",
    "commit": "5f15aca1894d33566769ece01f224c04295b9f75",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/SparkFun_Qwiic_ADXL313-Panel.GBL",
@@ -12182,7 +13093,7 @@
   "sparkfun:qwiic-atmospheric-sensor-breakout-bme280": {
    "repository": "sparkfun/Qwiic_Atmospheric_Sensor_Breakout_BME280",
    "commit": "14709d3629313938035690e38a8976b03e06c1bb",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Qwiic_Atmospheric_Sensor.brd",
@@ -12199,7 +13110,7 @@
   "sparkfun:qwiic-button": {
    "repository": "sparkfun/Qwiic_Button",
    "commit": "e89a82fe2ddb293bfe0d6d9f63ccf4782a77c359",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Qwiic_Button.brd",
@@ -12271,7 +13182,7 @@
   "sparkfun:qwiic-co2-sensor-xensiv-pas": {
    "repository": "sparkfun/SparkFun_Qwiic_CO2_Sensor_XENSIV_PAS",
    "commit": "08a65f08c40e3a63d90a3495de2a7a21fed05588",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_Qwiic_CO2_Sensor_XENSIV_PAS.brd",
@@ -12368,7 +13279,7 @@
   "sparkfun:qwiic-directional-pad": {
    "repository": "sparkfun/SparkFun_Qwiic_Directional_Pad",
    "commit": "97943e7af32b431a7294c276c6518cfa115ab99d",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_Qwiic_Directional_Pad.kicad_pcb",
@@ -12400,7 +13311,7 @@
   "sparkfun:qwiic-gnss-sam-m8q": {
    "repository": "sparkfun/SparkFun_Qwiic_GNSS_SAM-M8Q",
    "commit": "4c45d55c12864c7c771554039bac3d1ebb3cde6d",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/SparkFun_Qwiic_GNSS_SAM-M8Q_panelized.GBL",
@@ -12502,7 +13413,7 @@
   "sparkfun:qwiic-gps-rtk": {
    "repository": "sparkfun/Qwiic_GPS-RTK",
    "commit": "d4f7a0d1130eb3352325d8a333c648e706525aac",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Jig/Qwiic GPS-RTK - ublox NEO-M8P-BottomJig.GBL",
@@ -12739,7 +13650,7 @@
   "sparkfun:qwiic-gps-rtk2": {
    "repository": "sparkfun/Qwiic_GPS-RTK2",
    "commit": "898a676f3136b68118331e3683299951df3e7133",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/Qwiic GPS-RTK-SMA v12-Panel.zip",
@@ -12836,7 +13747,7 @@
   "sparkfun:qwiic-hall-effect-sensor-tmag5273": {
    "repository": "sparkfun/SparkFun_Qwiic_Hall_Effect_Sensor_TMAG5273",
    "commit": "d07050cddc7b813a3a273d384f90ada5aa5a642f",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/1x1/Production/Qwiic_Hall_Effect_Sensor_TMAG5273-Panel.GBL",
@@ -13123,7 +14034,7 @@
   "sparkfun:qwiic-hat-for-raspberry-pi": {
    "repository": "sparkfun/Qwiic_Hat_for_Raspberry_Pi",
    "commit": "398c9a96426808707a5230f6aac4adc2eb47b9eb",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Panel/Qwiic_Shield_RaspberryPi-Panel.GBL",
@@ -13205,7 +14116,7 @@
   "sparkfun:qwiic-human-presence-sensor-sths34pf80": {
    "repository": "sparkfun/SparkFun_Qwiic_Human_Presence_Sensor-STHS34PF80",
    "commit": "44ec023fd380eabd9e093a2e3a7bcab193ad5a97",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/1U/Production/SparkFun_Qwiic_Presence_STHS34PF80-Panel.GBL",
@@ -13387,7 +14298,7 @@
   "sparkfun:qwiic-micro-samd21e": {
    "repository": "sparkfun/SparkFun_Qwiic_Micro_SAMD21E",
    "commit": "fa536a4f7180cfc7450435ef9c204fd86e037201",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Buzzard Labels/D0.lbr",
@@ -13494,7 +14405,7 @@
   "sparkfun:qwiic-multistar-board-promo-constellation": {
    "repository": "sparkfun/Qwiic_MultiStar_Board_Promo_Constellation",
    "commit": "04d805d123eeb0026970922b6362c59c48df4577",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/Qwiic_MultiStar_pattern-Panel.GBL",
@@ -13586,7 +14497,7 @@
   "sparkfun:qwiic-navigation-switch": {
    "repository": "sparkfun/SparkFun_Qwiic_Navigation_Switch",
    "commit": "b64c0dac2134d69963bf28120305bd79aad3c8ac",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/SparkFun_Qwiic_Navigation.kicad_pcb",
@@ -13618,7 +14529,7 @@
   "sparkfun:qwiic-pi-shim": {
    "repository": "sparkfun/Qwiic_Pi_SHIM",
    "commit": "b1803830bd5c8b9f264a86ea724303ac92b6563b",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/Qwiic Pi SHIM-Panel.brd",
@@ -13647,10 +14558,112 @@
     }
    ]
   },
+  "sparkfun:qwiic-pocket-dev-board-esp32-c6": {
+   "repository": "sparkfun/SparkFun_Qwiic_Pocket_Dev_Board_ESP32_C6",
+   "commit": "242b9740cadc2667aff62b3298838541b47ff371",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "Hardware/ESP32-C6-MINI-1.lbr",
+     "blob": "d61218fe984eeaefc962316cf9017f48f48b33bd",
+     "size": 30106
+    },
+    {
+     "path": "Hardware/Qwiic_Pocket_Dev_ESP32_C6.brd",
+     "blob": "698dd26fe4d1902282a39119a178344d04e74075",
+     "size": 326995
+    },
+    {
+     "path": "Hardware/Qwiic_Pocket_Dev_ESP32_C6.sch",
+     "blob": "a15c3ad9ed19241193f13cd7acc58f405ed23c26",
+     "size": 1240410
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.GBL",
+     "blob": "9f5230fd663272752b3cf09f7a8394f18d463ce7",
+     "size": 3358438
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.GBO",
+     "blob": "6fa0ec34c472aa9a3b6367897abfc380146013ec",
+     "size": 2165830
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.GBP",
+     "blob": "351c74a91b5afa4650657e433006f1693c18252c",
+     "size": 271730
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.GBS",
+     "blob": "8db20366cb3c9417ebb2376e7b51a41582db09b8",
+     "size": 440148
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.GKO",
+     "blob": "1f3dbdecd887c15fbc41bac6b505b0c37bfa0662",
+     "size": 975181
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.GL2",
+     "blob": "ef6c65386b73148921bf7cea97685d1f299e8180",
+     "size": 1649820
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.GL3",
+     "blob": "d8f2cf22f4f27c636400c9c5e187dec2dfba6c08",
+     "size": 1474196
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.GTL",
+     "blob": "ce26d0b3baeeeb52d5c41631cfb5505e3ddad075",
+     "size": 3470544
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.GTO",
+     "blob": "2780d2778b7414b868197aec3982ce418b3503bd",
+     "size": 3987580
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.GTP",
+     "blob": "ce4d9af09c90df0a58965a06242184e08f9f8c6f",
+     "size": 687616
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.GTS",
+     "blob": "778ff6b0a99cd905393b4e920d21089276db9f66",
+     "size": 585048
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.TXT",
+     "blob": "395fe0c8a7d80dd708c3d1121fc65949a9f9a3f4",
+     "size": 17946
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.brd",
+     "blob": "3e901b2c53ca7bf53bb2b1464f7131c42b700953",
+     "size": 1716123
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-Panel.zip",
+     "blob": "b2195015f20ef9a4d5d9de22d8cb66e6b739f085",
+     "size": 3635661
+    },
+    {
+     "path": "Production/Qwiic_Pocket_Dev_ESP32_C6-PanelizerSettings.txt",
+     "blob": "6b746e51e4e9750b26d3221bf494442ec9432c06",
+     "size": 52
+    },
+    {
+     "path": "docs/assets/board_files/Qwiic_Pocket_Dev_ESP32_C6.zip",
+     "blob": "70191a2e96bf2897028d0dad685dd2414c06c1bb",
+     "size": 234015
+    }
+   ]
+  },
   "sparkfun:qwiic-power-switch": {
    "repository": "sparkfun/SparkFun_Qwiic_Power_Switch",
    "commit": "53923a22dddca15f32a1b240cad53cb96e67f99f",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/Qwiic Power Switch.GBL",
@@ -13727,7 +14740,7 @@
   "sparkfun:qwiic-pulsed-radar-sensor-xm125": {
    "repository": "sparkfun/SparkFun_Qwiic_Pulsed_Radar_Sensor_XM125",
    "commit": "a049212e3c587162418e354e34a03f33e962be72",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/XM125_Breakout-Panel.GBL",
@@ -13819,7 +14832,7 @@
   "sparkfun:qwiic-rfid-id-xxla": {
    "repository": "sparkfun/SparkFun_Qwiic_RFID_ID-XXLA",
    "commit": "78989e5954a674eb3848a7ec43b353622003aab9",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Buzzard Labels/ADR3.lbr",
@@ -13891,7 +14904,7 @@
   "sparkfun:qwiic-speaker-amp": {
    "repository": "sparkfun/SparkFun_Qwiic_Speaker_Amp",
    "commit": "0666c55c884f3d58f34ac0dac3905eb5b8ca0fcf",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/SparkFun_Qwiic_Speaker_Amp-Panel.brd",
@@ -13923,7 +14936,7 @@
   "sparkfun:qwiic-transparent-graphical-oled": {
    "repository": "sparkfun/Qwiic_Transparent_Graphical_OLED",
    "commit": "bd3d83e027a54ab27c442cdbed2abbb434173052",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Documentation/UG-2864KLBMG01 - 130409.zip",
@@ -14015,7 +15028,7 @@
   "sparkfun:real-time-clock-module-rv-8803": {
    "repository": "sparkfun/SparkFun_Real_Time_Clock_Module_RV-8803",
    "commit": "3e7ea152fc18804519abb0774bacf88edacfb60f",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Qwiic_RTC_RV8803.brd",
@@ -14032,7 +15045,7 @@
   "sparkfun:red-v": {
    "repository": "sparkfun/Red_V",
    "commit": "5a6ec4cebf5964b0f90b9e00a935603ce863242e",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/RedFive.brd",
@@ -14104,7 +15117,7 @@
   "sparkfun:red-v-thing-plus": {
    "repository": "sparkfun/SparkFun_Red-V_Thing_Plus",
    "commit": "f070a32961887692f1d988bd41f9c036962369a0",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/RedVThingPlus.brd",
@@ -14121,7 +15134,7 @@
   "sparkfun:red-vision-kit-for-redboard": {
    "repository": "sparkfun/SparkFun_Red_Vision_Kit_for_RedBoard",
    "commit": "6c86b9eb2ebfea38bdfdea1b9eca599980aadb75",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Camera Board - HM01B0/SparkFun_Camera_Board_HM01B0.kicad_pcb",
@@ -14180,10 +15193,32 @@
     }
    ]
   },
+  "sparkfun:red-vision-touch-display-for-redboard": {
+   "repository": "sparkfun/SparkFun_Red_Vision_Touch_Display_for_RedBoard",
+   "commit": "55d207429ee28a6960ceab4883a13edf81adeecc",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "Hardware/SparkFun_Red_Vision_Touch_Display_for_RedBoard.kicad_pcb",
+     "blob": "836e59554f72e03458ff2e33d2554b662365c71d",
+     "size": 1407374
+    },
+    {
+     "path": "Hardware/SparkFun_Red_Vision_Touch_Display_for_RedBoard.kicad_pro",
+     "blob": "e07380bf95adcfe11a7a0ea217f5a6e7f7947385",
+     "size": 19318
+    },
+    {
+     "path": "Hardware/SparkFun_Red_Vision_Touch_Display_for_RedBoard.kicad_sch",
+     "blob": "346d289478bf5c66fc2d102e8a89492c047e925a",
+     "size": 308383
+    }
+   ]
+  },
   "sparkfun:redboard": {
    "repository": "sparkfun/RedBoard",
    "commit": "498b7cf536c74f1a9a3a2315bf9f8feb0d7169c9",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/RedBoard.brd",
@@ -14205,7 +15240,7 @@
   "sparkfun:redboard-artemis": {
    "repository": "sparkfun/RedBoard_Artemis",
    "commit": "355f65af4583694bf7c2f49c74a0c9f74d5974dd",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/RedBoard-Artemis-Panel.GBL",
@@ -14282,7 +15317,7 @@
   "sparkfun:redboard-artemis-atp": {
    "repository": "sparkfun/RedBoard_Artemis_ATP",
    "commit": "3490ebb1f6841a20e3cfba503f3beb3c6d6553ad",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/RedBoard-Artemis-ATP-Panel.GBL",
@@ -14359,7 +15394,7 @@
   "sparkfun:redboard-artemis-nano": {
    "repository": "sparkfun/RedBoard_Artemis_Nano",
    "commit": "2e62061e8ccc0fd7359bf5a990b46df76c59b5bc",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Documents/3D_RedBoard-Artemis-Nano_OBJ.zip",
@@ -14456,7 +15491,7 @@
   "sparkfun:redboard-edge": {
    "repository": "sparkfun/RedBoard_Edge",
    "commit": "186dc531b1e939833299b7234856fb3991a4389b",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/.pretty/SWITCH TACTILE SPST-NO 0.05A 12V.kicad_mod",
@@ -14658,7 +15693,7 @@
   "sparkfun:redboard-plus": {
    "repository": "sparkfun/RedBoard_Plus",
    "commit": "74fe1f86ad605d7921c7d4fddd09638d498ec48d",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/RedBoard_Plus-Panel.GBL",
@@ -14755,7 +15790,7 @@
   "sparkfun:redboard-turbo": {
    "repository": "sparkfun/RedBoard_Turbo",
    "commit": "5dfe5c56b2d9400931264a1e5947249898173f7e",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/RedBoard_Turbo-Panel.brd",
@@ -14782,7 +15817,7 @@
   "sparkfun:temperature-sensor-stts22h": {
    "repository": "sparkfun/SparkFun_Temperature_Sensor-STTS22H",
    "commit": "9d0e0f48df40bdf507b0101b32ba3f23b96b763a",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Qwiic Micro/SparkFun_Micro_Temperature_Sensor-STTS22H.brd",
@@ -14944,7 +15979,7 @@
   "sparkfun:thing-plus-aw-cu488": {
    "repository": "sparkfun/SparkFun_Thing_Plus_AW-CU488",
    "commit": "8c0d87623aece93f37177357bd14fd34159ea21b",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/SparkFun_AzureWave_Module_Thing_Plus_AW-CU488-Panel_b.brd",
@@ -14973,10 +16008,214 @@
     }
    ]
   },
+  "sparkfun:thing-plus-esp32-c5": {
+   "repository": "sparkfun/SparkFun_Thing_Plus_ESP32-C5",
+   "commit": "54d6828b4ddf66997be65d3cfeeec9deda37174d",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.GBL",
+     "blob": "5b01e808e6363c222f888ae65808d8b7fba18ce9",
+     "size": 2118011
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.GBO",
+     "blob": "6943f59269ac08c0ea027a264b71e0cf50c7bc8e",
+     "size": 3803093
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.GBP",
+     "blob": "aa6f02d8578e893a39433de27abc682130dcb661",
+     "size": 18982
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.GBS",
+     "blob": "ad0285728566c3ad421813e341da25fc795f56c5",
+     "size": 61391
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.GKO",
+     "blob": "586deb36bdb7ab14cb83990c616b024d2c14aa27",
+     "size": 35882
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.GL2",
+     "blob": "0df58e4586f672d56ffbf356856d3ab996f88cd1",
+     "size": 1378401
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.GL3",
+     "blob": "ac3275681f9d1e13c47b4e23958f95291fb5ffc1",
+     "size": 1827893
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.GTL",
+     "blob": "11c8c448d22018acd40308f950602d3001241950",
+     "size": 1798032
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.GTO",
+     "blob": "ce9d0bbe809ccd598df6b7eff69deae32463b4a7",
+     "size": 1235300
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.GTP",
+     "blob": "ef837def445158d4f8d1ace00cbda8d000d34445",
+     "size": 52709
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.GTS",
+     "blob": "86f27af8e555c4a57a478d34ce15d5ea63e9c24b",
+     "size": 58979
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.drl",
+     "blob": "d3fbe71361d57c54748d7c5b81318a56efc6509c",
+     "size": 33436
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.kicad_pcb",
+     "blob": "d8d949a0e2559042f6165047dd5fb15a9914fd70",
+     "size": 19386731
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.kicad_pro",
+     "blob": "25baac9d4ef5339e8efdb6537b58e287a919bd8f",
+     "size": 18379
+    },
+    {
+     "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32_C5_panelized.zip",
+     "blob": "0e2c67ded09df3cbb7839d12037a02be36a4f241",
+     "size": 2886612
+    },
+    {
+     "path": "Hardware/SparkFun_Thing_Plus_ESP32_C5.kicad_pcb",
+     "blob": "983b872e508a39b15d8b19e0fd4325e4ebcfb080",
+     "size": 1636441
+    },
+    {
+     "path": "Hardware/SparkFun_Thing_Plus_ESP32_C5.kicad_pro",
+     "blob": "48dad4903c6461d8d2fdceea5244756ec4e088a0",
+     "size": 18369
+    },
+    {
+     "path": "Hardware/SparkFun_Thing_Plus_ESP32_C5.kicad_sch",
+     "blob": "b2d226fbe0df7e46ba576f5919a2eeb5d9682301",
+     "size": 444902
+    },
+    {
+     "path": "docs/static/ref/SparkFun_Thing_Plus_ESP32_C5.zip",
+     "blob": "0d30987ca8d285914481be7731467ef97bdaf9fc",
+     "size": 481647
+    }
+   ]
+  },
+  "sparkfun:thing-plus-esp32-c6": {
+   "repository": "sparkfun/SparkFun_Thing_Plus_ESP32_C6",
+   "commit": "fb7352f770b885fa9d5767bd25a168b90a11d4e5",
+   "indexed_at": "2026-10-09T18:54:10Z",
+   "files": [
+    {
+     "path": "Hardware/ESP32-C6-WROOM-1.lbr",
+     "blob": "49bc42645b48966a9e2ad3c387f1bfdac6cead36",
+     "size": 28464
+    },
+    {
+     "path": "Hardware/Thing_Plus_ESP32_C6.brd",
+     "blob": "5d347e64c6673affc92d83fdbd3c639f7c8758b2",
+     "size": 565257
+    },
+    {
+     "path": "Hardware/Thing_Plus_ESP32_C6.sch",
+     "blob": "6a7fcd8622a6f654dab39409cdf0e62a1269d40d",
+     "size": 1242417
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.GBL",
+     "blob": "a8b19ecf056963e242dbc534c79514175a613159",
+     "size": 2827422
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.GBO",
+     "blob": "250a4063d7a7a9708108d3e16d2383554a54ece7",
+     "size": 4835039
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.GBP",
+     "blob": "f6a03077d1f377fd36f1003195cece9b962aaf00",
+     "size": 236732
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.GBS",
+     "blob": "a66277ad1531c8b941148179ea3992d091f19e85",
+     "size": 352624
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.GKO",
+     "blob": "8c5441479cef6cfbd6559bd806cc84b3c9c1ae49",
+     "size": 696735
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.GL2",
+     "blob": "2dd0c43fe7b0b3fc4c44ea716d841042ecbb8e06",
+     "size": 1476228
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.GL3",
+     "blob": "662bf1adbd21f326bab7efbce7dd589f612a47aa",
+     "size": 1923210
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.GTL",
+     "blob": "124e3bcb5ba350a44d81b8e5554ddc64fbd98bb6",
+     "size": 3783724
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.GTO",
+     "blob": "86fce1d93cf985d9684419adca02f31e0761777d",
+     "size": 2226347
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.GTP",
+     "blob": "32daa4fb70827529f2e2e20cc488dd0dacaf9f7a",
+     "size": 661205
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.GTS",
+     "blob": "6734bea7742ded57a2404674872a1ab4f47964d6",
+     "size": 406482
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.TXT",
+     "blob": "8f8ce97bc8b4047f3cedde1092161e4363d273b5",
+     "size": 24576
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.brd",
+     "blob": "8f51c2ca6f5b9c30e76e2699ee3630f20dc916aa",
+     "size": 1797859
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-Panel.zip",
+     "blob": "31fc6dc91de95be2deb4b7424f3df61d63225998",
+     "size": 3763727
+    },
+    {
+     "path": "Production/Thing_Plus_ESP32_C6-PanelizerSettings.txt",
+     "blob": "8296251fc6c3707d3251ea12d79296c1df59921b",
+     "size": 52
+    },
+    {
+     "path": "docs/assets/board_files/Thing_Plus_ESP32_C6.zip",
+     "blob": "c28f002536f683d8fe101d63835b2f8da52f2398",
+     "size": 270296
+    }
+   ]
+  },
   "sparkfun:thing-plus-esp32-s3": {
    "repository": "sparkfun/SparkFun_Thing_Plus_ESP32-S3",
    "commit": "c9fc69fc1d79e1f3e45f7f2e50d5e357b4dd9242",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/SparkFun_Thing_Plus_ESP32-S3_panelized-backups/SparkFun_Thing_Plus_ESP32-S3_panelized-2023-12-06_125951.zip",
@@ -15088,7 +16327,7 @@
   "sparkfun:thing-plus-nora-w306": {
    "repository": "sparkfun/SparkFun_Thing_Plus_NORA-W306",
    "commit": "24c70e910118c9b052cc2f6e273e8e091190d3d5",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/SparkFun_Thing_Plus_NORA_W306-Panel.GBL",
@@ -15190,7 +16429,7 @@
   "sparkfun:thing-plus-ra6m5": {
    "repository": "sparkfun/SparkFun_Thing_Plus_RA6M5",
    "commit": "b655d23b286b797c6edc95dcd18786b6abdef8cd",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Firmware/CodelessBLE.zip",
@@ -15467,7 +16706,7 @@
   "sparkfun:thing-plus-rp2040": {
    "repository": "sparkfun/SparkFun_Thing_Plus-RP2040",
    "commit": "38fd2d27eaa2e6e9c16e8496f7d1777f83df842a",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/RP2040_Thing_Plus-Panel.GBL",
@@ -15559,7 +16798,7 @@
   "sparkfun:u-blox-neo-f9p": {
    "repository": "sparkfun/SparkFun_u-blox_NEO-F9P",
    "commit": "90b8425e15b942d88d00f5ae7f3450f0de818d28",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Hardware/Production/SparkFun NEO-F9P-Panel.GBL",
@@ -15646,7 +16885,7 @@
   "sparkfun:ultrasonic-distance-sensor-qwiic": {
    "repository": "sparkfun/SparkFun_Ultrasonic_Distance_Sensor-Qwiic",
    "commit": "05adcfd6fd2df8c31e4cee1ac57febd16a0ee829",
-   "indexed_at": "2026-10-09T12:54:09Z",
+   "indexed_at": "2026-10-09T18:54:10Z",
    "files": [
     {
      "path": "Firmware/firmware_v01.stp",

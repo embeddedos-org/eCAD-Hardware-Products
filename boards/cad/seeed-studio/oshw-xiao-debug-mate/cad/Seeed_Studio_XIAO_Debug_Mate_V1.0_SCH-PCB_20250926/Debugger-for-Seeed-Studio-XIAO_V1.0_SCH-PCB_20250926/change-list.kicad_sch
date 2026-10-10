@@ -1,0 +1,125 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "66a293f1-bc00-437a-9d54-545f007dae23")
+	(paper "A3")
+	(title_block
+		(title "Debugger for Seeed Studio XIAO")
+		(date "2025-09-26")
+		(comment 1 "JY")
+	)
+	(lib_symbols)
+	(rectangle
+		(start 97.79 66.04)
+		(end 256.54 127)
+		(stroke
+			(width 0)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid 26d31a50-5a09-40e6-84f8-d62c01b4eeb2)
+	)
+	(rectangle
+		(start 97.79 54.61)
+		(end 256.54 127)
+		(stroke
+			(width 0)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid 33a84809-eb63-41ce-b094-edafd0789a8e)
+	)
+	(rectangle
+		(start 149.86 54.61)
+		(end 256.54 127)
+		(stroke
+			(width 0)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid 37b2bf6a-475f-49ea-8c03-c346bc60a241)
+	)
+	(rectangle
+		(start 97.79 60.96)
+		(end 256.54 127)
+		(stroke
+			(width 0)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid 4c3003cf-f7f2-425b-be13-d3ac584d1c0d)
+	)
+	(rectangle
+		(start 97.79 73.66)
+		(end 256.54 127)
+		(stroke
+			(width 0)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid 53be7b66-10a5-4f1d-b5c1-e87317244fe6)
+	)
+	(rectangle
+		(start 97.79 87.63)
+		(end 256.54 127)
+		(stroke
+			(width 0)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid 7baf449a-39b6-4fc7-8d31-0784bd4b1028)
+	)
+	(rectangle
+		(start 124.46 54.61)
+		(end 256.54 127)
+		(stroke
+			(width 0)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid 7df7d632-36e8-4ad7-bf7f-a82031aac50f)
+	)
+	(text "   DATE                REVISION                DESCRIPTION\n\n2025/02/15              v1.0                  1.Initial\n\n"
+		(exclude_from_sim no)
+		(at 101.854 66.802 0)
+		(effects
+			(font
+				(size 1.5 1.5)
+				(thickness 0.4)
+				(bold yes)
+				(color 0 0 255 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "095fd13a-c58d-41db-b275-b9b1d3609903")
+	)
+	(text "Revision History"
+		(exclude_from_sim no)
+		(at 100.076 52.324 0)
+		(effects
+			(font
+				(size 2 2)
+				(thickness 0.5)
+				(bold yes)
+				(color 0 0 255 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "bf62cdc3-6314-4843-aa08-ed8acb924f87")
+	)
+)

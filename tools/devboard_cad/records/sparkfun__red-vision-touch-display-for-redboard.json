@@ -180,16 +180,16 @@
     }
   },
   "licenses": {
-    "hardware_license": "UNVERIFIED",
-    "cad_license": null,
-    "schematic_license": null,
-    "pcb_license": null,
-    "mechanical_cad_license": null,
-    "redistribution_allowed": null,
-    "modification_allowed": null,
-    "commercial_use_allowed": null,
-    "attribution_required": null,
-    "license_url": null
+    "hardware_license": "CC BY-SA 4.0",
+    "cad_license": "CC BY-SA 4.0",
+    "schematic_license": "CC BY-SA 4.0",
+    "pcb_license": "CC BY-SA 4.0",
+    "mechanical_cad_license": "CC BY-SA 4.0",
+    "redistribution_allowed": true,
+    "modification_allowed": true,
+    "commercial_use_allowed": true,
+    "attribution_required": true,
+    "license_url": "https://github.com/sparkfun/SparkFun_Red_Vision_Touch_Display_for_RedBoard/blob/55d207429ee28a6960ceab4883a13edf81adeecc/Hardware/SparkFun_Red_Vision_Touch_Display_for_RedBoard.kicad_pcb"
   },
   "sources": {
     "source_tier": "manufacturer_official",
@@ -202,5 +202,5 @@
     "direct_gerber_download": null
   },
   "record_status": "partial",
-  "notes": "File candidates harvested from the manufacturer's official repository sparkfun/SparkFun_Red_Vision_Touch_Display_for_RedBoard pinned at 55d207429ee2. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware."
+  "notes": "File candidates harvested from the manufacturer's official repository sparkfun/SparkFun_Red_Vision_Touch_Display_for_RedBoard pinned at 55d207429ee2. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware. Hardware licence read from https://raw.githubusercontent.com/sparkfun/SparkFun_Red_Vision_Touch_Display_for_RedBoard/55d207429ee28a6960ceab4883a13edf81adeecc/Hardware/SparkFun_Red_Vision_Touch_Display_for_RedBoard.kicad_pcb: \"Released under the Creative Commons Attribution Share-Alike 4.0 License\"."
 }

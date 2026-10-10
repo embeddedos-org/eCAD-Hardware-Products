@@ -1,10 +1,10 @@
 {
   "$schema": "https://embeddedos.org/schemas/devboard-cad/v1/board-record.schema.json",
   "contract_version": "1.1.0",
-  "board_id": "beagleboard:capes",
+  "board_id": "beagleboard:beaglebone-robotics-cape",
   "manufacturer": "BeagleBoard.org Foundation",
   "family": "Capes",
-  "board": "Official BeagleBoard.org capes",
+  "board": "BeagleBone Robotics Cape",
   "part_number": "UNVERIFIED",
   "revision": "not-stated",
   "mcu_soc": "not-applicable",
@@ -19,7 +19,7 @@
       "verified_revision": null,
       "evidence": {
         "sha256": null,
-        "captured_at": "2026-09-29T07:09:40Z",
+        "captured_at": "2026-10-09T18:52:22Z",
         "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
         "verification_method": "official_index_absent",
         "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
@@ -31,7 +31,7 @@
       "verified_revision": null,
       "evidence": {
         "sha256": null,
-        "captured_at": "2026-09-29T07:09:40Z",
+        "captured_at": "2026-10-09T18:52:22Z",
         "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
         "verification_method": "official_index_absent",
         "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
@@ -43,7 +43,7 @@
       "verified_revision": null,
       "evidence": {
         "sha256": null,
-        "captured_at": "2026-09-29T07:09:40Z",
+        "captured_at": "2026-10-09T18:52:22Z",
         "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
         "verification_method": "official_index_absent",
         "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
@@ -51,14 +51,14 @@
     },
     "eagle": {
       "available": true,
-      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Load/Load_Cape.brd",
+      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Robotics/EAGLE/Robotics_Cape.brd",
       "verified_revision": null,
       "evidence": {
-        "captured_at": "2026-09-29T07:19:16Z",
+        "captured_at": "2026-10-09T18:53:05Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
-        "sha256": "a6fa8442f4eaee151325c5bd21343c9a41b8891604afd1d2bb239315276758b4",
-        "size_bytes": 162372,
+        "sha256": "f431cbf5eede8738d78246a5d2b058283b4df0aa5d57826d6c17d43eb5690c8e",
+        "size_bytes": 284098,
         "media_type": "text/plain",
         "detected_format": "eagle",
         "verification_method": "http_get_magic"
@@ -69,7 +69,7 @@
       "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Robotics/EAGLE/Strawson_Eagle_Lib.lbr",
       "verified_revision": null,
       "evidence": {
-        "captured_at": "2026-09-29T07:19:16Z",
+        "captured_at": "2026-10-09T18:53:05Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
         "sha256": "d13d341b378f110d4bb87ec3c8a4c278faca0f213051b3f7384e59c613f5afbf",
@@ -84,7 +84,7 @@
       "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Robotics/MFG/SD-101D%20Robotics%20Cape.bcream.ger",
       "verified_revision": null,
       "evidence": {
-        "captured_at": "2026-09-29T07:19:16Z",
+        "captured_at": "2026-10-09T18:53:05Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
         "sha256": "64ac9afadc9a4da22500adf4589455c81be23b54723d7850a07cfc2557fb7294",
@@ -95,18 +95,15 @@
       }
     },
     "kicad": {
-      "available": true,
-      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab/kicad/TechLab.kicad_pcb",
+      "available": false,
+      "url": null,
       "verified_revision": null,
       "evidence": {
-        "captured_at": "2026-09-29T07:19:18Z",
-        "producer_tool_id": "devboard-cad-verifier@0.1.0",
-        "http_status": 200,
-        "sha256": "a356b8f08b35b5ee4e9901181e4aa6ee1c02560c848de3a69679e6c7d26bcf61",
-        "size_bytes": 2822803,
-        "media_type": "text/plain",
-        "detected_format": "kicad",
-        "verification_method": "http_get_magic"
+        "sha256": null,
+        "captured_at": "2026-10-09T18:52:22Z",
+        "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
+        "verification_method": "official_index_absent",
+        "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
       }
     },
     "mechanical": {
@@ -115,7 +112,7 @@
       "verified_revision": null,
       "evidence": {
         "sha256": null,
-        "captured_at": "2026-09-29T07:09:40Z",
+        "captured_at": "2026-10-09T18:52:22Z",
         "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
         "verification_method": "official_index_absent",
         "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
@@ -129,16 +126,16 @@
     },
     "pcb_source": {
       "available": true,
-      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab/kicad/TechLab.kicad_pcb",
+      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Robotics/EAGLE/Robotics_Cape.brd",
       "verified_revision": null,
       "evidence": {
-        "captured_at": "2026-09-29T07:19:17Z",
+        "captured_at": "2026-10-09T18:53:05Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
-        "sha256": "a356b8f08b35b5ee4e9901181e4aa6ee1c02560c848de3a69679e6c7d26bcf61",
-        "size_bytes": 2822803,
+        "sha256": "f431cbf5eede8738d78246a5d2b058283b4df0aa5d57826d6c17d43eb5690c8e",
+        "size_bytes": 284098,
         "media_type": "text/plain",
-        "detected_format": "kicad",
+        "detected_format": "eagle",
         "verification_method": "http_get_magic"
       }
     },
@@ -148,7 +145,7 @@
       "verified_revision": null,
       "evidence": {
         "sha256": null,
-        "captured_at": "2026-09-29T07:09:40Z",
+        "captured_at": "2026-10-09T18:52:22Z",
         "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
         "verification_method": "official_index_absent",
         "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
@@ -156,16 +153,16 @@
     },
     "schematic": {
       "available": true,
-      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/pocketbeagle/TechLab/kicad/TechLab.kicad_sch",
+      "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Robotics/Robotics_Cape_sch.pdf",
       "verified_revision": null,
       "evidence": {
-        "captured_at": "2026-09-29T07:19:16Z",
+        "captured_at": "2026-10-09T18:53:07Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
-        "sha256": "a0d8c449ead7833c4082abd94ea33b7a2d3278912e3c0cf780e1fa07ac2f3f6d",
-        "size_bytes": 1734,
-        "media_type": "text/plain",
-        "detected_format": "kicad",
+        "sha256": "268f558b4d6506d086b7a16bebd30b1e131613f30cc169db890b3915612ea144",
+        "size_bytes": 159635,
+        "media_type": "application/octet-stream",
+        "detected_format": "pdf",
         "verification_method": "http_get_magic"
       }
     },
@@ -180,7 +177,7 @@
       "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Robotics/models/SD-101D%20Robotics%20Cape%203D%20Model.STEP",
       "verified_revision": null,
       "evidence": {
-        "captured_at": "2026-09-29T07:19:20Z",
+        "captured_at": "2026-10-09T18:53:07Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
         "sha256": "3a479cec056b47a507ede1a3841832ea8ab774647e310c225efab348c79f3bff",
@@ -196,7 +193,7 @@
       "verified_revision": null,
       "evidence": {
         "sha256": null,
-        "captured_at": "2026-09-29T07:09:40Z",
+        "captured_at": "2026-10-09T18:52:22Z",
         "producer_tool_id": "devboard-cad-github-harvester@0.1.0",
         "verification_method": "official_index_absent",
         "index_ref": "beagleboard/capes@5c7c21154fd4a9155f0ca0754398c54ce858e37a"
@@ -207,7 +204,7 @@
       "url": "https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Robotics/EAGLE/Strawson_Eagle_Lib.lbr",
       "verified_revision": null,
       "evidence": {
-        "captured_at": "2026-09-29T07:19:16Z",
+        "captured_at": "2026-10-09T18:53:07Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
         "sha256": "d13d341b378f110d4bb87ec3c8a4c278faca0f213051b3f7384e59c613f5afbf",
@@ -219,21 +216,21 @@
     }
   },
   "licenses": {
-    "hardware_license": "UNVERIFIED",
-    "cad_license": null,
-    "schematic_license": null,
-    "pcb_license": null,
-    "mechanical_cad_license": null,
-    "redistribution_allowed": null,
-    "modification_allowed": null,
-    "commercial_use_allowed": null,
-    "attribution_required": null,
-    "license_url": null
+    "hardware_license": "CC BY 4.0",
+    "cad_license": "CC BY 4.0",
+    "schematic_license": "CC BY 4.0",
+    "pcb_license": "CC BY 4.0",
+    "mechanical_cad_license": "CC BY 4.0",
+    "redistribution_allowed": true,
+    "modification_allowed": true,
+    "commercial_use_allowed": true,
+    "attribution_required": true,
+    "license_url": "https://github.com/beagleboard/capes/blob/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Robotics/LICENSE.txt"
   },
   "sources": {
     "source_tier": "manufacturer_official",
     "official_product_page": "https://www.beagleboard.org/boards",
-    "official_cad_repository": "https://github.com/beagleboard/capes",
+    "official_cad_repository": "https://github.com/beagleboard/capes/tree/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Robotics",
     "official_github_repository": "https://github.com/beagleboard/capes",
     "official_documentation": null,
     "direct_cad_download": null,
@@ -241,5 +238,5 @@
     "direct_gerber_download": null
   },
   "record_status": "partial",
-  "notes": "File candidates harvested from the manufacturer's official repository beagleboard/capes pinned at 5c7c21154fd4. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware."
+  "notes": "File candidates harvested from the manufacturer's official repository beagleboard/capes pinned at 5c7c21154fd4, folder beaglebone/Robotics. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware. Hardware licence read from https://raw.githubusercontent.com/beagleboard/capes/5c7c21154fd4a9155f0ca0754398c54ce858e37a/beaglebone/Robotics/LICENSE.txt: \"CC-BY-4.0\"."
 }

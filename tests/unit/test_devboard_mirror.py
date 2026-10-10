@@ -379,6 +379,22 @@ class LicenceTextTests(unittest.TestCase):
             problems = mirror.check(root, [self._mit_record()])
         self.assertEqual(problems, ["licence text does not match its digest: open:a"])
 
+    def test_a_cc_board_with_a_notice_carries_its_copyright_lines(self) -> None:
+        record = _record("open:a", {"eagle": _entry("https://x/a.brd", EAGLE_BRD)})
+        text = "CC-BY-4.0\n\nCopyright (c) 2017 Example Author\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / mirror.NOTICES_PATH).parent.mkdir(parents=True, exist_ok=True)
+            (root / mirror.NOTICES_PATH).write_text(json.dumps({"notices": {"open:a": {
+                "licence": "CC BY-SA 4.0", "source": "https://x/LICENSE", "sha256": _sha(text.encode()), "text": text}}}),
+                encoding="utf-8")
+            report = mirror.build(root, [record], FakeFetcher({"https://x/a.brd": EAGLE_BRD}))
+            attribution = (root / "boards/cad/open/a/ATTRIBUTION.md").read_text(encoding="utf-8")
+            self.assertEqual(mirror.check(root, [record]), [])
+        self.assertTrue(report.ok)
+        self.assertIn("Copyright (c) 2017 Example Author", attribution)
+        self.assertIn("as the licensor wrote them", attribution)
+
     def test_share_alike_boards_need_no_licence_text(self) -> None:
         record = _record("open:a", {"eagle": _entry("https://x/a.brd", EAGLE_BRD)})
         with tempfile.TemporaryDirectory() as tmp:
@@ -481,6 +497,13 @@ class RepositoryIndexTests(unittest.TestCase):
                          ["fab/board.GTL", "fab/board.TXT", "hw/board.kicad_pcb", "hw/power.kicad_sch"])
         self.assertEqual(notes, [])
 
+    def test_a_board_that_is_a_folder_indexes_only_that_folder(self) -> None:
+        record = _repo_record({"hw/board.kicad_pcb": KICAD_PCB})
+        record["sources"] = {"official_cad_repository": f"https://github.com/vendor/board/tree/{COMMIT}/hw"}
+        boards, _ = mirror.build_index([record], lambda path: {"tree": self.TREE}, "now")
+        self.assertEqual([f["path"] for f in boards["vendor:board"]["files"]],
+                         ["hw/board.kicad_pcb", "hw/power.kicad_sch"])
+
     def test_a_record_spanning_two_commits_is_not_indexed(self) -> None:
         record = _record("vendor:board", {
             "pcb_source": _entry(f"{RAW}/a.kicad_pcb", KICAD_PCB),
@@ -561,6 +584,81 @@ class RepositoryBuildTests(unittest.TestCase):
         self.assertIn(mirror.NOT_COPIED_HEADING, attribution)
         self.assertIn("`schematic.pdf` in panel.zip: PDF document", attribution)
         self.assertEqual(mirror.check(root, [record], _index(files)), [])
+
+    def test_a_licence_covering_only_the_schematic_copies_only_the_schematic(self) -> None:
+        archive = _zip({"main.kicad_sch": KICAD_SCH, "main.kicad_pcb": KICAD_PCB,
+                        "main.kicad_pro": b'{"meta": {"filename": "main.kicad_pro", "version": 1}}\n'})
+        files = {"hw/board.kicad_pcb": KICAD_PCB, "hw/power.kicad_sch": KICAD_SCH,
+                 "case/lid.step": b"ISO-10303-21;\nHEADER;\nENDSEC;\n", "kicad.zip": archive}
+        record = _repo_record(files)
+        record["licenses"].update({"hardware_license": "CC BY-SA 4.0 (schematic only)", "cad_license": None,
+                                   "schematic_license": "CC BY-SA 4.0", "pcb_license": None,
+                                   "mechanical_cad_license": None})
+        root, record, report = self._build(files, {f"{RAW}/{p}": d for p, d in files.items()}, record)
+        self.assertTrue(report.ok, report.refused)
+        store = root / "boards/cad/vendor/board/cad"
+        self.assertEqual(sorted(p.relative_to(store).as_posix() for p in store.rglob("*") if p.is_file()),
+                         ["hw/power.kicad_sch", "kicad/main.kicad_sch"])
+        attribution = (root / "boards/cad/vendor/board/ATTRIBUTION.md").read_text(encoding="utf-8")
+        self.assertIn(mirror.NOT_COVERED_HEADING, attribution)
+        for item in ("- `case/lid.step`", "- `hw/board.kicad_pcb`", "- `main.kicad_pcb` in kicad.zip",
+                     "- `main.kicad_pro` in kicad.zip"):
+            self.assertIn(item, attribution)
+        self.assertNotIn(mirror.NOT_COPIED_HEADING, attribution)
+        self.assertEqual(mirror.check(root, [record], _index(files)), [])
+
+    @staticmethod
+    def _scoped(record: dict, **fields: Optional[str]) -> dict:
+        record["licenses"].update({"cad_license": None, "schematic_license": None, "pcb_license": None,
+                                   "mechanical_cad_license": None, **fields})
+        return record
+
+    def test_an_archive_whose_cad_members_are_all_outside_the_licence_is_left_out_not_missing(self) -> None:
+        archive = _zip({"fab/top.GTL": GERBER, "fab/drill.TXT": PADS_DRILL})
+        files = {"hw/board.kicad_pcb": KICAD_PCB, "hw/power.kicad_sch": KICAD_SCH, "Production/panel.zip": archive}
+        record = self._scoped(_repo_record(files), hardware_license="CC BY-SA 4.0 (schematic only)",
+                              schematic_license="CC BY-SA 4.0")
+        root, record, report = self._build(files, {f"{RAW}/{p}": d for p, d in files.items()}, record)
+        self.assertTrue(report.ok, report.refused)
+        manifest = json.loads((root / mirror.MANIFEST_PATH).read_text(encoding="utf-8"))
+        self.assertEqual(sorted((e["url"].rsplit("/", 1)[-1], e["reason"]) for e in manifest["excluded"]),
+                         [("board.kicad_pcb", mirror.NOT_COVERED_REASON), ("panel.zip", mirror.NOT_COVERED_REASON)])
+        self.assertEqual([e["sha256"] for e in manifest["excluded"] if e["url"].endswith("board.kicad_pcb")],
+                         [_sha(KICAD_PCB)])
+        self.assertEqual(mirror.check(root, [record], _index(files)), [])
+
+    def test_check_fails_when_a_mirrored_file_is_no_longer_covered(self) -> None:
+        root, record, report = self._build(self.FILES, {f"{RAW}/{p}": d for p, d in self.FILES.items()})
+        self.assertTrue(report.ok, report.refused)
+        self._scoped(record, schematic_license="CC BY-SA 4.0")
+        problems = mirror.check(root, [record], _index(self.FILES))
+        self.assertIn(f"{mirror.NOT_COVERED_REASON}: vendor:board boards/cad/vendor/board/cad/hw/board.kicad_pcb", problems)
+        self.assertIn(f"{mirror.NOT_COVERED_REASON}: vendor:board boards/cad/vendor/board/cad/fab/drill.drl", problems)
+        self.assertNotIn(f"{mirror.NOT_COVERED_REASON}: vendor:board boards/cad/vendor/board/cad/hw/power.kicad_sch",
+                         problems)
+
+    def test_fabrication_files_and_models_are_matched_to_a_licence_by_content(self) -> None:
+        cases = {("hw/a.kicad_sch", None): "schematic_license", ("hw/a.SchDoc", "ole"): "schematic_license",
+                 ("fab/a.GTL", "gerber"): "pcb_license", ("fab/drill.TXT", "excellon"): "pcb_license",
+                 ("fab/a.gl5", "gerber"): "pcb_license", ("case/lid", "step:AUTOMOTIVE_DESIGN"): "mechanical_cad_license",
+                 ("a.fzz", "fritzing"): "cad_license", ("a.kicad_pro", "kicad"): "cad_license",
+                 ("lib/a.kicad_sym", "kicad"): "cad_license", ("lib/a.SchLib", "ole"): "cad_license"}
+        for (name, detected), field_name in cases.items():
+            with self.subTest(name=name):
+                self.assertEqual(mirror.licence_field(name, detected), field_name)
+
+    def test_a_scoped_licence_does_not_reach_project_and_library_files(self) -> None:
+        record = self._scoped(_record("raspberry-pi:5", {}), cad_license="MIT", mechanical_cad_license="MIT")
+        self.assertTrue(mirror.covered(record, "rpi-5b.step", "step"))
+        for name in ("rpi-5b.kicad_pro", "lib/footprints.kicad_mod", "rpi-5b.kicad_pcb", "drill.TXT"):
+            with self.subTest(name=name):
+                self.assertFalse(mirror.covered(record, name, "excellon" if name.endswith("TXT") else None))
+
+    def test_a_record_without_per_kind_licence_fields_is_covered_whole(self) -> None:
+        record = _record("open:a", {})
+        for name in ("a.kicad_sch", "a.kicad_pcb", "a.step", "a.kicad_pro", "fab.zip"):
+            with self.subTest(name=name):
+                self.assertTrue(mirror.covered(record, name))
 
     def test_an_indexed_archive_of_documents_is_left_out_not_failed(self) -> None:
         files = {"hw/board.kicad_pcb": KICAD_PCB, "docs/datasheets.zip": _zip({"a.pdf": PDF})}

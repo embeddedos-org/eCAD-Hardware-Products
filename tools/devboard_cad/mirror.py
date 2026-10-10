@@ -9,7 +9,10 @@ What is copied, and the rules nothing gets past:
 
 1. **Licence first.** Only records with ``licenses.redistribution_allowed`` set to
    ``true`` are mirrored. Unknown is not permission: those boards keep their link and
-   digest and nothing else.
+   digest and nothing else. A licence scoped to part of a design covers only the files of
+   its kind (``schematic_license``, ``pcb_license``, ``mechanical_cad_license``; projects,
+   libraries and rules need the whole design licensed); the rest are listed in
+   ``ATTRIBUTION.md`` and the manifest's ``excluded``, and not copied.
 2. **The whole design, not one file per format.** A record names one file per format, but
    a design is more than that: a KiCad project has several schematic sheets, a project file
    and footprints; a board has fabrication outputs and 3D models beside its sources. When a
@@ -67,6 +70,7 @@ NOTICES_PATH = Path("tools") / "devboard_cad" / "licence-notices.json"
 ATTRIBUTION_NAME = "ATTRIBUTION.md"
 LICENCE_TEXT_HEADING = "## Licence text"
 NOT_COPIED_HEADING = "## Not copied"
+NOT_COVERED_HEADING = "## Not covered by the licence"
 # Licences whose terms require their text to accompany every copy.
 NOTICE_LICENCES = frozenset({"MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause"})
 LFS_POINTER_PREFIX = b"version https://git-lfs.github.com/spec/v1"
@@ -109,11 +113,26 @@ DESIGN_SUFFIXES = (
 # and kept only if its content is Excellon. Names that are plainly prose are not fetched.
 PROSE_NAME = re.compile(r"(readme|licen[cs]e|copying|order|instruction|note)", re.IGNORECASE)
 CAD_MEMBER_SUFFIXES = tuple(s for s in DESIGN_SUFFIXES if s != ".zip")
+# Which licence field covers a file. A statement scoped to part of a design leaves the other
+# fields empty (Raspberry Pi 5: only its 3D model), so only the files it covers are copied.
+# Fabrication files and models are known by their content, whatever their suffix; a native
+# design document by its suffix. Projects, libraries and rules belong to the whole design and
+# fall under cad_license, which a scoped licence does not reach.
+FABRICATION_FORMATS = frozenset({"gerber", "excellon"})
+MODEL_FORMATS = frozenset({"step", "iges", "stl", "vrml", "obj", "dxf"})
+SCHEMATIC_SUFFIXES = (".sch", ".kicad_sch", ".schdoc", ".dsn")
+PCB_SUFFIXES = (".brd", ".kicad_pcb", ".pcbdoc", ".drl", ".xln", ".exc") + GERBER_SUFFIXES
+MECHANICAL_SUFFIXES = (".step", ".stp", ".iges", ".igs", ".stl", ".wrl", ".obj", ".dxf",
+                       ".sldprt", ".sldasm", ".f3d", ".f3z", ".fcstd")
+KIND_FIELDS = ("schematic_license", "pcb_license", "mechanical_cad_license")
+NOT_COVERED_REASON = "not covered by the licence"
 EXTENSION_FOR_FORMAT = {
     "pdf": ".pdf", "zip": ".zip", "step": ".step", "stl": ".stl", "dxf": ".dxf",
     "gerber": ".gbr", "excellon": ".drl", "csv": ".csv", "eagle": ".xml",
 }
 RAW_GITHUB = re.compile(r"^https://raw\.githubusercontent\.com/([^/]+)/([^/]+)/([0-9a-f]{40})/(.+)$")
+# A record for one board of a repository that holds several names the board's folder.
+TREE_FOLDER = re.compile(r"github\.com/[^/]+/[^/]+/tree/[0-9a-f]{40}/(.+?)/?$")
 
 
 # --------------------------------------------------------------------------------------
@@ -141,6 +160,46 @@ class Source:
 
 def redistributable(record: Dict[str, Any]) -> bool:
     return (record.get("licenses") or {}).get("redistribution_allowed") is True
+
+
+def licence_field(name: str, detected: Optional[str] = None) -> str:
+    """The record's licence field that covers the file ``name`` of format ``detected``.
+
+    >>> licence_field("hw/power.kicad_sch")
+    'schematic_license'
+    >>> licence_field("fab/drill.TXT", "excellon")
+    'pcb_license'
+    """
+    fmt = (detected or "").split(":", 1)[0]
+    if fmt in FABRICATION_FORMATS:
+        return "pcb_license"
+    if fmt in MODEL_FORMATS:
+        return "mechanical_cad_license"
+    ext = suffix(name)
+    if ext in SCHEMATIC_SUFFIXES:
+        return "schematic_license"
+    if ext in PCB_SUFFIXES:
+        return "pcb_license"
+    if ext in MECHANICAL_SUFFIXES:
+        return "mechanical_cad_license"
+    return "cad_license"
+
+
+def covered(record: Dict[str, Any], name: str, detected: Optional[str] = None) -> bool:
+    """Whether the board's licence covers the file ``name`` of format ``detected``.
+
+    A field the record does not carry falls back to cad_license, so a record licensed as a
+    whole is unaffected. A project, library or rule file needs the whole design licensed: a
+    licence that leaves any kind of file out does not reach it, even when cad_license is set.
+
+    >>> covered({"licenses": {"cad_license": None, "schematic_license": "CC BY-SA 4.0"}}, "a.kicad_pcb")
+    False
+    """
+    licences = record.get("licenses") or {}
+    field_name = licence_field(name, detected)
+    if field_name == "cad_license" and any(k in licences and not licences[k] for k in KIND_FIELDS):
+        return False
+    return bool(licences.get(field_name, licences.get("cad_license")))
 
 
 def recorded_kind(detected: Optional[str], url: str) -> str:
@@ -483,7 +542,8 @@ def manifest_entry(item: Item, path: Path) -> Dict[str, Any]:
 
 def render_attribution(record: Dict[str, Any], entries: Sequence[Dict[str, Any]],
                        notice: Optional[Dict[str, Any]] = None,
-                       left_out: Sequence[Tuple[str, str, str]] = ()) -> str:
+                       left_out: Sequence[Tuple[str, str, str]] = (),
+                       uncovered: Sequence[str] = ()) -> str:
     licences = record.get("licenses") or {}
     licence = licences.get("cad_license") or licences.get("hardware_license") or "see source"
     licence_url = licences.get("license_url")
@@ -520,12 +580,19 @@ def render_attribution(record: Dict[str, Any], entries: Sequence[Dict[str, Any]]
                   "Members of the archives above that are not CAD, left out of the mirror:", ""]
         for archive, member, reason in sorted(left_out):
             lines.append(f"- `{member}` in {file_name(archive, 'zip')}: {reason}")
+    if uncovered:
+        lines += ["", NOT_COVERED_HEADING, "",
+                  f"CAD files of this design outside its licence, {licence}, left out:", ""]
+        lines += [f"- {item}" for item in sorted(uncovered)]
     if notice:
+        why = (f"{notice['licence']} requires its text to accompany every copy."
+               if notice["licence"] in NOTICE_LICENCES else
+               "The licence notice and copyright lines, as the licensor wrote them.")
         lines += [
             "",
             LICENCE_TEXT_HEADING,
             "",
-            f"{notice['licence']} requires its text to accompany every copy. Verbatim from",
+            f"{why} Verbatim from",
             f"[the manufacturer's licence]({notice['source']}), SHA-256 `{notice['sha256'][:16]}…`:",
             "",
             "````text",
@@ -603,10 +670,13 @@ def build_index(records: Iterable[Dict[str, Any]], gh_api: Callable[[str], Any],
                 notes.append(f"{record['board_id']}: files span {len(pins)} commits; not indexed")
             continue
         owner, repo, commit = next(iter(pins))  # type: ignore[misc]
+        folder_match = TREE_FOLDER.search((record.get("sources") or {}).get("official_cad_repository") or "")
+        folder = urllib.parse.unquote(folder_match.group(1)) + "/" if folder_match else ""
         tree = gh_api(f"repos/{owner}/{repo}/git/trees/{commit}?recursive=1")
         if tree.get("truncated"):
             notes.append(f"{record['board_id']}: the tree listing of {owner}/{repo} is truncated")
-        blobs = [e for e in tree.get("tree", []) if e.get("type") == "blob"]
+        blobs = [e for e in tree.get("tree", []) if e.get("type") == "blob"
+                 and e["path"].startswith(folder)]
         gerber_dirs = {PurePosixPath(e["path"]).parent for e in blobs
                        if e["path"].lower().endswith(GERBER_SUFFIXES)}
         files = [{"path": e["path"], "blob": e["sha"], "size": e.get("size")} for e in blobs
@@ -721,6 +791,7 @@ def build_board(root: Path, sources: Sequence[Source], fetcher: Any,
     board_id = sources[0].board_id
     items: List[Item] = []
     left_out: List[Tuple[str, str, str]] = []
+    uncovered: List[str] = []
 
     def exclude(source: Source, reason: str) -> None:
         # A file the record names is claimed to be CAD, so it failing is an error. A file the
@@ -732,6 +803,12 @@ def build_board(root: Path, sources: Sequence[Source], fetcher: Any,
                          "repository_path": source.repo_path, "git_blob": source.blob,
                          "reason": reason})
         left_out.append((source.url, source.repo_path or source.url, reason))
+
+    def leave_uncovered(source: Source) -> None:
+        # Verified and CAD, but outside the licence: listed, and recorded so check knows it.
+        excluded.append({"board_id": board_id, "url": source.url,
+                         "repository_path": source.repo_path, "git_blob": source.blob,
+                         "sha256": source.sha256, "reason": NOT_COVERED_REASON})
 
     for source in sources:
         payload: Optional[bytes] = None
@@ -762,15 +839,26 @@ def build_board(root: Path, sources: Sequence[Source], fetcher: Any,
                 exclude(source, "archive holds no CAD files")
                 continue
             archive_sha = hashlib.sha256(payload).hexdigest()
-            for member, data, member_format in members:
+            inside = [m for m in members if covered(record, m[0], m[2])]
+            uncovered.extend(f"`{member}` in {file_name(source.url, 'zip')}"
+                             for member, _, member_format in members
+                             if not covered(record, member, member_format))
+            left_out.extend((source.url, member, reason) for member, reason in skipped)
+            if not inside:
+                leave_uncovered(source)
+                continue
+            for member, data, member_format in inside:
                 if len(data) >= GITHUB_FILE_LIMIT:
                     left_out.append((source.url, member, "larger than GitHub's 100 MiB file limit"))
                     continue
                 items.append(Item(source, data, member_format, member, archive_sha))
-            left_out.extend((source.url, member, reason) for member, reason in skipped)
             continue
         if kind != "cad":
             exclude(source, f"not a CAD file ({describe(detected, name)})")
+            continue
+        if not covered(record, name, detected):
+            uncovered.append(f"`{source.repo_path or source.url}`")
+            leave_uncovered(source)
             continue
         items.append(Item(source, payload, detected))
 
@@ -788,12 +876,12 @@ def build_board(root: Path, sources: Sequence[Source], fetcher: Any,
         board_entries.append(manifest_entry(item, path))
     if not board_entries:
         return board_entries
-    notice = notices.get(board_id) if needs_notice(board_entries[0]) else None
+    notice = notices.get(board_id)
     if needs_notice(board_entries[0]) and notice is None:
         report.refused.append(f"{board_id}: {board_entries[0]['licence']} needs its licence "
                               f"text; run read_licenses.py --notices")
     attribution = root / board_dir(board_id) / ATTRIBUTION_NAME
-    attribution.write_text(render_attribution(record, board_entries, notice, left_out),
+    attribution.write_text(render_attribution(record, board_entries, notice, left_out, uncovered),
                            encoding="utf-8")
     return board_entries
 
@@ -844,13 +932,16 @@ def check(root: Path, records: Sequence[Dict[str, Any]],
     for entry in entries:
         by_url.setdefault((entry["board_id"], entry["url"]), []).append(entry)
     allowed = {r["board_id"] for r in records if redistributable(r)}
+    by_id = {r["board_id"]: r for r in records}
     excluded = {(e["board_id"], e["url"]): e for e in manifest.get("excluded", [])}
 
     for source in select(records, index):
         mirrored = by_url.get((source.board_id, source.url))
         left = excluded.get((source.board_id, source.url))
-        if not mirrored and left is not None and source.sha256 is None \
-                and left.get("git_blob") == source.blob:
+        if not mirrored and left is not None and (
+                (source.sha256 is None and left.get("git_blob") == source.blob)
+                or (left.get("reason") == NOT_COVERED_REASON and source.sha256 is not None
+                    and left.get("sha256") == source.sha256)):
             continue
         if not mirrored:
             problems.append(f"missing: {source.board_id} {source.url}")
@@ -868,6 +959,9 @@ def check(root: Path, records: Sequence[Dict[str, Any]],
         label = f"{entry['board_id']} {entry['path']}"
         if entry["board_id"] not in allowed:
             problems.append(f"not redistributable: {label}")
+        elif not covered(by_id[entry["board_id"]], (entry.get("archive") or {}).get("member") or entry["path"],
+                         entry.get("detected_format")):
+            problems.append(f"{NOT_COVERED_REASON}: {label}")
         path = root / entry["path"]
         if not path.is_file():
             problems.append(f"file absent: {label}")
