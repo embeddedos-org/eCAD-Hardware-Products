@@ -1,9 +1,9 @@
 """Write the symbols KiCad's own libraries do not have.
 
 EoS_Connectors.kicad_sym: KiCad's generic double-row connectors stop at 2x40, and the Raspberry Pi
-Compute Module 5 needs two 100-pin (2x50) connectors. The symbol follows KiCad's
-Conn_02xNN_Odd_Even layout exactly: odd pins on the left, even pins on the right, 2.54 mm apart,
-passive.
+Compute Module 5 needs two 100-pin (2x50) connectors, and a 98-hole (2x49) breakout row needs a
+2x49. The symbols follow KiCad's Conn_02xNN_Odd_Even layout exactly: odd pins on the left, even
+pins on the right, 2.54 mm apart, passive.
 
 EoS_Parts.kicad_sym: a flow-through TPD4EUSB30 (see its docstring).
 
@@ -18,7 +18,9 @@ Rev. 1.70, Table 1.15; KiCad has no RA-family symbol.
 
 The Renesas R7FA4M2AD3CFP (RA4M2, LQFP-100) follows R01DS0367EJ0150 Table 1.17;
 R5F100LEAFB (RL78/G13, LFQFP-64) follows R01DS0131EJ0380 section 1.3.11;
-TI TMS320F280049CPZ (C2000, LQFP-100) follows SPRS945H Table 5-1 and Figure 5-1.
+TI TMS320F280049CPZ (C2000, LQFP-100) follows SPRS945H Table 5-1 and Figure 5-1;
+TI TM4C1294NCPDT (TQFP-128) follows SPMS433B Table 26-5 (the 90 GPIO pins), Table 26-3 (the fixed
+supply, oscillator, hibernation and Ethernet pins) and Figure 25-1. KiCad 10 has no TM4C129x symbol.
 
 usage: python3 tools/eos_boards/symbols/generate.py
 """
@@ -545,15 +547,114 @@ def _check_f280049c() -> None:
     assert len(names) == len(set(names)), sorted({n for n in names if names.count(n) > 1})
 
 
+# --- pin table: (number, name, KiCad electrical type), TI SPMS433B (June 18, 2014): the GPIO pins from
+# Table 26-5 (GPIO Pins and Alternate Functions), the fixed pins from Table 26-3 (Signals by Signal
+# Name), checked against Figure 25-1 (128-Pin TQFP Package Pin Diagram). A name carries the pin's
+# fixed or analog function where it has one (Table 26-5, "Analog or Special Function") ---
+TM4C129_LEFT = [  # reset, both oscillators, hibernation, the Ethernet PHY, then ports A to E and L
+    ("70", "~{RST}", "input"), None,
+    ("88", "OSC0", "passive"), ("89", "OSC1", "passive"), ("66", "XOSC0", "passive"), ("67", "XOSC1", "passive"), None,
+    ("64", "~{WAKE}", "input"), ("65", "~{HIB}", "output"), None,
+    ("53", "EN0RXIN", _IO), ("54", "EN0RXIP", _IO), ("56", "EN0TXON", _IO), ("57", "EN0TXOP", _IO),
+    ("59", "RBIAS", "passive"), None,
+    ("33", "PA0/U0Rx", _IO), ("34", "PA1/U0Tx", _IO), ("35", "PA2", _IO), ("36", "PA3", _IO), ("37", "PA4", _IO),
+    ("38", "PA5", _IO), ("40", "PA6", _IO), ("41", "PA7", _IO), None,
+    ("95", "PB0/USB0ID", _IO), ("96", "PB1/USB0VBUS", _IO), ("91", "PB2", _IO), ("92", "PB3", _IO),
+    ("121", "PB4/AIN10", _IO), ("120", "PB5/AIN11", _IO), None,
+    ("100", "PC0/TCK/SWCLK", _IO), ("99", "PC1/TMS/SWDIO", _IO), ("98", "PC2/TDI", _IO), ("97", "PC3/TDO/SWO", _IO),
+    ("25", "PC4/C1-", _IO), ("24", "PC5/C1+", _IO), ("23", "PC6/C0+", _IO), ("22", "PC7/C0-", _IO), None,
+    ("1", "PD0/AIN15", _IO), ("2", "PD1/AIN14", _IO), ("3", "PD2/AIN13", _IO), ("4", "PD3/AIN12", _IO),
+    ("125", "PD4/AIN7", _IO), ("126", "PD5/AIN6", _IO), ("127", "PD6/AIN5", _IO), ("128", "PD7/AIN4/NMI", _IO), None,
+    ("15", "PE0/AIN3", _IO), ("14", "PE1/AIN2", _IO), ("13", "PE2/AIN1", _IO), ("12", "PE3/AIN0", _IO),
+    ("123", "PE4/AIN9", _IO), ("124", "PE5/AIN8", _IO), None,
+    ("81", "PL0", _IO), ("82", "PL1", _IO), ("83", "PL2", _IO), ("84", "PL3", _IO), ("85", "PL4", _IO), ("86", "PL5", _IO),
+    ("94", "PL6/USB0DP", _IO), ("93", "PL7/USB0DM", _IO),
+]
+TM4C129_RIGHT = [  # ports F to K, M, N, P and Q
+    ("42", "PF0", _IO), ("43", "PF1", _IO), ("44", "PF2", _IO), ("45", "PF3", _IO), ("46", "PF4", _IO), None,
+    ("49", "PG0", _IO), ("50", "PG1", _IO), None,
+    ("29", "PH0", _IO), ("30", "PH1", _IO), ("31", "PH2", _IO), ("32", "PH3", _IO), None,
+    ("116", "PJ0", _IO), ("117", "PJ1", _IO), None,
+    ("18", "PK0/AIN16", _IO), ("19", "PK1/AIN17", _IO), ("20", "PK2/AIN18", _IO), ("21", "PK3/AIN19", _IO),
+    ("63", "PK4", _IO), ("62", "PK5", _IO), ("61", "PK6", _IO), ("60", "PK7", _IO), None,
+    ("78", "PM0", _IO), ("77", "PM1", _IO), ("76", "PM2", _IO), ("75", "PM3", _IO),
+    ("74", "PM4/TMPR3", _IO), ("73", "PM5/TMPR2", _IO), ("72", "PM6/TMPR1", _IO), ("71", "PM7/TMPR0", _IO), None,
+    ("107", "PN0", _IO), ("108", "PN1", _IO), ("109", "PN2", _IO), ("110", "PN3", _IO), ("111", "PN4", _IO),
+    ("112", "PN5", _IO), None,
+    ("118", "PP0/C2+", _IO), ("119", "PP1/C2-", _IO), ("103", "PP2", _IO), ("104", "PP3", _IO), ("105", "PP4", _IO),
+    ("106", "PP5", _IO), None,
+    ("5", "PQ0", _IO), ("6", "PQ1", _IO), ("11", "PQ2", _IO), ("27", "PQ3", _IO), ("102", "PQ4", _IO),
+]
+TM4C129_TOP = [  # 3.3 V supplies, the ADC's analog supply and high reference, the 1.2 V core pins, VBAT
+    *[(n, "VDD", "power_in") for n in ("7", "16", "26", "28", "39", "47", "51", "52", "69", "79", "90", "101", "113", "122")],
+    ("8", "VDDA", "power_in"), ("9", "VREFA+", "power_in"), ("87", "VDDC", "power_in"), ("115", "VDDC", "power_in"),
+    ("68", "VBAT", "power_in"),
+]
+TM4C129_BOTTOM = [(n, "GND", "power_in") for n in ("17", "48", "55", "58", "80", "114")] + [("10", "GNDA", "power_in")]
+
+TM4C129_FOOTPRINT = "Package_QFP:TQFP-128_14x14mm_P0.4mm"
+TM4C129_DATASHEET = "https://www.ti.com/lit/ds/symlink/tm4c1294ncpdt.pdf"
+
+
+def tm4c1294ncpdt() -> list:
+    """TI TM4C1294NCPDT, 128-pin TQFP (PDT). Pins as TI SPMS433B Tables 26-5 and 26-3 and Figure 25-1:
+    reset, the main and hibernation oscillators, WAKE/HIB, the Ethernet PHY pins and RBIAS, then ports
+    A to E and L on the left; ports F to K, M, N, P and Q on the right; VDD, VDDA, VREFA+, VDDC and VBAT
+    on top; GND and GNDA below. The oscillator pins and RBIAS are passive (a crystal, a resistor), as on
+    the TM4C123GH6PM symbol above."""
+    name = "TM4C1294NCPDT"
+    rows = max(len(TM4C129_LEFT), len(TM4C129_RIGHT))
+    top = round(2.54 * (rows + 1) / 2, 2)
+    top = round(2.54 * round(top / 2.54), 2)
+    body = [Sym("symbol"), f"{name}_1_1",
+            [Sym("rectangle"), [Sym("start"), -25.4, top], [Sym("end"), 25.4, -top],
+             [Sym("stroke"), [Sym("width"), 0.254], [Sym("type"), Sym("default")]], [Sym("fill"), [Sym("type"), Sym("background")]]]]
+
+    def pin(number, label, kind, x, y, angle):
+        return [Sym("pin"), Sym(kind), Sym("line"), [Sym("at"), x, y, angle], [Sym("length"), 2.54],
+                [Sym("name"), label, _font()], [Sym("number"), number, _font()]]
+
+    for column, x, angle in ((TM4C129_LEFT, -27.94, 0), (TM4C129_RIGHT, 27.94, 180)):
+        for row, entry in enumerate(column):
+            if entry is not None:
+                body.append(pin(*entry, x, round(top - 2.54 * (row + 1), 2), angle))
+    for k, (number, label, kind) in enumerate(TM4C129_TOP):
+        body.append(pin(number, label, kind, round(-22.86 + 2.54 * k, 2), round(top + 2.54, 2), 270))
+    for k, (number, label, kind) in enumerate(TM4C129_BOTTOM):
+        body.append(pin(number, label, kind, round(-7.62 + 2.54 * k, 2), round(-top - 2.54, 2), 90))
+    return [Sym("symbol"), name, [Sym("exclude_from_sim"), Sym("no")], [Sym("in_bom"), Sym("yes")], [Sym("on_board"), Sym("yes")],
+            _prop("Reference", "U", 0, round(top + 5.08, 2)), _prop("Value", name, 0, round(-top - 5.08, 2)),
+            _prop("Footprint", TM4C129_FOOTPRINT, 0, 0, True),
+            _prop("Datasheet", TM4C129_DATASHEET, 0, 0, True),
+            _prop("Description", "Tiva C Arm Cortex-M4F MCU, 120 MHz, 1 MB flash, 256 kB SRAM, 6 kB EEPROM, 10/100 "
+                                 "Ethernet MAC and PHY, USB 2.0 OTG, TQFP-128 14 x 14 mm (TI SPMS433B)", 0, 0, True),
+            body]
+
+
+def _check_tm4c1294() -> None:
+    """Every TQFP-128 pin 1-128 exactly once, the 90 GPIOs named PA0-PQ4 as Table 26-5 lists them, and no
+    name given twice except the supply and ground pins."""
+    entries = [e for e in TM4C129_LEFT + TM4C129_RIGHT if e is not None] + TM4C129_TOP + TM4C129_BOTTOM
+    numbers = [e[0] for e in entries]
+    assert len(numbers) == 128, len(numbers)
+    assert sorted(numbers, key=int) == [str(n) for n in range(1, 129)], sorted(set(range(1, 129)) - {int(n) for n in numbers})
+    gpio = [e[1].split("/")[0] for e in entries if e[1].startswith("P")]
+    assert len(gpio) == 90 and len(set(gpio)) == 90, len(gpio)
+    names = [e[1] for e in entries if e[1] not in ("VDD", "VDDC", "GND")]
+    assert len(names) == len(set(names)), sorted({n for n in names if names.count(n) > 1})
+
+
 def main() -> int:
     _check_lpc55s69()
     _check_ra2e1()
     _check_ra4m2()
     _check_rl78g13()
     _check_f280049c()
-    for file, symbols in (("EoS_Connectors", [double_row(50)]), ("EoS_Parts", [tpd4eusb30_flow_through()]),
+    _check_tm4c1294()
+    for file, symbols in (("EoS_Connectors", [double_row(50), double_row(49)]), ("EoS_Parts", [tpd4eusb30_flow_through()]),
                           ("EoS_Sensors", [adt7410()]), ("EoS_MCU", [tm4c123gh6pm(), lpc55s69jbd100(), r7fa2e1a92dfm(),
-                                       r7fa4m2ad3cfp(), r5f100leafb(), tms320f280049cpz()])):
+                                       r7fa4m2ad3cfp(), r5f100leafb(), tms320f280049cpz(),
+                                       tm4c1294ncpdt()])):
         lib = [Sym("kicad_symbol_lib"), [Sym("version"), 20231120], [Sym("generator"), "eos_boards"], *symbols]
         out = HERE / f"{file}.kicad_sym"
         out.write_text(dumps(lib) + "\n")

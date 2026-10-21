@@ -1,0 +1,82 @@
+All Rights Reserved Board Licence
+
+EoS TM4C1294 Board, revision A
+Copyright (c) 2026 Kartikeydheer Srivastava ("the copyright holder").
+All rights reserved.
+
+This board's design is not open source. It is not under the MIT Licence in
+the eCAD-Hardware-Products repository's LICENSE file, and this revision is
+not offered or contributed under that licence.
+
+"The Design" means these files of EoS TM4C1294 Board in the
+eCAD-Hardware-Products repository:
+- everything in boards/eos/eos-tm4c1294-board/: its KiCad project, Gerber, drill,
+  bill-of-materials, placement, STEP and PDF files, renders and
+  documentation;
+- its design file, tools/eos_boards/boards/eos_tm4c1294_board.py;
+- tools/eos_boards/boards/owner.py and
+  tools/eos_boards/boards/licence_terms.txt.
+It does not include the material listed at the end, which keeps its own
+terms.
+
+1. Permission is needed. Except as sections 2 and 3 allow, no one may copy,
+   modify, publish, distribute or sell the Design, make boards from it or
+   have them made, or make another design from it, without the copyright
+   holder's prior written permission, which may be given for a fee. To ask,
+   write to kartikeydheer@gmail.com. A board made with that permission, or under
+   section 3, may be used without further permission.
+
+2. Viewing. Anyone may view the Design where it is published with the
+   copyright holder's consent. They may also download or clone the
+   repository that holds it, open its files in KiCad or another viewer to
+   look at them, and run that repository's tests, but may not use those
+   copies to make boards or other designs. On GitHub, users also have the
+   rights that GitHub's Terms of Service give over public repositories,
+   such as viewing and forking. No other right is given, except as
+   section 3 gives EmbeddedOS.
+
+3. EmbeddedOS. EmbeddedOS (EoS) Research Foundation ("EmbeddedOS") may,
+   free of charge, until this permission ends (see Withdrawal below):
+   - publish the Design, and versions of it that EmbeddedOS has changed, in
+     its repositories and on its website for viewing, under this licence
+     and with this notice kept;
+   - copy and change the Design for its own projects; and
+   - make boards from the Design or its changed versions, or have a
+     manufacturer make them for it, and use and lend those boards for its
+     own development, research, teaching and demonstrations.
+   EmbeddedOS may not sell boards made from the Design, and may not give
+   or license the Design or a changed version to anyone, except by
+   publishing it for viewing as above and by sending a manufacturer the
+   files it needs to make boards for EmbeddedOS. As a condition of this
+   permission, changes EmbeddedOS makes stay under this licence, and
+   EmbeddedOS gives the copyright holder a free, permanent, worldwide
+   permission to use and relicense them on any terms. This permission is
+   not exclusive, and it may not be transferred or sublicensed.
+
+   Withdrawal: the copyright holder may withdraw this permission by email
+   or letter to EmbeddedOS. It ends thirty days after that notice. By then
+   EmbeddedOS must remove the Design and its changed versions from its
+   current repositories and website (it need not rewrite past version
+   history) and stop making boards. Boards made before then may still be
+   used.
+
+4. Other material. The material listed at the end stays under its own
+   licence, where it has one. Nothing here limits anyone's rights in
+   that material, and facts taken from other designs are not claimed as
+   the copyright holder's.
+
+5. Names. This licence gives no right in the names "EmbeddedOS" or "EoS".
+
+6. No warranty. The Design is provided "as is", without warranty of any
+   kind, express or implied, including the warranties of merchantability,
+   fitness for a particular purpose and non-infringement. In no event shall
+   the copyright holder be liable for any claim, damages or other liability
+   arising from the Design or its use.
+
+Material on this board that this licence does not cover (section 4):
+
+- Outline, header and breakout positions, mounting-hole centres and the signal on each header pin: TI SPMU365C (EK-TM4C1294XL User's Guide), Table 1-1, Tables 2-1 to 2-4 and Figure 4-1, used as mechanical and pinout facts only; hole drill enlarged from 3.175 to 3.2 mm for M3 clearance
+- BoosterPack header type (female with long male leads) from TI's BoosterPack Pinout Standard (updated Sept 1, 2013), used as a fact only
+- Schematic symbols in hardware/symbols (EoS_Connectors.kicad_sym, EoS_MCU.kicad_sym, EoS_Parts.kicad_sym): written by this repository's generator, tools/eos_boards/symbols, MIT licence
+- Footprint libraries in hardware/footprints (EoS_Packages.pretty): written by this repository's generator, tools/eos_boards/footprints, MIT licence
+- Footprints, symbols and 3D models from KiCad's libraries: CC BY-SA 4.0, with the KiCad libraries' exception for designs that use them and files generated from those designs (kicad.org/libraries/license)

@@ -96,7 +96,8 @@ class Batch3SymbolTest(unittest.TestCase):
 
     def test_supply_and_debug_pin_numbers(self):
         # Renesas R01DS0367 Table 1.17, R01DS0131 section 1.3.11;
-        # TI SPRS945H Table 5-1, 100 PZ column. A shifted supply pin can damage hardware.
+        # TI SPRS945H Table 5-1, 100 PZ column; TI SPMS433B Table 26-3 (128-pin TQFP).
+        # A shifted supply pin can damage hardware.
         expected = {
             "R7FA4M2AD3CFP": (100, {
                 "9": ("VCL", "power_out"), "15": ("VCC", "power_in"),
@@ -116,6 +117,13 @@ class Batch3SymbolTest(unittest.TestCase):
                 "71": ("VDD", "power_in"), "73": ("VREGENZ", "input"),
                 "80": ("VDDIO_SW", "power_in"), "82": ("VSS_SW", "power_in"),
                 "87": ("VDD", "power_in"),
+            }),
+            "TM4C1294NCPDT": (128, {
+                "7": ("VDD", "power_in"), "8": ("VDDA", "power_in"), "9": ("VREFA+", "power_in"),
+                "10": ("GNDA", "power_in"), "17": ("GND", "power_in"), "65": ("~{HIB}", "output"),
+                "68": ("VBAT", "power_in"), "70": ("~{RST}", "input"), "87": ("VDDC", "power_in"),
+                "97": ("PC3/TDO/SWO", "bidirectional"), "99": ("PC1/TMS/SWDIO", "bidirectional"),
+                "100": ("PC0/TCK/SWCLK", "bidirectional"), "115": ("VDDC", "power_in"),
             }),
         }
         library = Library(REPO_ROOT / "tools" / "eos_boards" / "symbols")

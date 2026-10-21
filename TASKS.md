@@ -9,11 +9,34 @@ Status is one of: `todo`, `in-progress`, `blocked`, `review`, `done`.
 
 ## Active
 
-### EoS original boards — batch 3 (campaign #55)
+### EoS original boards — batch 4: EoS TM4C1294 Board (campaign #55)
 
 Owner: implementation and independent review assigned per board
 Mode: Review
 Status: review
+
+Scope: the EoS TM4C1294 Board; its generic MCU symbol, 2x49 connector symbol and footprint,
+generated artifacts, evidence and documentation.
+
+Acceptance criteria (verbatim from the campaign handoff)
+: - "Never open or use a vendor's design files (schematic, layout, Gerbers, BOM)."
+  - "Replace on-board debug probes."
+  - "A board passes only at: ERC 0, DRC errors 0, unconnected 0, schematic parity 0."
+  - "Independent review by a different agent or person: check pins, power, USB, headers, BOM, layout and docs, and grade findings BLOCKER, MAJOR or MINOR."
+  - "Fix the findings, rebuild, then have the fixes verified by another reviewer on the routed board."
+  - "Previews in every PR"
+
+State (2026-10-22): build 20 at 0/0/0/0 (19 silkscreen-at-edge warnings). Independent full
+review: 0 BLOCKER, 2 MAJOR, 13 MINOR; fix verification on build 20: 0 BLOCKER, 0 MAJOR, 9 MINOR
+open, all disclosed in the board README; acceptable for rev A. Deferred to a library/generator
+change: an FTSH-105 land pattern (shared by eight boards), the stack-up written into the board
+file, and BOM lines for jumper shunts.
+
+### EoS original boards — batch 3 (campaign #55)
+
+Owner: implementation and independent review assigned per board
+Mode: Review
+Status: done (merged as #64, 2026-10-20)
 
 Scope: EoS RA4M2 Board, EoS RL78G13 Board and EoS F280049C Board;
 their generic MCU symbols, generated artifacts, evidence and documentation.

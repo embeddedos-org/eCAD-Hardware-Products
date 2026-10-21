@@ -25,6 +25,7 @@ board's schematic, layout, routing, checks and fabrication outputs; see
 | [EoS F280049C Board](eos-f280049c-board) | TI TMS320F280049C (C2000) board with two 40-pin BoosterPack sites, four layers: CP2102N USB-UART, JTAG | 4 | 0 | 0 | 0 | 0 |
 | [EoS RA4M2 Board](eos-ra4m2-board) | Renesas RA4M2 board that fits Uno R3 shields: SPI and I2C Pmod ports, 40-pin GPIO header, USB device, CP2102N, SWD | 2 | 0 | 0 | 0 | 0 |
 | [EoS RL78G13 Board](eos-rl78g13-board) | Renesas RL78/G13 (R5F100LEAFB) stick board: two 30-pin headers 25.4 mm apart, USB-C serial port, TOOL0 debug | 2 | 0 | 0 | 0 | 0 |
+| [EoS TM4C1294 Board](eos-tm4c1294-board) | TI TM4C1294NCPDT board with two 40-pin BoosterPack sites, a 98-hole breakout and 10/100 Ethernet, six layers: USB device port, CP2102N USB-UART, SWD/JTAG | 6 | 0 | 0 | 0 | 0 |
 
 Each board folder contains:
 

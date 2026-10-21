@@ -1,6 +1,6 @@
 """Write the footprints KiCad's own libraries do not have (part of the MIT generator).
 
-EoS_Packages.pretty: NXP HLQFP-100 (SOT1570-3), which KiCad 10 does not ship.
+EoS_Packages.pretty: NXP HLQFP-100 (SOT1570-3), which KiCad 10 does not ship, and a 2 x 49 pin header.
 
 The LPC55S69JBD100's package has an exposed pad of only 3.21-3.61 mm (data sheet Figure 32,
 "VIEW J-J"), and on this package that pad is the chip's only VSS connection (Table 3). KiCad
@@ -23,8 +23,16 @@ a 2 x 2 array of vias into any exposed pad on a plane net (pcb_build.fanout). Co
 mm outside the pads, as KiCad's own QFP footprints. 3D model: KiCad's LQFP-100 14 x 14 mm body
 (the same 14 x 14 x 1.4 mm outline; HLQFP's 1.45 mm maximum height is within it).
 
+It also holds a 2 x 49 (98-hole) straight 2.54 mm header, PinHeader_2x49_P2.54mm_Vertical: KiCad's
+Connector_PinHeader_2.54mm library stops at 2 x 40. It is drawn exactly as KiCad's own generated pin
+headers (PinHeader_2x40_P2.54mm_Vertical, KiCad 10): 1.7 mm pads on 1.0 mm drills, pad 1 square,
+odd pads in the first column and even pads in the second, the silkscreen outline 1.38 mm outside the
+pad centres with the pin-1 corner open, the courtyard 1.77 mm out, the fabrication outline 1.27 mm out
+with a chamfer at pin 1. KiCad ships no 3D model of this length, so none is referenced.
+
 usage: python3 tools/eos_boards/footprints/generate.py
    writes tools/eos_boards/footprints/EoS_Packages.pretty/HLQFP-100-1EP_14x14mm_P0.5mm_EP3.21x3.21mm.kicad_mod
+   and tools/eos_boards/footprints/EoS_Packages.pretty/PinHeader_2x49_P2.54mm_Vertical.kicad_mod
 """
 
 from __future__ import annotations
@@ -130,13 +138,58 @@ def check() -> None:
     assert EP_PASTE_OFF + EP_PASTE / 2 <= EP / 2
 
 
+HEADER_ROWS = 49
+HEADER_NAME = f"PinHeader_2x{HEADER_ROWS}_P2.54mm_Vertical"
+
+
+def header_2x49() -> list:
+    """2 x 49 straight pin header, 2.54 mm pitch, drawn as KiCad's generated PinHeader_2xNN (see above):
+    pad n at column (n - 1) % 2, row (n - 1) // 2, pad 1 at the origin."""
+    p, end = 2.54, round(2.54 * (HEADER_ROWS - 1), 2)
+    fp = [Sym("footprint"), HEADER_NAME, [Sym("version"), 20241229], [Sym("generator"), "eos_boards"],
+          [Sym("layer"), "F.Cu"],
+          [Sym("descr"), f"Through hole straight pin header, 2x{HEADER_ROWS}, 2.54mm pitch, double rows (drawn as "
+                         "KiCad's generated pin headers; KiCad's library stops at 2x40)"],
+          [Sym("tags"), f"Through hole pin header THT 2x{HEADER_ROWS} 2.54mm double row"],
+          _prop("Reference", "REF**", 1.27, -2.38, "F.SilkS"),
+          _prop("Value", HEADER_NAME, 1.27, round(end + 2.38, 2), "F.Fab"),
+          [Sym("attr"), Sym("through_hole")]]
+    s, c, f = 1.38, 1.77, 1.27
+    fp += [_line((-s, -s), (0, -s), "F.SilkS", 0.12), _line((-s, 0), (-s, -s), "F.SilkS", 0.12),
+           _line((-s, f), (-s, round(end + s, 2)), "F.SilkS", 0.12), _line((-s, f), (f, f), "F.SilkS", 0.12),
+           _line((-s, round(end + s, 2)), (round(p + s, 2), round(end + s, 2)), "F.SilkS", 0.12),
+           _line((f, -s), (round(p + s, 2), -s), "F.SilkS", 0.12), _line((f, f), (f, -s), "F.SilkS", 0.12),
+           _line((round(p + s, 2), -s), (round(p + s, 2), round(end + s, 2)), "F.SilkS", 0.12)]
+    fp += _poly([(-c, -c), (round(p + c, 2), -c), (round(p + c, 2), round(end + c, 2)), (-c, round(end + c, 2))], "F.CrtYd", 0.05)
+    fp += _poly([(-f, 0), (0, -f), (round(p + f, 2), -f), (round(p + f, 2), round(end + f, 2)), (-f, round(end + f, 2))],
+                "F.Fab", 0.1)
+    fp.append([Sym("fp_text"), Sym("user"), "${REFERENCE}", [Sym("at"), 1.27, round(end / 2, 2), 90], [Sym("layer"), "F.Fab"],
+               _font()])
+    for n in range(1, 2 * HEADER_ROWS + 1):
+        x, y = round(p * ((n - 1) % 2), 2), round(p * ((n - 1) // 2), 2)
+        fp.append([Sym("pad"), str(n), Sym("thru_hole"), Sym("rect" if n == 1 else "circle"), [Sym("at"), x, y],
+                   [Sym("size"), 1.7, 1.7], [Sym("drill"), 1.0], [Sym("layers"), "*.Cu", "*.Mask"],
+                   [Sym("remove_unused_layers"), Sym("no")]])
+    fp.append([Sym("embedded_fonts"), Sym("no")])
+    return fp
+
+
+def check_header() -> None:
+    pads = [q for q in header_2x49() if isinstance(q, list) and str(q[0]) == "pad"]
+    assert [str(q[1]) for q in pads] == [str(n) for n in range(1, 2 * HEADER_ROWS + 1)]
+    xy = {(q[4][1], q[4][2]) for q in pads}
+    assert len(xy) == 2 * HEADER_ROWS and max(y for _, y in xy) == round(2.54 * (HEADER_ROWS - 1), 2)
+
+
 def main() -> int:
     out = HERE / "EoS_Packages.pretty"
     check()
+    check_header()
     out.mkdir(parents=True, exist_ok=True)
-    path = out / f"{NAME}.kicad_mod"
-    path.write_text(dumps(footprint()) + "\n")
-    print(path)
+    for name, fp in ((NAME, footprint()), (HEADER_NAME, header_2x49())):
+        path = out / f"{name}.kicad_mod"
+        path.write_text(dumps(fp) + "\n")
+        print(path)
     return 0
 
 

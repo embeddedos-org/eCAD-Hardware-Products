@@ -15,6 +15,16 @@ has never run.
 
 ### Added
 
+- One more original EmbeddedOS board (batch 4), all rights reserved like the others: the EoS
+  TM4C1294 Board, a TI TM4C1294NCPDT board for the EK-TM4C1294XL form factor (two 40-pin
+  BoosterPack sites, a 98-hole breakout, 10/100 Ethernet on the chip's own PHY, USB device, a
+  CP2102N USB-UART and a 10-pin SWD/JTAG header in place of the on-board ICDI), six layers. Built
+  with `tools/eos_boards` at ERC 0, DRC errors 0, unconnected 0 and schematic parity 0; an
+  independent review, its findings fixed, and a second check of the fixes on the rebuilt board.
+- Generic libraries (MIT, like the generator): the `EoS_MCU:TM4C1294NCPDT` symbol, checked pin for
+  pin against TI SPMS433B; `EoS_Connectors:Conn_02x49_Odd_Even`; and `PinHeader_2x49_P2.54mm_Vertical`
+  from `footprints/generate.py`. The batch-3 symbol test covers the new symbol's supply and debug pins.
+
 - Three more original EmbeddedOS boards (batch 3), all rights reserved like the others. Each was
   built with `tools/eos_boards` at ERC 0, DRC errors 0, unconnected 0 and schematic parity 0. Each
   had an independent review, its findings were fixed, and then a second reviewer checked the
