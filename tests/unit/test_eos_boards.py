@@ -819,11 +819,12 @@ class ExposedPadTest(unittest.TestCase):
 VIA_PAD_GAP = 0.1   # mm of solder mask between a via and a surface pad (pcb_build.VIA_PAD_GAP)
 
 
-def _vias_in_pads(pcb):
+def _vias_in_pads(pcb, skip=()):
     """The surface pads, other than a chip's exposed pad, that some via's copper overlaps or comes
-    within VIA_PAD_GAP of."""
+    within VIA_PAD_GAP of. Vias centred at a position in ``skip`` (mm, to 0.001) are left out."""
     vias = [(float(find(v, "at")[1]), float(find(v, "at")[2]), float(find(v, "size")[1]) / 2)
-            for v in find_all(pcb, "via")]
+            for v in find_all(pcb, "via")
+            if (round(float(find(v, "at")[1]), 3), round(float(find(v, "at")[2]), 3)) not in skip]
     hits = set()
     for fp in find_all(pcb, "footprint"):
         ref = next(str(p[2]) for p in find_all(fp, "property") if str(p[1]) == "Reference")
@@ -861,12 +862,14 @@ def _vias_in_pads(pcb):
 
 class ViaInPadTest(unittest.TestCase):
     """No via sits in a surface pad, or within VIA_PAD_GAP of one, except the vias a chip's exposed
-    pad takes on purpose: solder wicks down an open barrel and starves the joint. The boards below
-    were built before the generator kept vias off pads; each comes off the list when it is rebuilt."""
+    pad takes on purpose: solder wicks down an open barrel and starves the joint. Every board is
+    built under the rule, the ten built before it included."""
 
-    BUILT_BEFORE_THE_RULE = {"eos-atmega328p-board", "eos-cm4-base", "eos-cm5-base", "eos-esp32-devkit",
-                             "eos-ke16z-board", "eos-kl25-board", "eos-learn-rp2350", "eos-lpc55s69-board",
-                             "eos-ra2e1-board", "eos-stm32-64"}
+    # Raspberry Pi's RP2350A reference copper, kept exactly as drawn (the board README's "The core
+    # layout is Raspberry Pi's, exactly"): two of its locked ground vias sit 0.05 mm from the
+    # regulator capacitors' ground pads (C6.2, C7.2). Only these two vias, by position, are left
+    # out; any other via in or beside any pad, those two pads included, still fails.
+    REFERENCE_COPPER = {"eos-learn-rp2350": {(29.4, 24.8), (29.4, 25.4)}}
 
     def test_the_gap_matches_the_generators(self):
         source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
@@ -877,12 +880,10 @@ class ViaInPadTest(unittest.TestCase):
             pcb_path = folder / "hardware" / f"{folder.name}.kicad_pcb"
             if not pcb_path.is_file():
                 continue
-            hits = _vias_in_pads(loads(pcb_path.read_text(encoding="utf-8")))
+            hits = _vias_in_pads(loads(pcb_path.read_text(encoding="utf-8")),
+                                 skip=self.REFERENCE_COPPER.get(folder.name, set()))
             with self.subTest(board=folder.name):
-                if folder.name in self.BUILT_BEFORE_THE_RULE:
-                    self.assertTrue(hits, "rebuilt clean: take it off BUILT_BEFORE_THE_RULE")
-                else:
-                    self.assertFalse(hits, f"vias in {', '.join(sorted(hits))}")
+                self.assertFalse(hits, f"vias in {', '.join(sorted(hits))}")
 
 
 

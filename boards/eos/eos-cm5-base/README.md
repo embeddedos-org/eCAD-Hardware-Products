@@ -67,7 +67,8 @@ The numbers below are from `build-report.json` and `drc.json` in this folder.
 
 - **Vias:** 0.45 mm with a 0.2 mm drill, the size Raspberry Pi's CM5 IO Board uses around this
   connector.
-- **Tracks:** 0.15 mm, narrowing at fine-pitch pins; 0.5 mm on 5 V.
+- **Tracks:** 0.15 mm by default and 0.2 mm on the USB and Ethernet lines, narrowing at fine-pitch
+  pins; 0.5 mm on 5 V.
 - **Coin-cell holder:** on the bottom side, under the module. Everything else is on top.
 - **Under the module:** nothing on the top side, because 1.5 mm stacking leaves no room. There is
   no copper at all under the antenna.

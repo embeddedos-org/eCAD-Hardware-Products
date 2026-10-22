@@ -1,4 +1,4 @@
-(pcb "/private/tmp/claude-501/-Users-kartikey-Desktop-task/976907d0-9b6c-4cb9-9098-77aa58ceb1c8/scratchpad/wt-pr54/boards/eos/eos-learn-rp2350/.build/eos-learn-rp2350.dsn"
+(pcb "/Users/kartikey/Desktop/task/wt-ecad-rebuild10/boards/eos/eos-learn-rp2350/.build/eos-learn-rp2350.dsn"
   (parser
     (string_quote ")
     (space_in_quoted_tokens on)
@@ -8,6 +8,9 @@
   (resolution um 10)
   (unit um)
   (structure
+    (control
+      (via_at_smd off)
+    )
     (layer F.Cu
       (type signal)
       (property
@@ -70,8 +73,8 @@
     (via "Via[0-3]_600:300_um" "Via[0-3]_600:250_um")
     (rule
       (width 150)
-      (clearance 150)
-      (clearance 37.5 (type smd_smd))
+      (clearance 160)
+      (clearance 40 (type smd_smd))
     )
   )
   (placement
@@ -1185,7 +1188,7 @@
       )
       (rule
         (width 150)
-        (clearance 150)
+        (clearance 160)
       )
     )
     (class USB /RP_USB_DM /RP_USB_DP /USB_D+ "/USB_D-"
@@ -1194,7 +1197,7 @@
       )
       (rule
         (width 200)
-        (clearance 150)
+        (clearance 160)
       )
     )
     (class Power +5V /VBUS_F VBUS
@@ -1203,7 +1206,7 @@
       )
       (rule
         (width 500)
-        (clearance 150)
+        (clearance 160)
       )
     )
     (class PowerFine +1V1 +3V3 /VREG_LX
@@ -1212,7 +1215,7 @@
       )
       (rule
         (width 200)
-        (clearance 150)
+        (clearance 160)
       )
     )
   )
@@ -1227,13 +1230,13 @@
     (wire (path F.Cu 300  38550 -19900  39416.2 -19033.8)(net GND)(type route))
     (wire (path F.Cu 300  36650 -19900  37516.2 -19033.8)(net +3V3)(type route))
     (wire (path F.Cu 300  45987.5 -22000  45987.5 -21025)(net GND)(type route))
-    (wire (path F.Cu 300  19340 -26900  18579.9 -26139.9)(net GND)(type route))
+    (wire (path F.Cu 300  19340 -26900  18721.3 -26281.3)(net GND)(type route))
     (wire (path F.Cu 300  20290 -26900  20290 -26125)(net +3V3)(type route))
     (wire (path F.Cu 300  19340 -31700  17965 -31700)(net GND)(type route))
-    (wire (path F.Cu 300  24500 -36855  23739.9 -37615.1)(net GND)(type route))
+    (wire (path F.Cu 300  24500 -36855  23881.3 -37473.7)(net GND)(type route))
     (wire (path F.Cu 300  32460 -34300  33835 -34300)(net GND)(type route))
     (wire (path F.Cu 300  33860 -30700  34635 -30700)(net GND)(type route))
-    (wire (path F.Cu 300  32310 -27300  31549.9 -26539.9)(net +3V3)(type route))
+    (wire (path F.Cu 300  32310 -27300  31620.6 -26610.6)(net +3V3)(type route))
     (wire (path F.Cu 300  33260 -26300  33832.8 -25727.2)(net GND)(type route))
     (wire (path F.Cu 300  32300 -26300  32300 -25490)(net +3V3)(type route))
     (wire (path F.Cu 300  19345 -29300  17970 -29300)(net GND)(type route))
@@ -1664,13 +1667,13 @@
     (via "Via[0-3]_600:300_um"  39416.2 -19033.8 (net GND)(type route))
     (via "Via[0-3]_600:300_um"  37516.2 -19033.8 (net +3V3)(type route))
     (via "Via[0-3]_600:300_um"  45987.5 -21025 (net GND)(type route))
-    (via "Via[0-3]_600:300_um"  18579.9 -26139.9 (net GND)(type route))
+    (via "Via[0-3]_600:300_um"  18721.3 -26281.3 (net GND)(type route))
     (via "Via[0-3]_600:300_um"  20290 -26125 (net +3V3)(type route))
     (via "Via[0-3]_600:300_um"  17965 -31700 (net GND)(type route))
-    (via "Via[0-3]_600:300_um"  23739.9 -37615.1 (net GND)(type route))
+    (via "Via[0-3]_600:300_um"  23881.3 -37473.7 (net GND)(type route))
     (via "Via[0-3]_600:300_um"  33835 -34300 (net GND)(type route))
     (via "Via[0-3]_600:300_um"  34635 -30700 (net GND)(type route))
-    (via "Via[0-3]_600:300_um"  31549.9 -26539.9 (net +3V3)(type route))
+    (via "Via[0-3]_600:300_um"  31620.6 -26610.6 (net +3V3)(type route))
     (via "Via[0-3]_600:300_um"  33832.8 -25727.2 (net GND)(type route))
     (via "Via[0-3]_600:300_um"  32300 -25490 (net +3V3)(type route))
     (via "Via[0-3]_600:300_um"  17970 -29300 (net GND)(type route))

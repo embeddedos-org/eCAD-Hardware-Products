@@ -47,6 +47,38 @@ bundle validates and verifies; the full suite's one error is the existing
 `pytest` import in `tests/unit/test_validation_schemas.py`. Remaining: PR, previews
 and CI.
 
+### EoS original boards — rebuild the ten built before the via rule (campaign #55)
+
+Owner: implementation; independent verification by a different agent
+Mode: Review
+Status: review
+
+Scope: the ten boards `ViaInPadTest` listed as built before the no-via-in-pad rule;
+board-file routing options only (no part, value, net or position change); the test.
+
+Acceptance criteria (verbatim from the verification brief)
+: - "A board passes only at: ERC 0, DRC errors 0, unconnected 0, schematic parity 0."
+  - "No via in a non-exposed surface pad, and every via ≥ `VIA_PAD_GAP` from same-net pads: `ViaInPadTest` passes for each rebuilt board with the board removed from `BUILT_BEFORE_THE_RULE`."
+  - "Only copper changed: nets, pads, footprints, positions, values and the schematic identical to the merged build, unless the notes declare a design-file change, which you must then review on its merits."
+  - "No regression in the routes the earlier reviews graded: every priority route still connected, with its length, vias and layers compared old → new; plane fan-out not longer; no new pour island or single-link GND fragment that holds a pad."
+  - "README \"Build results\" match each `build-report.json` / `drc.json`; any README sentence about vias, pads or routed lengths that the rebuild made false is listed."
+
+State (2026-10-21): all ten rebuilt at 0/0/0/0 with the batch-3 generator, on master `23aa853`
+(PR #64 merged); DRC warnings identical to the merged builds; board tests 59 run, 1 skipped.
+Design-file changes are routing options only (priority routes, `fanout_first`, `ground_vias`,
+a bottom-layer router keep-out on the KL25 crystal). Independent verification: three rounds.
+
+Owner decision (2026-10-22): adopted, for two-layer boards, the verifier's wording below in place
+of "no new pour island or single-link GND fragment that holds a pad":
+: "On a two-layer board, a via-less pour island or single-link GND group that holds a pad is acceptable when, for each pad it holds, the track path to the nearest GND via is no longer than master's plus 1 mm, or the pad is a strap or logic tie; a decoupling, analog or oscillator ground pad that becomes single-linked must not have a longer path than master's. Exceptions are listed in the README."
+
+Waivers recorded with it: EoS CM4 Base (a 0.37 mm² via-less sliver beside U7.9, a logic tie
+joined under the package); EoS CM5 Base (a 2.3 mm² sliver along C7.2's unchanged ground track,
+C1.2 on its own fan-out via, the USB host pair's skew 0.57 → 2.81 mm); both four-layer boards with
+an inner ground plane. Listed exception: EoS STM32 64's VSS 47, 6.4 mm of track from a via
+(master 1.3 mm), because its capacitor's supply pad sits between pin and ground pad; fixing it
+needs a placement change.
+
 | ID | Task | Owner | Mode | Status | Depends on |
 |----|------|-------|------|--------|------------|
 | T-002 | Author catalogs for the 260 remaining product directories | — | build | todo | T-001 |

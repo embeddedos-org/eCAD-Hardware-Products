@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/drc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-12T22:54:43",
+    "date": "2026-10-20T23:04:36",
     "ignored_checks": [
         {
             "description": "Footprint has no courtyard defined",
@@ -40,56 +40,10 @@
                 {
                     "description": "Segment on Edge.Cuts",
                     "pos": {
-                        "x": 3.0,
-                        "y": 0.0
-                    },
-                    "uuid": "d15d0c7d-415c-4e34-8335-f5e71d55ff0a"
-                },
-                {
-                    "description": "Segment of J3 on F.Silkscreen",
-                    "pos": {
-                        "x": 19.3,
-                        "y": 1.19
-                    },
-                    "uuid": "ddf0f134-01d2-4073-b14c-331c61182b46"
-                }
-            ],
-            "severity": "warning",
-            "type": "silk_edge_clearance"
-        },
-        {
-            "description": "Silkscreen clipped by board edge",
-            "items": [
-                {
-                    "description": "Segment on Edge.Cuts",
-                    "pos": {
-                        "x": 3.0,
-                        "y": 0.0
-                    },
-                    "uuid": "d15d0c7d-415c-4e34-8335-f5e71d55ff0a"
-                },
-                {
-                    "description": "Segment of J3 on F.Silkscreen",
-                    "pos": {
-                        "x": 28.7,
-                        "y": 1.19
-                    },
-                    "uuid": "03159858-3e84-4158-af3c-89ae7505ce73"
-                }
-            ],
-            "severity": "warning",
-            "type": "silk_edge_clearance"
-        },
-        {
-            "description": "Silkscreen clipped by board edge",
-            "items": [
-                {
-                    "description": "Segment on Edge.Cuts",
-                    "pos": {
                         "x": 90.0,
                         "y": 3.0
                     },
-                    "uuid": "058503d2-980c-4b66-bdb1-b470beed06ac"
+                    "uuid": "a0e6c420-b4d5-4243-bbda-2fd0a0be3339"
                 },
                 {
                     "description": "Segment of J4 on F.Silkscreen",
@@ -97,7 +51,7 @@
                         "x": 89.58,
                         "y": 33.81
                     },
-                    "uuid": "6ef291f9-ae15-461e-8a12-ca16040e68f4"
+                    "uuid": "a4a413f0-4a3c-4ffa-803d-16f34c1c0eb5"
                 }
             ],
             "severity": "warning",
@@ -112,7 +66,7 @@
                         "x": 90.0,
                         "y": 3.0
                     },
-                    "uuid": "058503d2-980c-4b66-bdb1-b470beed06ac"
+                    "uuid": "a0e6c420-b4d5-4243-bbda-2fd0a0be3339"
                 },
                 {
                     "description": "Segment of J4 on F.Silkscreen",
@@ -120,7 +74,53 @@
                         "x": 90.1,
                         "y": 19.19
                     },
-                    "uuid": "608e60cc-7dbb-4702-ae5f-8536ea78f32b"
+                    "uuid": "1d0bdaed-c190-4e75-ba5d-161134686e4b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 3.0,
+                        "y": 0.0
+                    },
+                    "uuid": "2fd0e994-7090-4848-a164-1a995a8686f6"
+                },
+                {
+                    "description": "Segment of J3 on F.Silkscreen",
+                    "pos": {
+                        "x": 19.3,
+                        "y": 1.19
+                    },
+                    "uuid": "4ca4c467-10c2-410a-869f-3d1e3d52d052"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 3.0,
+                        "y": 0.0
+                    },
+                    "uuid": "2fd0e994-7090-4848-a164-1a995a8686f6"
+                },
+                {
+                    "description": "Segment of J3 on F.Silkscreen",
+                    "pos": {
+                        "x": 28.7,
+                        "y": 1.19
+                    },
+                    "uuid": "a2779d96-50d6-485e-8bd4-1d540d4205d6"
                 }
             ],
             "severity": "warning",
@@ -135,7 +135,7 @@
                         "x": 0.0,
                         "y": 77.0
                     },
-                    "uuid": "e5292de2-6ba3-435c-b346-228bbe9f8547"
+                    "uuid": "2ce34e1a-796b-41a6-bdad-0e1145734119"
                 },
                 {
                     "description": "Segment of J5 on F.Silkscreen",
@@ -143,7 +143,7 @@
                         "x": -0.27,
                         "y": 51.88
                     },
-                    "uuid": "cec884d7-b98d-460b-913d-162905ccafab"
+                    "uuid": "83378e42-2c9d-4463-aa70-628ebe0313d9"
                 }
             ],
             "severity": "warning",
@@ -158,7 +158,7 @@
                         "x": 0.0,
                         "y": 77.0
                     },
-                    "uuid": "e5292de2-6ba3-435c-b346-228bbe9f8547"
+                    "uuid": "2ce34e1a-796b-41a6-bdad-0e1145734119"
                 },
                 {
                     "description": "Segment of J5 on F.Silkscreen",
@@ -166,7 +166,7 @@
                         "x": 12.25,
                         "y": 68.12
                     },
-                    "uuid": "a64ccd78-140c-4555-8b38-ef36d42ba882"
+                    "uuid": "1a58e52b-479d-4e32-9e0e-441e1ad80e76"
                 }
             ],
             "severity": "warning",

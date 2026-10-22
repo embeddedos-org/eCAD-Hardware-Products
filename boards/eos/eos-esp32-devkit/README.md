@@ -136,8 +136,8 @@ The numbers below are from `build-report.json` and `drc.json` in this folder.
 
 2 layers, 1.6 mm thick, ground poured on both sides. Design rules:
 
-- **Tracks:** 0.15 mm, narrowing to the 0.1 mm minimum at fine-pitch pads; 0.4 mm on the
-  supplies (VBUS, the fuse-to-Schottky link, 5 V and 3.3 V); 0.2 mm on USB D+/D−.
+- **Tracks:** 0.15 mm (the rules allow 0.1 mm at fine-pitch pads; this build narrows none); 0.4 mm
+  on the supplies (VBUS, the fuse-to-Schottky link, 5 V and 3.3 V); 0.2 mm on USB D+/D−.
 - **Clearance:** 0.15 mm.
 - **Vias:** 0.6 mm with a 0.3 mm drill.
 - **Smallest drill:** 0.2 mm, in the module footprint's thermal vias under its ground pad.

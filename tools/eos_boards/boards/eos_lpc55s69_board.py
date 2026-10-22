@@ -527,6 +527,9 @@ PRIORITY = [(("J2", "A7"), ("U2", "2")), (("J2", "A6"), ("U2", "3")),
             (("J1", "B7"), ("J1", "A7"), "join"), (("J1", "B6"), ("J1", "A6"), "join"),
             (("U4", "3"), ("R14", "2")),
             (("U3", "2"), ("U3", "7")), (("U3", "5"), ("R12", "1")), (("R12", "1"), ("F2", "2")),
+            # The PR1 divider node: the autorouter left it open twice once no via may sit in a pad
+            # (2026-10-20 rebuilds), so PR1 goes to R13 and R13 to R12 here.
+            (("U3", "4"), ("R13", "1")), (("R13", "1"), ("R12", "2")),
             (("U4", "7"), ("U4", "9"), "join"),
             (("U6", "28"), ("Y1", "3")), (("U6", "29"), ("Y1", "1")),
             (("Y1", "3"), ("C36", "1")), (("Y1", "1"), ("C35", "1")),
@@ -580,6 +583,9 @@ BOARD = Board(
     local_footprints=["EoS_Packages"],
     parts=PARTS,
     priority_routes=PRIORITY,
+    # R13's ground end sits inside the PR1 divider's lines, and no via may sit in a pad:
+    # its plane via goes in first (the 2026-10-20 rebuild left it a pour island with no via).
+    fanout_first=["R13"],
     power_nets={"GND": "power:GND", "+3V3": "power:+3V3", "+5V": "power:+5V"},
     flagged_nets=["GND", "VBUS_USB_F", "VBUS_DBG_F", "VDD_PMU", "VDDA"],
     headings=[((30, 70), "USB0 port (J1) and debug port (J2): USB-C, ESD, fuses"),

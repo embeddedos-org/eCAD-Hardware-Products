@@ -268,8 +268,12 @@ PRIORITY = [r for cm5, jack in _ETH for esd, inner, outer in [_FLOW[jack]]
             for r in ((("J1", cm5), (esd, inner)), ((esd, inner), (esd, outer)), ((esd, outer), ("J5", jack)))]
 # The USB host pair passes through its ESD part (in on one pad, out on the other of the same
 # line), nearer the connector's right end first.
-PRIORITY += [(("J2", "36"), ("U3", "3")), (("U3", "4"), ("J4", "2")),     # USBH_DM (CM5 pin 136)
-             (("J2", "34"), ("U3", "1")), (("U3", "6"), ("J4", "3"))]     # USBH_DP (CM5 pin 134)
+# The ESD part's VBUS pin (5) sits between the two port-side lines and must cross D- to reach the
+# port's VBUS (pin 1), and no via may sit in its pad: so it leaves first, before those two lines box
+# it in, and changes layer clear of the pad (the 2026-10-20 rebuilds left it open twice).
+PRIORITY += [(("J2", "36"), ("U3", "3")), (("J2", "34"), ("U3", "1")),   # USBH_DM / USBH_DP (CM5 pins 136, 134)
+             (("U3", "5"), ("J4", "1")),
+             (("U3", "4"), ("J4", "2")), (("U3", "6"), ("J4", "3"))]
 # Three microSD lines run first, shortest first, so they nest inside one another on the top layer:
 # DAT1, DAT0 and CLK leave the connector's outer row in the order they reach the socket. CMD (from
 # the inner row), DAT3 and DAT2 must cross them; the autorouter, which plans crossings for the
@@ -311,6 +315,9 @@ BOARD = Board(
     local_footprints=["EoS_Connectors"],
     copper_keepouts=[ANTENNA_KEEPOUT],
     priority_routes=PRIORITY,
+    # The ESD part's ground pin (2) sits between its two module-side lines, and no via may sit in a pad:
+    # its plane via goes in first (the 2026-10-20 rebuild left it a pour island with no via).
+    fanout_first=["U3"],
     escape_footprints=["J1", "J2"],
     # Under the module there is room to wrap round the connector ends on the top layer, where
     # vias at the inner row's 0.4 mm pitch would block one another: make the router prefer it.

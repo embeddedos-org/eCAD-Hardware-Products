@@ -167,9 +167,10 @@ The numbers below are from `build-report.json` and `drc.json` in this folder.
     pin → crystal pad → load capacitor on the top layer, no via; one ground trace from VSS pin 39
     through the load capacitors' ground ends to the crystal's ground pads. The analog lines run down
     the column right of the MCU and the RGB LED is below. The reset line leaves RESET_b's capacitor
-    and pull-up between the analog lines and the crystal's XTAL line, but on the routed board it then
-    drops to the bottom layer and crosses under Y1 and C14 on its way to the SWD header, the reset
-    button and the shield RESET pin (see "What has not been done");
+    and pull-up between the analog lines and the crystal's XTAL line, and is laid round the
+    oscillator to the SWD header before the autorouter runs; from there it reaches the reset button
+    and the shield RESET pin. The bottom layer under the crystal, its load capacitors and its two
+    lines from the MCU is a router keep-out, so no signal runs there and the ground pour is solid;
   - decoupling (KLQRUG 2.1.3.2, CP2102N Figure 2.3): VDD pins 7 and 38, VOUT33, VREGIN, VDDA and VREFH
     (with JP1), RESET_b's 100 nF and pull-up, the CP2102N's four capacitors, and the LDO's input and
     output capacitors, each joined to its own pin by a short top-layer route.
@@ -185,12 +186,6 @@ The numbers below are from `build-report.json` and `drc.json` in this folder.
 ## What has not been done
 
 - **No board has been made or tested.**
-- **The reset line runs under the crystal on the bottom layer.** KLQRUG 2.1.3.3.1 asks that "no
-  signals of any kind" be routed on the layer directly below the crystal, and the generator has no
-  bottom-layer keep-out. On the routed board RESET_b runs on the bottom layer in a diagonal between
-  vias at (47.3, 31.7) and (39.6, 40.1) mm: 2.1 mm of it inside Y1's courtyard (0.7 mm under its
-  body) and 0.7 mm inside C14's. RESET_b changes state only at a reset, so the coupling into the
-  oscillator should be small, but that has not been measured; keeping it off needs a re-route.
 - **PTD6 at unplug.** C24 keeps PTD6 under VDD + 0.3 V at plug-in, but works the other way at
   unplug: with J1 the only source, VBUS1 (1.1 µF) collapses while C24 holds PTD6 up and VDD falls
   with the load. A model of that (Assumed: 104.7 µF on the 5 V rail, a constant load until VDD is

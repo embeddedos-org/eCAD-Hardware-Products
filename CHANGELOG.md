@@ -231,6 +231,20 @@ has never run.
 
 ### Changed
 
+- The ten original EmbeddedOS boards built before the no-via-in-pad rule (ATmega328P, RA2E1,
+  KE16Z, KL25, STM32 64, ESP32 DevKit, Learn RP2350, LPC55S69, CM4 Base, CM5 Base) are rebuilt
+  under it, each at ERC 0, DRC errors 0, unconnected 0 and schematic parity 0, with the same parts,
+  values, nets and positions and the same DRC warnings as before. Where the autorouter could no
+  longer close a short link without a via in a pad, the design file now lays that link first
+  (a priority route) or gives a boxed-in ground pad its plane via first (`fanout_first`). On the
+  two-layer boards, `ground_vias` gives the grounds the rebuild left on via-less pour pieces their
+  own vias (ATmega328P's power path, KL25's MCU and accelerometer, STM32 64's decoupling and analog
+  capacitors and all but one (C24) of its oscillator capacitors, ESP32's C9); STM32 64's VSS pins,
+  too fine-pitched for a via each, run to their capacitors' ground ends instead. KL25's bottom
+  layer under the 8 MHz crystal and its lines is now a router keep-out, so RESET_b no longer runs
+  under the crystal.
+  `ViaInPadTest` no longer lists any board as built before the rule; it allows only Learn
+  RP2350's two Raspberry Pi reference-copper vias beside C6 and C7.
 - The Icarus Verilog tool adapter runs both of its steps, and its version
   probe, through `run_process`, with the scrubbed environment, the output cap
   and an empty stdin (ARCH-10); it returns the metrics its inputs declare as

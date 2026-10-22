@@ -303,11 +303,20 @@ PRIORITY = [r for cm, jack in _ETH for esd, inner, outer in [_FLOW[jack]]
 # same line) to the USB-A port.
 PRIORITY += [(("J2", "3"), ("U7", "6")),       # USB_N (CM4 pin 103) to D-
              (("J2", "5"), ("U7", "4")),       # USB_P (CM4 pin 105) to D+
-             (("U7", "8"), ("U3", "3")), (("U3", "4"), ("J4", "2")),     # USBH_DM: D1- through I/O2
-             (("U7", "2"), ("U3", "1")), (("U3", "6"), ("J4", "3")),     # USBH_DP: D1+ through I/O1
              # ~OE (pin 9, tied low) sits between signal pads with no room for a ground via: join it
-             # under the package to the switch's own GND pin 5
-             (("U7", "9"), ("U7", "5"), "join")]
+             # under the package to the switch's own GND pin 5, before VCC's line can close that path
+             (("U7", "9"), ("U7", "5"), "join"),
+             # The switch's VCC (pin 10) to its 100 nF: with VBUS laid before it, the autorouter left
+             # this 3.3 V link open (2026-10-20 rebuild).
+             (("U7", "10"), ("C9", "1")),
+             # The ESD part's VBUS pin (5) sits between the two port-side lines and must cross D- to
+             # reach the port's VBUS (pin 1), and no via may sit in its pad: so it leaves before the
+             # pair's lines into and out of U3 box it in, and changes layer clear of the pad
+             # (2026-10-20 rebuilds left it open twice; laid after the lines into U3, D+ wrapped it).
+             (("U3", "5"), ("J4", "1")),
+             (("U7", "8"), ("U3", "3")), (("U7", "2"), ("U3", "1")),     # USBH_DM / USBH_DP into I/O2, I/O1
+             (("U3", "4"), ("J4", "2")), (("U3", "6"), ("J4", "3"))]     # out of I/O2, I/O1 to the port
+
 # Three microSD lines run first, shortest first, so they nest inside one another on the top layer:
 # DAT1, DAT0 and CLK leave the connector's outer row in the order they reach the socket. CMD (from
 # the inner row), DAT3 and DAT2 must cross them; the autorouter, which plans crossings for the
@@ -343,6 +352,9 @@ BOARD = Board(
     local_footprints=["EoS_Connectors"],
     copper_keepouts=[ANTENNA_KEEPOUT],
     priority_routes=PRIORITY,
+    # The ESD part's ground pin (2) sits between its two module-side lines, and no via may sit in a pad:
+    # its plane via goes in first (the 2026-10-20 rebuild left it a pour island with no via).
+    fanout_first=["U3"],
     escape_footprints=["J1", "J2"],
     maze_via_cost_mm=8.0,
     parts=PARTS,

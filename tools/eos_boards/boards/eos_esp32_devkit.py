@@ -311,6 +311,10 @@ TEXTS = [
     {"text": "IO4", "x": 22.40, "y": 47.30, "size": 0.8},
 ]
 
+# Laid before the autorouter: the CP2102N's VBUS-sense divider (R8) to the receptacle's VBUS. With no
+# via allowed in a pad, the autorouter left this link open twice (2026-10-20 rebuilds).
+PRIORITY = [(("R8", "1"), ("J1", "A9"))]
+
 BOARD = Board(
     name="eos-esp32-devkit",
     title="EoS ESP32 DevKit",
@@ -330,7 +334,11 @@ BOARD = Board(
     rules={"min_drill": 0.2},     # the ESP32-WROOM-32E footprint's thermal vias under the module are 0.2 mm
     thickness=1.6,
     layers=2,
+    # A via beside the CP2102N VIO capacitor's ground pad: the 2026-10-20 rebuild left it on a via-less
+    # sliver, 13 mm of track from the nearest ground anchor.
+    ground_vias=["C9"],
     parts=PARTS,
+    priority_routes=PRIORITY,
     power_nets={"GND": "power:GND", "+3V3": "power:+3V3", "+5V": "power:+5V", "VBUS": "power:VBUS"},
     flagged_nets=["GND", "VBUS", "+5V"],
     headings=[((25, 75), "USB-C, ESD, fuse, Schottky, VBUS bleed"), ((200, 75), "3.3 V LDO (1 A)"), ((265, 75), "Power LED"),

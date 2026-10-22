@@ -2,7 +2,7 @@
  "board": "eos-cm5-base",
  "kicad": "10.0.6",
  "erc_violations": 0,
- "repair_rounds": 5,
+ "repair_rounds": 0,
  "drc": {
   "violations": 6,
   "unconnected_items": 1,

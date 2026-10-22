@@ -52,6 +52,7 @@
    "ref": "J1",
    "value": "CM5 1-100",
    "footprint": "Connector_Hirose_DF40:Hirose_DF40C-100DS-0.4V_2x50_P0.4mm",
+   "in_bom": true,
    "x": 36.5,
    "y": 46.5,
    "rot": 0,
@@ -172,6 +173,7 @@
    "ref": "J2",
    "value": "CM5 101-200",
    "footprint": "Connector_Hirose_DF40:Hirose_DF40C-100DS-0.4V_2x50_P0.4mm",
+   "in_bom": true,
    "x": 36.5,
    "y": 12.5,
    "rot": 0,
@@ -292,6 +294,7 @@
    "ref": "J3",
    "value": "USB-C",
    "footprint": "Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12",
+   "in_bom": true,
    "x": 24.0,
    "y": 3.19,
    "rot": 180,
@@ -329,6 +332,7 @@
    "ref": "U1",
    "value": "USBLC6-2SC6",
    "footprint": "Package_TO_SOT_SMD:SOT-23-6",
+   "in_bom": true,
    "x": 33.5,
    "y": 4.0,
    "rot": 0,
@@ -355,6 +359,7 @@
    "ref": "C1",
    "value": "10u",
    "footprint": "Capacitor_SMD:C_0805_2012Metric",
+   "in_bom": true,
    "x": 40.0,
    "y": 51.6,
    "rot": 0,
@@ -375,6 +380,7 @@
    "ref": "C2",
    "value": "10u",
    "footprint": "Capacitor_SMD:C_0805_2012Metric",
+   "in_bom": true,
    "x": 43.6,
    "y": 51.6,
    "rot": 0,
@@ -395,6 +401,7 @@
    "ref": "C3",
    "value": "100n",
    "footprint": "Capacitor_SMD:C_0402_1005Metric",
+   "in_bom": true,
    "x": 46.6,
    "y": 51.6,
    "rot": 0,
@@ -415,6 +422,7 @@
    "ref": "U2",
    "value": "TPS2051C",
    "footprint": "Package_TO_SOT_SMD:SOT-23-5",
+   "in_bom": true,
    "x": 68.0,
    "y": 16.5,
    "rot": 0,
@@ -440,6 +448,7 @@
    "ref": "C4",
    "value": "100n",
    "footprint": "Capacitor_SMD:C_0402_1005Metric",
+   "in_bom": true,
    "x": 64.5,
    "y": 14.0,
    "rot": 90,
@@ -460,6 +469,7 @@
    "ref": "C5",
    "value": "10u",
    "footprint": "Capacitor_SMD:C_0805_2012Metric",
+   "in_bom": true,
    "x": 64.5,
    "y": 19.0,
    "rot": 90,
@@ -480,6 +490,7 @@
    "ref": "C6",
    "value": "150u",
    "footprint": "Capacitor_SMD:CP_Elec_6.3x5.8",
+   "in_bom": true,
    "x": 68.0,
    "y": 36.5,
    "rot": 0,
@@ -502,6 +513,7 @@
    "ref": "J4",
    "value": "USB-A",
    "footprint": "Connector_USB:USB_A_Molex_67643_Horizontal",
+   "in_bom": true,
    "x": 77.0,
    "y": 30.0,
    "rot": 90,
@@ -527,6 +539,7 @@
    "ref": "U3",
    "value": "USBLC6-2SC6",
    "footprint": "Package_TO_SOT_SMD:SOT-23-6",
+   "in_bom": true,
    "x": 71.0,
    "y": 26.5,
    "rot": 90,
@@ -553,6 +566,7 @@
    "ref": "J5",
    "value": "TRJG0926HENL",
    "footprint": "EoS_Connectors:TRXCOM_TRJG0926HENL",
+   "in_bom": true,
    "x": 10.75,
    "y": 60.0,
    "rot": 270,
@@ -593,6 +607,7 @@
    "ref": "C7",
    "value": "100n",
    "footprint": "Capacitor_SMD:C_0402_1005Metric",
+   "in_bom": true,
    "x": 29.0,
    "y": 53.0,
    "rot": 90,
@@ -613,6 +628,7 @@
    "ref": "R1",
    "value": "470",
    "footprint": "Resistor_SMD:R_0402_1005Metric",
+   "in_bom": true,
    "x": 25.5,
    "y": 59.0,
    "rot": 0,
@@ -633,6 +649,7 @@
    "ref": "R2",
    "value": "470",
    "footprint": "Resistor_SMD:R_0402_1005Metric",
+   "in_bom": true,
    "x": 25.5,
    "y": 61.0,
    "rot": 0,
@@ -653,6 +670,7 @@
    "ref": "U4",
    "value": "TPD4EUSB30",
    "footprint": "Package_SON:USON-10_2.5x1.0mm_P0.5mm",
+   "in_bom": true,
    "x": 23.0,
    "y": 55.4,
    "rot": 0,
@@ -683,6 +701,7 @@
    "ref": "U5",
    "value": "TPD4EUSB30",
    "footprint": "Package_SON:USON-10_2.5x1.0mm_P0.5mm",
+   "in_bom": true,
    "x": 23.0,
    "y": 62.4,
    "rot": 0,
@@ -713,6 +732,7 @@
    "ref": "J6",
    "value": "microSD",
    "footprint": "Connector_Card:microSD_HC_Molex_104031-0811",
+   "in_bom": true,
    "x": 82.0,
    "y": 62.0,
    "rot": 90,
@@ -742,6 +762,7 @@
    "ref": "U6",
    "value": "RT9742GGJ5",
    "footprint": "Package_TO_SOT_SMD:TSOT-23-5",
+   "in_bom": true,
    "x": 72.0,
    "y": 56.0,
    "rot": 0,
@@ -767,6 +788,7 @@
    "ref": "R3",
    "value": "10k",
    "footprint": "Resistor_SMD:R_0402_1005Metric",
+   "in_bom": true,
    "x": 72.0,
    "y": 52.6,
    "rot": 0,
@@ -787,6 +809,7 @@
    "ref": "C8",
    "value": "10u",
    "footprint": "Capacitor_SMD:C_0805_2012Metric",
+   "in_bom": true,
    "x": 72.0,
    "y": 59.4,
    "rot": 0,
@@ -807,6 +830,7 @@
    "ref": "J7",
    "value": "GPIO",
    "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical",
+   "in_bom": true,
    "x": 24.5,
    "y": 76.5,
    "rot": 90,
@@ -865,6 +889,7 @@
    "ref": "J8",
    "value": "FAN",
    "footprint": "Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical",
+   "in_bom": true,
    "x": 76.0,
    "y": 5.0,
    "rot": 0,
@@ -889,6 +914,7 @@
    "ref": "BT1",
    "value": "CR2032",
    "footprint": "Battery:BatteryHolder_Keystone_3034_1x20mm",
+   "in_bom": true,
    "x": 34.0,
    "y": 30.0,
    "rot": 0,
@@ -914,6 +940,7 @@
    "ref": "SW1",
    "value": "POWER",
    "footprint": "Button_Switch_SMD:SW_Push_1P1T_NO_CK_KMR2",
+   "in_bom": true,
    "x": 84.0,
    "y": 42.5,
    "rot": 90,
@@ -936,6 +963,7 @@
    "ref": "J9",
    "value": "BOOT",
    "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x02_P2.54mm_Vertical",
+   "in_bom": true,
    "x": 64.6,
    "y": 5.0,
    "rot": 0,
@@ -958,6 +986,7 @@
    "ref": "R4",
    "value": "1k",
    "footprint": "Resistor_SMD:R_0402_1005Metric",
+   "in_bom": true,
    "x": 65.0,
    "y": 43.5,
    "rot": 0,
@@ -978,6 +1007,7 @@
    "ref": "D1",
    "value": "PWR",
    "footprint": "LED_SMD:LED_0603_1608Metric",
+   "in_bom": true,
    "x": 68.6,
    "y": 43.5,
    "rot": 180,
@@ -1001,6 +1031,7 @@
    "ref": "R5",
    "value": "1k",
    "footprint": "Resistor_SMD:R_0402_1005Metric",
+   "in_bom": true,
    "x": 65.0,
    "y": 45.5,
    "rot": 0,
@@ -1021,6 +1052,7 @@
    "ref": "D2",
    "value": "ACT",
    "footprint": "LED_SMD:LED_0603_1608Metric",
+   "in_bom": true,
    "x": 68.6,
    "y": 45.5,
    "rot": 180,
@@ -1044,6 +1076,7 @@
    "ref": "H1",
    "value": "M2.5",
    "footprint": "MountingHole:MountingHole_2.7mm_M2.5",
+   "in_bom": false,
    "x": 10.0,
    "y": 46.0,
    "rot": 0,
@@ -1061,6 +1094,7 @@
    "ref": "H2",
    "value": "M2.5",
    "footprint": "MountingHole:MountingHole_2.7mm_M2.5",
+   "in_bom": false,
    "x": 58.0,
    "y": 46.0,
    "rot": 0,
@@ -1078,6 +1112,7 @@
    "ref": "H3",
    "value": "M2.5",
    "footprint": "MountingHole:MountingHole_2.7mm_M2.5",
+   "in_bom": false,
    "x": 10.0,
    "y": 13.0,
    "rot": 0,
@@ -1095,6 +1130,7 @@
    "ref": "H4",
    "value": "M2.5",
    "footprint": "MountingHole:MountingHole_2.7mm_M2.5",
+   "in_bom": false,
    "x": 58.0,
    "y": 13.0,
    "rot": 0,
@@ -1283,10 +1319,14 @@
  "fanout_avoid": [],
  "no_fanout": [],
  "fanout_pads": {},
+ "ground_vias": [],
+ "fanout_first": [
+  "U3"
+ ],
  "preroutes": [],
  "reference_copper": null,
  "local_footprints": {
-  "EoS_Connectors": "/private/tmp/claude-501/-Users-kartikey-Desktop-task/976907d0-9b6c-4cb9-9098-77aa58ceb1c8/scratchpad/wt-pr54/tools/eos_boards/footprints/EoS_Connectors.pretty"
+  "EoS_Connectors": "/Users/kartikey/Desktop/task/wt-ecad-rebuild10/tools/eos_boards/footprints/EoS_Connectors.pretty"
  },
  "router_keepouts": [],
  "copper_keepouts": [
@@ -1297,6 +1337,7 @@
    41.0
   ]
  ],
+ "pour_keepouts": [],
  "priority_routes": [
   [
    [
@@ -1550,22 +1591,32 @@
   ],
   [
    [
-    "U3",
-    "4"
-   ],
-   [
-    "J4",
-    "2"
-   ]
-  ],
-  [
-   [
     "J2",
     "34"
    ],
    [
     "U3",
     "1"
+   ]
+  ],
+  [
+   [
+    "U3",
+    "5"
+   ],
+   [
+    "J4",
+    "1"
+   ]
+  ],
+  [
+   [
+    "U3",
+    "4"
+   ],
+   [
+    "J4",
+    "2"
    ]
   ],
   [

@@ -95,7 +95,8 @@ lays the same routes before routing the rest):
 | USB D+ | B6 → U1 pin 6 → pin 1 → CH340C UD+ | 3.35 + 2.25 + 9.38 mm | 0 |
 | USB ties | A6 → B6 behind the pad row; A7 → B7 | 2.66 mm; 1.96 mm | 0 |
 | CH340C decoupling | VCC → C9; V3 → C10 | 2.55; 2.90 mm | 0 |
-| D4 … D0 | MCU → digital header, round the right of the crystal | 23.98 to 34.85 mm | 0 |
+| D4 … D0 | MCU → digital header, round the right of the crystal | 25.55 to 35.14 mm | 0 |
+| 5 V at the MCU | C14 (10 µF bulk) → C13 (100 nF at VCC) | 2.83 mm | 0 |
 | 5 V bulk | TPS2116 VOUT → C6 (100 µF) | 5.30 mm | 0 |
 
 - **Crystal.** Each load capacitor sits beside its own crystal pad, each line runs pin → crystal

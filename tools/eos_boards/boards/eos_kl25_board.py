@@ -581,6 +581,14 @@ PRIORITY += [(("U5", "7"), ("C8", "1")), (("U5", "8"), ("C8", "2")),
              (("C20", "1"), ("C19", "1")), (("C19", "1"), ("C17", "1")),
              (("U4", "3"), ("C5", "1")), (("U4", "1"), ("C4", "1")),
              (("U5", "42"), ("C16", "1")), (("C16", "1"), ("R12", "1"))]
+# With no via allowed in a pad, the autorouter left the CP2102N's VBUS-sense pin unjoined to its
+# divider twice (2026-10-20 rebuilds), so that line goes first. (The accelerometer's CS pin, tied to
+# 3.3 V, can't be a priority route: the 0.3 mm supply class has no way out between its 0.5 mm-pitch
+# neighbours; the autorouter necks it down instead.)
+PRIORITY += [(("U6", "8"), ("R16", "1"))]
+# RESET_b from its capacitor to the SWD header, laid before the autorouter boxes it in: with the
+# bottom layer under the crystal kept clear, the line goes round the oscillator, not under it.
+PRIORITY += [(("C16", "1"), ("J7", "10"))]
 
 _unplaced = sorted({p.ref for p in PARTS} - set(PLACEMENT))
 assert not _unplaced, f"parts without a board position: {_unplaced}"
@@ -625,6 +633,14 @@ BOARD = Board(
     corner_radius=1.0,
     thickness=1.6,
     layers=2,
+    # A via beside each ground pad of the MCU and the accelerometer: the 2026-10-20 rebuild left VSS 59
+    # and the LIS2HH12's ground pins 5-8 on via-less slivers of top-layer pour.
+    ground_vias=["U5", "U7"],
+    # The bottom layer under the 8 MHz crystal, its load capacitors and its two lines from the MCU is a
+    # router keep-out, so no signal runs below them (KLQRUG 2.1.3.3.1: "no signals of any kind" on the
+    # layer below the crystal) and the ground pour there stays solid. Until 2026-10-21 RESET_b crossed
+    # under Y1 and C14 there.
+    router_keepouts=[(43.4, 29.0, 49.2, 41.2, "B.Cu")],
     parts=PARTS,
     power_nets={"GND": "power:GND", "+3V3": "power:+3V3", "+5V": "power:+5V"},
     flagged_nets=["GND", "VBUS1", "VBUS1_F", "VBUS2", "VBUS2_F", "VDDA", "VREFH"],
