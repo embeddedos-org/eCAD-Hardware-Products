@@ -15,6 +15,11 @@ has never run.
 
 ### Added
 
+- EoS Feather RP2040, an original board in the Feather form factor (50.8 × 22.86 mm, four layers),
+  all rights reserved like the others: RP2040, 16 MB QSPI flash, USB-C, a LiPo charger with load
+  sharing, STEMMA QT and a 3-pin SWD connector. Built with `tools/eos_boards` at ERC 0, DRC errors
+  0, unconnected 0 and schematic parity 0; an independent review (0 blocker, 0 major, 9 minor), its
+  findings fixed in the README or listed as rev B follow-ups, and a second independent check.
 - Three more original EmbeddedOS boards (batch 3), all rights reserved like the others. Each was
   built with `tools/eos_boards` at ERC 0, DRC errors 0, unconnected 0 and schematic parity 0. Each
   had an independent review, its findings were fixed, and then a second reviewer checked the
@@ -255,6 +260,12 @@ has never run.
 
 ### Fixed
 
+- `tools/eos_boards`: the finishing step no longer crashes in `prune_dangling`. KiCad 10's Python
+  bindings broke when the proxies of removed tracks and vias were freed (`TypeError:
+  'swig_runtime_data5.SwigPyObject' object is not iterable`, exit 139; 3 of the EoS Feather
+  RP2040's first 4 full builds). The removed items are now kept referenced until the process
+  exits. The output is unchanged: on EoS Probe S3, EoS Learn RP2350 and EoS CM5 Base the finished
+  boards with and without the change are identical as sets of items (uuids dropped, order ignored).
 - EmbeddedOS boards: each USB-C receptacle (HRO TYPE-C-31-M-12) now sits where HRO's recommended
   layout puts it, its footprint origin 3.19 mm from the board edge (`design.USB_C_EDGE`; HRO
   draws the PCB edge 5.79 mm from the locating pegs). At the old 3.8 mm the shell's face was

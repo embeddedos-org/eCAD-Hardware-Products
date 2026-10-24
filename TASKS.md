@@ -9,6 +9,31 @@ Status is one of: `todo`, `in-progress`, `blocked`, `review`, `done`.
 
 ## Active
 
+### EoS Feather RP2040 (campaign #55)
+
+Owner: implementation and independent review assigned separately
+Mode: Review
+Status: review
+
+Scope: EoS Feather RP2040 (catalogue entry `adafruit:feather`), its generated artifacts and
+documentation; the `prune_dangling` crash fix in `tools/eos_boards/pcb_build.py`.
+
+Acceptance criteria (verbatim from the campaign handoff)
+: - "Never open or use a vendor's design files (schematic, layout, Gerbers, BOM)."
+  - "A board passes only at: ERC 0, DRC errors 0, unconnected 0, schematic parity 0."
+  - "Independent review by a different agent or person: check pins, power, USB, headers, BOM, layout and docs, and grade findings BLOCKER, MAJOR or MINOR."
+  - "Fix the findings, rebuild, then have the fixes verified by another reviewer on the routed board."
+  - "Previews in every PR"
+
+State (2026-10-24): full build 13 passes (ERC 0, DRC errors 0, unconnected 0, parity 0;
+7 silkscreen-to-edge warnings). Independent review: 0 blocker, 0 major, 9 minor; generator fix
+accepted. The fixes were README and comment changes only, so no rebuild was needed; the board files
+are byte-identical to build 13. Every finding that needs a rebuild is listed in the README's "Rev B
+follow-ups". A second reviewer checked the fixes (two rounds). Board tests: 59 run, 1 skipped.
+Open: the owner's decision on the battery connector's position (the Feather specification puts it
+0.425 in from the left edge; this board has it at the right end); the other `board.Remove()` sites
+in `pcb_build.py` (follow-up issue).
+
 ### EoS original boards — batch 3 (campaign #55)
 
 Owner: implementation and independent review assigned per board

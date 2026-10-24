@@ -1423,6 +1423,14 @@ def ease_vias(board, spec):
     return moved, left
 
 
+# Tracks and vias removed by prune_dangling, kept referenced until the process exits. KiCad 10's
+# SWIG proxies for removed tracks and vias break the bindings when they are garbage-collected: the
+# next board.GetTracks() raises "TypeError: 'swig_runtime_data5.SwigPyObject' object is not
+# iterable" and the process ends with exit 139 (EoS Feather RP2040, 3 builds of 4). Holding them
+# here avoids it; the board's geometry is unchanged.
+_REMOVED = []
+
+
 def prune_dangling(board):
     """Remove the router's vias and track stubs that lead nowhere (connected on one layer, or an
     end touching nothing), until none are left. Locked copper (a reference design's) stays."""
@@ -1435,6 +1443,7 @@ def prune_dangling(board):
             break
         for t in dead:
             board.Remove(t)
+        _REMOVED.extend(dead)          # see _REMOVED: freeing their proxies breaks the bindings
         removed += len(dead)
     return removed
 
