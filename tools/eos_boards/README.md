@@ -187,13 +187,17 @@ enforces three things:
 - **Same footprints and pad nets.** Each reused part must use the reference footprint, and
   every pad the copper touches must be on the same net in our schematic. Otherwise the build
   stops before placing anything.
-- **Fixed copper.** The copper is laid down locked, so the autorouter treats it as fixed.
+- **Fixed copper.** The copper is laid down locked, so the autorouter treats it as fixed. A board
+  may list `"moved_vias": [((x, y), (new_x, new_y)), ...]` in reference coordinates to move a
+  reference via off a pad. The build refuses a via the reference does not have, or a move of more
+  than 0.25 mm.
 - **No router interference.** The area inside the chip's pins, and each reused zone, is closed
   to the autorouter. Nets the reused copper completes on its own are taken away from it, so it
   cannot add a second path. Plane nets are not included: their fan-out vias are not locked.
 
 `tests/unit/test_eos_boards.py` reads the built board and checks every reused footprint, track
-end, via and zone corner against the reference file, in integer nanometres. The reference file
+end, via and zone corner against the reference file, in integer nanometres; a moved via is
+checked at the position the board gives it. The reference file
 records the SHA-256 of the design it was taken from. With `RPI_MINIMAL_PCB` pointing at
 Raspberry Pi's file, a test re-extracts it and compares the two.
 
@@ -216,9 +220,14 @@ Most boards need only parts, nets and positions. These options cover the rest:
   via spots (EoS F280049C's C11, after VIA_PAD_GAP moved the /VDD4 route). A pad that finds no
   spot then is not tried again after the priority routes: the autorouter joins it.
 - `priority_routes`: lines routed before the autorouter, in the order given. Add `"join"` to end
-  a route at any copper the net already has; that suits a branch such as an ESD part's pad. Add a
-  number to give that route its own track width in mm (at least the board's minimum track), say a
-  supply branch wider than its net class: `(("U1", "1"), ("C1", "1"), 0.4)`.
+  a route at any copper the net already has; that suits a branch such as an ESD part's pad.
+  An optional width in mm overrides the net class for that one line (a 0.15 mm neck off a
+  fine-pitch Power pad, or a supply branch wider than its class: `(("U1", "1"), ("C1", "1"), 0.4)`).
+  `{"via": [x, y, diameter, drill]}` (mm) pins a via the line passes through, for a gap the maze
+  grid cannot land in, such as the centre of four 0402 pads. The build stops unless the via meets
+  the board's via rules, the board-edge and hole-to-hole limits, every net class's clearance from
+  other nets' copper on every copper layer and from their reference zones, and `VIA_PAD_GAP` from
+  its own net's pads. A board's own planes are filled afterwards and are not treated as obstacles.
   Lines that start at a reference design's pin follow its escape first.
 - `escape_footprints`: fine-pitch connectors whose pads keep a clear way out. The channel
   between the pad rows is closed, and each pad keeps a 1 mm corridor for its own net.

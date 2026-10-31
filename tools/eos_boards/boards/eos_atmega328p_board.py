@@ -460,16 +460,15 @@ PLACEMENT = {
     "R5": (11.0, 30.5, 90), "D2": (13.0, 30.5, 90),
 }
 # Laid first, in this order, before the autorouter (see the docstring): the crystal, the MCU's
-# decoupling, the USB pair (the TM4C123 board's pattern: connector -> ESD -> bridge, then the
+# decoupling (C12, C13, then C14's 10 uF from C13's 5 V pad, before D0-D4 cross that gap),
+# the USB pair (the TM4C123 board's pattern: connector -> ESD -> bridge, then the
 # duplicated contacts joined), the CH340C's decoupling, D4..D0 around the crystal block, and
 # the TPS2116's bulk capacitor.
 PRIORITY = [(("U6", "7"), ("Y1", "1")), (("Y1", "1"), ("C17", "1")),
             (("U6", "8"), ("Y1", "3")), (("Y1", "3"), ("C18", "1")),
             (("U6", "6"), ("C12", "1")), (("U6", "5"), ("C12", "2")),
             (("U6", "4"), ("C13", "1")), (("U6", "3"), ("C13", "2")),
-            # The 5 V bulk capacitor to the 100 nF beside VCC: with no via allowed in a pad, the
-            # autorouter left this 5 V link open twice (2026-10-20 rebuilds).
-            (("C14", "1"), ("C13", "1")),
+            (("C13", "1"), ("C14", "1")),
             (("J1", "B7"), ("U1", "4")), (("U1", "4"), ("U1", "3")), (("U1", "3"), ("U5", "6")),
             (("J1", "B6"), ("U1", "6")), (("U1", "6"), ("U1", "1")), (("U1", "1"), ("U5", "5")),
             (("J1", "A6"), ("J1", "B6"), "join"), (("J1", "A7"), ("J1", "B7"), "join"),
@@ -544,10 +543,6 @@ BOARD = Board(
     corner_radius=1.0,
     thickness=1.6,
     layers=2,
-    # A via beside each ground pad of the power path (TPS2116, AP2112K, U9, the LDO output and mux
-    # output capacitors) and of the AVCC filter's C15: a repair route on the 2026-10-20 rebuild walled
-    # their top-layer ground off as a 106 mm2 island with no via, and C15 lost its via.
-    ground_vias=["U3", "U4", "U9", "C8", "C20", "C15"],
     parts=PARTS,
     power_nets={"GND": "power:GND", "+3V3": "power:+3V3", "+5V": "power:+5V", "VBUS": "power:VBUS"},
     flagged_nets=["GND", "VBUS", "VUSB", "VIN", "5V_REG", "AVCC"],

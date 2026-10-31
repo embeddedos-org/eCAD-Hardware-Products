@@ -90,10 +90,18 @@ The numbers below are from `build-report.json` and `drc.json` in this folder.
   no copper at all under the antenna.
 
 Some lines are routed first, in a set order, before the autorouter:
-- the Ethernet pairs;
-- the USB pair from the module to the switch;
-- the host pair through its ESD part to the USB-A port;
+- the Ethernet pairs, each through its ESD part to the MagJack;
+- the USB pair from the module to the switch (USB_N to D−, then USB_P to D+);
+- the switch's ground pin 9 joined to its ground pin 5, and its supply pin 10 to C9;
+- USBH_VBUS from the host ESD part's VBUS pin (U3.5) to the USB-A port's VBUS pin. This pin
+  sits between the pair's pads, so it is routed before the pair, through the channel between
+  U3's pad rows;
+- the host pair from the switch through its ESD part to the USB-A port, D− and then D+. D− runs
+  partly on the bottom layer, so that the VBUS route and D+ can stay on top;
 - three microSD lines (DAT1, DAT0, CLK).
+
+U3's ground pad gets its plane via before any of these lines, so that the host pair cannot close
+it in.
 
 The power switch and the 150 µF capacitor sit more than 10 mm from the module's antenna.
 

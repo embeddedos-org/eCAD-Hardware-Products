@@ -542,10 +542,17 @@ PLACEMENT = {
 # are 0.3 mm wide at 0.5 mm pitch, so 5 V has one way out of each VOUT pad. Pad 2 to pad 7 under the
 # body, then pad 7 down to the 100 uF.
 PRIORITY = [(("U3", "2"), ("U3", "7")), (("U3", "7"), ("C3", "1"))]
-# The accelerometer's two interrupt lines (U7 pins 11 and 12, side by side at 0.5 mm) go first too,
+# The accelerometer's two interrupt lines (U7 pins 11 and 12, side by side at 0.5 mm) go first,
 # INT2 then INT1: they leave the package in the same order they reach the MCU (pins 77 and 80), and
-# laid before the plane fan-out, neither one's via can land in front of the other's pad.
-PRIORITY += [(("U7", "11"), ("U5", "77")), (("U7", "12"), ("U5", "80"))]
+# laid before the plane fan-out, neither one's via can land in front of the other's pad. SA0 (pin 3
+# to JP2) is next, while the south side of that pad is still open. Pins 2 and 9 are both +3V3, but
+# a 0.3 mm track cannot leave either (the neighbours are 0.5 mm away and the maze's margin closes
+# the gap). Pin 10, the corner +3V3 pad, then joins C22, and JP2's +3V3 pad joins that capacitor,
+# so the jumper meets the accelerometer supply without crossing SA0.
+PRIORITY += [(("U7", "11"), ("U5", "77")), (("U7", "12"), ("U5", "80")),
+             (("U7", "3"), ("JP2", "2")),
+             (("U7", "10"), ("C22", "1")),
+             (("JP2", "3"), ("C22", "1"))]
 # The USB pairs (KLQ 9.6.3), D+ then D- for each line segment: from the receptacle's A6/A7 through
 # the ESD part's pads to R5/R6 and the MCU, or to the CP2102N, on the top layer. The receptacle's
 # order (A6 D+ above A7 D-) is the order at the far end, so the main lines do not cross. Then the
@@ -569,26 +576,20 @@ PRIORITY += [(("Y1", "2"), ("Y1", "4")),
 # Decoupling (KLQ 2.1.3.2, CP2102N Figure 2.3), each capacitor joined to its own pin: VDD pin 7 and
 # VSS pin 8 to C8; VOUT33 to C7; VREGIN to C6; VDDA to C11, then JP1, the 1 uF and the bead; VREFH to
 # C13, then JP1, and VSSA pin 20 to C13's ground end, with the ground ends of C7, C11 and C6 joined;
-# the CP2102N's VDD and VREGIN pads to each other and to their 100 nF and 4.7 uF capacitors; the LDO's
-# IN and OUT to C4 and C5; RESET_b to C16 and R12.
+# the CP2102N's VBUS pin to the divider (R16) before its supply routes, then its VDD and VREGIN
+# pads to each other and to their 100 nF and 4.7 uF capacitors; the LDO's IN and OUT to C4 and C5;
+# RESET_b to C16 and R12.
 PRIORITY += [(("U5", "7"), ("C8", "1")), (("U5", "8"), ("C8", "2")),
              (("U5", "11"), ("C7", "1")), (("U5", "12"), ("C6", "1")),
              (("U5", "17"), ("C11", "1")), (("C11", "1"), ("JP1", "1")), (("C11", "1"), ("C12", "1")),
              (("C12", "1"), ("FB1", "2")),
              (("U5", "18"), ("C13", "1")), (("C13", "1"), ("JP1", "2")), (("U5", "20"), ("C13", "2")),
              (("C7", "2"), ("C11", "2")), (("C11", "2"), ("C6", "2")),
+             (("U6", "8"), ("R16", "1")),
              (("U6", "6"), ("U6", "7")), (("U6", "7"), ("C18", "1")), (("U6", "6"), ("C20", "1")),
              (("C20", "1"), ("C19", "1")), (("C19", "1"), ("C17", "1")),
              (("U4", "3"), ("C5", "1")), (("U4", "1"), ("C4", "1")),
              (("U5", "42"), ("C16", "1")), (("C16", "1"), ("R12", "1"))]
-# With no via allowed in a pad, the autorouter left the CP2102N's VBUS-sense pin unjoined to its
-# divider twice (2026-10-20 rebuilds), so that line goes first. (The accelerometer's CS pin, tied to
-# 3.3 V, can't be a priority route: the 0.3 mm supply class has no way out between its 0.5 mm-pitch
-# neighbours; the autorouter necks it down instead.)
-PRIORITY += [(("U6", "8"), ("R16", "1"))]
-# RESET_b from its capacitor to the SWD header, laid before the autorouter boxes it in: with the
-# bottom layer under the crystal kept clear, the line goes round the oscillator, not under it.
-PRIORITY += [(("C16", "1"), ("J7", "10"))]
 
 _unplaced = sorted({p.ref for p in PARTS} - set(PLACEMENT))
 assert not _unplaced, f"parts without a board position: {_unplaced}"
@@ -633,14 +634,6 @@ BOARD = Board(
     corner_radius=1.0,
     thickness=1.6,
     layers=2,
-    # A via beside each ground pad of the MCU and the accelerometer: the 2026-10-20 rebuild left VSS 59
-    # and the LIS2HH12's ground pins 5-8 on via-less slivers of top-layer pour.
-    ground_vias=["U5", "U7"],
-    # The bottom layer under the 8 MHz crystal, its load capacitors and its two lines from the MCU is a
-    # router keep-out, so no signal runs below them (KLQRUG 2.1.3.3.1: "no signals of any kind" on the
-    # layer below the crystal) and the ground pour there stays solid. Until 2026-10-21 RESET_b crossed
-    # under Y1 and C14 there.
-    router_keepouts=[(43.4, 29.0, 49.2, 41.2, "B.Cu")],
     parts=PARTS,
     power_nets={"GND": "power:GND", "+3V3": "power:+3V3", "+5V": "power:+5V"},
     flagged_nets=["GND", "VBUS1", "VBUS1_F", "VBUS2", "VBUS2_F", "VDDA", "VREFH"],

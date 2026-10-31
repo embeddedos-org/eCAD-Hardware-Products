@@ -29,18 +29,23 @@ permission. See [LICENSE.txt](LICENSE.txt) and [the licence summary](../README.m
 
 Every value comes from Raspberry Pi's *Hardware design with RP2350* and the RP2350 datasheet.
 
-## The core layout is Raspberry Pi's, exactly
+## The core layout is Raspberry Pi's, with two moved vias
 
 The RP2350 datasheet says the regulator's inductor "must be ... placed on the layout as indicated
 in Figure 26". Raspberry Pi publishes that layout, the RP2350A Minimal Design R4, under the MIT
-licence. So everything around the chip is theirs, unchanged:
+licence. The layout matches that reference except for the two ground vias below:
 
 - the footprints and positions of the chip, its regulator, the decoupling (all but C17, this
   board's own capacitor on ADC_AVDD), the crystal circuit, the USB resistors and the flash;
-- the copper between them: 124 tracks, 25 vias and 7 zones.
+- the copper between them: 124 tracks, 25 vias and 7 zones, except those two ground vias.
+
+One change: two of the 25 vias, ground vias beside the regulator capacitors, sat 0.05 mm from
+the C6 and C7 ground pads, where solder wicks down the open barrel. They move 0.11 mm and
+0.18 mm, still inside Raspberry Pi's ground pour, to clear both pads by at least 0.1 mm.
 
 `tests/unit/test_eos_boards.py` checks where those parts sit, and the copper between them, down
-to KiCad's 1 nm resolution, every time the test suite runs. It compares the board with the
+to KiCad's 1 nm resolution, every time the test suite runs. The comparison permits only the two
+declared moved ground vias. It compares the board with the
 reference file. The reference file records the SHA-256 of the Raspberry Pi design it was taken
 from, and a test re-extracts it from that design when you supply the file (`RPI_MINIMAL_PCB`). The GPIO lines leave the chip along
 Raspberry Pi's own escape paths; from there to the headers, the routing is this board's.
@@ -89,6 +94,9 @@ The four warnings:
   design rule checks; no hardware has been tested.
 - **No signal-integrity simulation.** USB and QSPI were not simulated; the QSPI routing is
   Raspberry Pi's own.
+- **USB D+ meets its ESD pad on a stub.** D+ from the connector and D+ from R3 join 0.7 mm from
+  the USBLC6's D+ pad, which hangs on a 1.37 mm stub instead of lying on the line. D+ is
+  32.05 mm and D− 25.85 mm, 6.19 mm apart. The link is Full Speed (12 Mbit/s).
 
 ## Rebuild
 

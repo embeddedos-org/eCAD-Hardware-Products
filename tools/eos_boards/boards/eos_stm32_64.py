@@ -615,11 +615,6 @@ PRIORITY = [
     (("R20", "2"), ("C23", "1"), "join"), (("R21", "2"), ("C24", "2"), "join"),
     (("R18", "2"), ("C21", "1"), "join"), (("R19", "2"), ("C22", "2"), "join"),
     (("U1", "30"), ("C16", "2")), (("U1", "13"), ("C18", "2")), (("U1", "7"), ("C20", "1")),
-    # Each VSS pin to the ground end of the capacitor beside it (VSS 31 to VCAP_1's), each of which has
-    # a ground via: with no via allowed in TP2, the 2026-10-21 rebuilds left one VSS pin or another on a
-    # via-less sliver of top pour, up to 23 mm of track from a via.
-    (("U1", "31"), ("C16", "1")), (("U1", "18"), ("C11", "2")), (("U1", "47"), ("C13", "2")),
-    (("U1", "63"), ("C14", "2")),
     (("U4", "3"), ("C5", "1")), (("U4", "2"), ("U4", "3"), "join"), (("U4", "4"), ("C5", "2")),
     (("U4", "5"), ("C6", "1")), (("U4", "6"), ("C6", "2")), (("C6", "1"), ("L1", "1")),
     (("D4", "1"), ("C5", "1"), "join"),
@@ -669,15 +664,6 @@ BOARD = Board(
     corner_radius=1.5,
     thickness=1.6,
     layers=2,
-    # A via beside each ground pad of the crystal load capacitors, the VBAT capacitor and Y1's case:
-    # AN2867 section 7.1 asks for the oscillator ground to reach the MCU ground nearby. Without the via
-    # that sat in TP2 (no longer allowed), that group hung on one 0.15 mm track (2026-10-20 rebuild).
-    # And one beside each of the MCU's VSS pads: VSS 18 (with C11) sat on a via-less sliver on master,
-    # and VSS 63 did on the first rebuild with the crystal vias.
-    # And the VDDA/VSSA capacitors and the NRST capacitor: the analog ground group (VSSA 12, C17, C18) hung
-    # on one 0.15 mm track on the 2026-10-21 rebuild, because a fine-pitch pin has no room for its own via.
-    ground_vias=["U1", "C11", "C12", "C13", "C14", "C16", "C17", "C18", "C19", "C20", "C21", "C22", "C23",
-                 "C24", "Y1"],
     parts=PARTS,
     power_nets={"GND": "power:GND", "+3V3": "power:+3V3", "+5V": "power:+5V"},
     flagged_nets=["GND", "+5V", "VDD_MCU", "VDDA", "VBAT", "VIN_P"],

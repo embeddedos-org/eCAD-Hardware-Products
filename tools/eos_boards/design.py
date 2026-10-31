@@ -74,7 +74,7 @@ class Board:
     ground_vias: List[str] = field(default_factory=list)                   # two layers: parts whose pads on a two-sided pour get a via beside them
     fanout_first: List[str] = field(default_factory=list)                  # parts whose plane vias go in before the priority routes
     preroutes: List[Tuple[Tuple[str, str], Tuple[str, str], float]] = field(default_factory=list)  # (ref, pad), (ref, pad), width
-    reference_copper: Dict[str, object] = field(default_factory=dict)   # {file, origin}: copper from a reference design
+    reference_copper: Dict[str, object] = field(default_factory=dict)   # {file, origin[, moved_vias]}: copper from a reference design
     local_footprints: List[str] = field(default_factory=list)          # footprint libraries shipped in tools/eos_boards/footprints
     router_keepouts: List[tuple] = field(default_factory=list)  # (x0, y0, x1, y1[, "B.Cu"]): areas the routers may not enter, top layer unless "B.Cu" is named
     copper_keepouts: List[Tuple[float, float, float, float]] = field(default_factory=list)  # x0, y0, x1, y1: no copper on any layer (an antenna cut-out)
@@ -82,7 +82,7 @@ class Board:
     credits: List[str] = field(default_factory=list)                   # notices third-party licences require (one line each)
     contact: str = ""                                                   # whom to ask for permission; an all-rights-reserved board needs it
     licence_terms: str = ""                                             # an all-rights-reserved board's terms file, relative to tools/eos_boards
-    priority_routes: List[tuple] = field(default_factory=list)  # ((ref, pad), (ref, pad)[, "join"]) routed first, in order, before the autorouter; "join" ends at any copper of the net
+    priority_routes: List[tuple] = field(default_factory=list)  # ((ref, pad), (ref, pad)[, "join"][, width_mm][, {"via": [x, y, diameter, drill]}]) routed first, in order; "join" ends at any copper of the net; width_mm overrides the net class; "via" pins a via the line passes through
     rules: Dict[str, float] = field(default_factory=dict)              # design-rule overrides, e.g. a smaller drill a module footprint needs
     escape_footprints: List[str] = field(default_factory=list)          # fine-pitch connectors whose pads keep a clear way out (maze router)
     maze_via_cost_mm: float = 1.2                                        # maze router: a via costs as much as this much track
