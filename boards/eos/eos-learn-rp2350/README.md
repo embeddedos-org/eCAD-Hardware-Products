@@ -95,8 +95,10 @@ The four warnings:
 - **No signal-integrity simulation.** USB and QSPI were not simulated; the QSPI routing is
   Raspberry Pi's own.
 - **USB D+ meets its ESD pad on a stub.** D+ from the connector and D+ from R3 join 0.7 mm from
-  the USBLC6's D+ pad, which hangs on a 1.37 mm stub instead of lying on the line. D+ is
-  32.05 mm and D− 25.85 mm, 6.19 mm apart. The link is Full Speed (12 Mbit/s).
+  the USBLC6's D+ pad, which hangs on a 1.37 mm stub instead of lying on the line. For the USB
+  D+ / D− pair (USB_D+ and USB_D−), D+ is 32.05 mm and D− is 25.85 mm. The 6.19 mm figure is
+  that pair's length mismatch, from the unrounded lengths 32.048 mm and 25.854 mm. The link is
+  Full Speed (12 Mbit/s).
 
 ## Rebuild
 
