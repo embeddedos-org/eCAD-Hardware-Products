@@ -137,14 +137,28 @@ The numbers below are from `build-report.json` and `drc.json` in this folder.
 2 layers, 1.6 mm thick, ground poured on both sides. Design rules:
 
 - **Tracks:** 0.15 mm, narrowing to the 0.1 mm minimum at fine-pitch pads; 0.4 mm on the
-  supplies (VBUS, the fuse-to-Schottky link, 5 V and 3.3 V); 0.2 mm on USB D+/D−.
+  supplies (VBUS, the fuse-to-Schottky link, 5 V and 3.3 V); 0.2 mm on USB D+/D−. The
+  exception is 3.3 V at the CP2102N: pins 5 to 7 leave the package at 0.15 mm, because a 0.4 mm
+  track cannot pass between 0.5 mm-pitch pins.
 - **Clearance:** 0.15 mm.
-- **Vias:** 0.6 mm with a 0.3 mm drill.
+- **Vias:** 0.6 mm with a 0.3 mm drill, except one. VBUS reaches the R8/R9 divider through a
+  0.5 mm via with a 0.25 mm drill, placed at the centre of R8's and R9's four pads, 0.175 mm
+  from each.
 - **Smallest drill:** 0.2 mm, in the module footprint's thermal vias under its ground pad.
   The other holes are the 1.0 mm header holes, the USB-C shell's 0.6 mm-wide slots and its
   0.65 mm locating holes.
 - **Header pads** sit 0.39 mm (left row) and 0.45 mm (right row) from the board edge. That is
   where the DevKitC V4 grid puts them.
+
+The lines around the CP2102N are routed first, in a set order, before the autorouter. That
+order keeps every via off the pads:
+- USB D− from the CP2102N to the ESD part, then D+;
+- the ground and 3.3 V links between C6, C7, C8 and C9;
+- the 0.15 mm 3.3 V lines from pins 5 to 7;
+- reset to R7;
+- VBUS from the USB-C connector to R8, through the pinned via;
+- VBUS sense from pin 8 to R8;
+- R7's 3.3 V pad to C7, last.
 
 ## What has not been done
 

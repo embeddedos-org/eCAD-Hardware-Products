@@ -300,14 +300,18 @@ PRIORITY = [r for cm, jack in _ETH for esd, inner, outer in [_FLOW[jack]]
 # The USB pair from the module to the switch. Both leave the connector's inner row next to its
 # pin-101 end and wrap round that end, so the line nearer the end goes first, as with Ethernet.
 # Then the host pair from the switch through its ESD part (in on one pad, out on the other of the
-# same line) to the USB-A port.
+# same line) to the USB-A port. The ESD part's VBUS pin 5 sits between the pair's two outer-row
+# pads and goes first, through the channel between the pad rows to the port's VBUS pin: laid
+# after the pair, it is walled in on the top layer, and no via may sit in its pad.
 PRIORITY += [(("J2", "3"), ("U7", "6")),       # USB_N (CM4 pin 103) to D-
              (("J2", "5"), ("U7", "4")),       # USB_P (CM4 pin 105) to D+
-             (("U7", "8"), ("U3", "3")), (("U3", "4"), ("J4", "2")),     # USBH_DM: D1- through I/O2
-             (("U7", "2"), ("U3", "1")), (("U3", "6"), ("J4", "3")),     # USBH_DP: D1+ through I/O1
              # ~OE (pin 9, tied low) sits between signal pads with no room for a ground via: join it
              # under the package to the switch's own GND pin 5
-             (("U7", "9"), ("U7", "5"), "join")]
+             (("U7", "9"), ("U7", "5"), "join"),
+             (("U7", "10"), ("C9", "1")),      # VCC to its capacitor, before D+ can wrap round the pin
+             (("U3", "5"), ("J4", "1")),       # USBH_VBUS to the ESD part's reference pin
+             (("U7", "8"), ("U3", "3")), (("U3", "4"), ("J4", "2")),     # USBH_DM: D1- through I/O2
+             (("U7", "2"), ("U3", "1")), (("U3", "6"), ("J4", "3"))]     # USBH_DP: D1+ through I/O1
 # Three microSD lines run first, shortest first, so they nest inside one another on the top layer:
 # DAT1, DAT0 and CLK leave the connector's outer row in the order they reach the socket. CMD (from
 # the inner row), DAT3 and DAT2 must cross them; the autorouter, which plans crossings for the
@@ -343,6 +347,7 @@ BOARD = Board(
     local_footprints=["EoS_Connectors"],
     copper_keepouts=[ANTENNA_KEEPOUT],
     priority_routes=PRIORITY,
+    fanout_first=["U3"],          # the ESD part's ground via goes in before D- passes below the package
     escape_footprints=["J1", "J2"],
     maze_via_cost_mm=8.0,
     parts=PARTS,

@@ -73,8 +73,20 @@ The numbers below are from `build-report.json` and `drc.json` in this folder.
   no copper at all under the antenna.
 
 The connector's ground pads drop their vias into the channel between its two pad rows, as on
-CM5IO, so the signals keep the outward side. The Ethernet pairs, the USB host pair, SD_CLK and
-the ESD parts' links are routed first in a set order, before the autorouter.
+CM5IO, so the signals keep the outward side. Some lines are routed first, in a set order, before
+the autorouter:
+- the Ethernet pairs, each through its ESD part to the MagJack;
+- the USB host pair through its ESD part (U3), each line entering one pad and leaving from the
+  other. Each line's two pads are joined straight across first;
+- USBH_VBUS from U3's VBUS pin (U3.5, a reference input with no load current) to the USB-A
+  port's VBUS pin. The joined pads wall that pin in, so it drops through a via placed in the gap
+  between U3's pad rows and reaches the port on the bottom layer;
+- the host pair's runs: D+ from U3 to the port over the top of U3, then D− and D+ from the module
+  to U3, then D− from U3 to the port. Both lines stay on the top layer with no vias;
+- three microSD lines (DAT1, DAT0, CLK), then GPIO2 to the 40-pin header.
+
+U3's ground pad gets its plane via before any of these lines. Without that, the host pair closed
+it in and left it as an unconnected scrap of ground pour.
 
 - Gerbers and drill files: [fab/gerbers](fab/gerbers)
 - Bill of materials: [fab/eos-cm5-base-bom.csv](fab/eos-cm5-base-bom.csv)

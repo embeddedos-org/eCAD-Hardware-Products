@@ -460,13 +460,15 @@ PLACEMENT = {
     "R5": (11.0, 30.5, 90), "D2": (13.0, 30.5, 90),
 }
 # Laid first, in this order, before the autorouter (see the docstring): the crystal, the MCU's
-# decoupling, the USB pair (the TM4C123 board's pattern: connector -> ESD -> bridge, then the
+# decoupling (C12, C13, then C14's 10 uF from C13's 5 V pad, before D0-D4 cross that gap),
+# the USB pair (the TM4C123 board's pattern: connector -> ESD -> bridge, then the
 # duplicated contacts joined), the CH340C's decoupling, D4..D0 around the crystal block, and
 # the TPS2116's bulk capacitor.
 PRIORITY = [(("U6", "7"), ("Y1", "1")), (("Y1", "1"), ("C17", "1")),
             (("U6", "8"), ("Y1", "3")), (("Y1", "3"), ("C18", "1")),
             (("U6", "6"), ("C12", "1")), (("U6", "5"), ("C12", "2")),
             (("U6", "4"), ("C13", "1")), (("U6", "3"), ("C13", "2")),
+            (("C13", "1"), ("C14", "1")),
             (("J1", "B7"), ("U1", "4")), (("U1", "4"), ("U1", "3")), (("U1", "3"), ("U5", "6")),
             (("J1", "B6"), ("U1", "6")), (("U1", "6"), ("U1", "1")), (("U1", "1"), ("U5", "5")),
             (("J1", "A6"), ("J1", "B6"), "join"), (("J1", "A7"), ("J1", "B7"), "join"),

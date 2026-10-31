@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/drc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-13T05:01:39",
+    "date": "2026-10-24T14:35:25",
     "ignored_checks": [
         {
             "description": "Footprint has no courtyard defined",
@@ -43,7 +43,7 @@
                         "x": 26.94,
                         "y": 48.76
                     },
-                    "uuid": "d29506a0-459c-4368-bf3b-c6ce3f0b5382"
+                    "uuid": "d4c74fa0-121e-4cf0-b8e1-7c3e06fedbbd"
                 },
                 {
                     "description": "Segment of J3 on F.Silkscreen",
@@ -51,7 +51,7 @@
                         "x": 25.26,
                         "y": 3.02
                     },
-                    "uuid": "ead558d2-bdbc-4853-94e5-0608ad555696"
+                    "uuid": "cc28f78e-8a50-4590-b6cd-9126c7d495a2"
                 }
             ],
             "severity": "warning",
@@ -66,7 +66,7 @@
                         "x": 27.94,
                         "y": 1.0
                     },
-                    "uuid": "8bbcfdf1-264f-49cc-9a28-9dcd9e30800f"
+                    "uuid": "b6097ac3-3ea6-4e4d-b7b8-d58eb20ecc0b"
                 },
                 {
                     "description": "Segment of J3 on F.Silkscreen",
@@ -74,53 +74,7 @@
                         "x": 25.26,
                         "y": 3.02
                     },
-                    "uuid": "42c00555-b1d3-46dd-9789-c390f8388897"
-                }
-            ],
-            "severity": "warning",
-            "type": "silk_edge_clearance"
-        },
-        {
-            "description": "Silkscreen clipped by board edge",
-            "items": [
-                {
-                    "description": "Segment on Edge.Cuts",
-                    "pos": {
-                        "x": 26.94,
-                        "y": 48.76
-                    },
-                    "uuid": "d29506a0-459c-4368-bf3b-c6ce3f0b5382"
-                },
-                {
-                    "description": "Segment of J1 on F.Silkscreen",
-                    "pos": {
-                        "x": 10.3,
-                        "y": 47.57
-                    },
-                    "uuid": "189d0b33-9f9e-4023-9504-c73af9b9ad36"
-                }
-            ],
-            "severity": "warning",
-            "type": "silk_edge_clearance"
-        },
-        {
-            "description": "Silkscreen clipped by board edge",
-            "items": [
-                {
-                    "description": "Segment on Edge.Cuts",
-                    "pos": {
-                        "x": 26.94,
-                        "y": 48.76
-                    },
-                    "uuid": "d29506a0-459c-4368-bf3b-c6ce3f0b5382"
-                },
-                {
-                    "description": "Segment of J1 on F.Silkscreen",
-                    "pos": {
-                        "x": 19.7,
-                        "y": 47.57
-                    },
-                    "uuid": "67422b5b-4c6e-40b7-9254-1c2153da87e2"
+                    "uuid": "b4c2ca53-8f41-4ba9-9fc2-3636c5508e16"
                 }
             ],
             "severity": "warning",
@@ -135,7 +89,7 @@
                         "x": 1.0,
                         "y": 0.0
                     },
-                    "uuid": "d3ef89c6-f949-4eee-a84c-b587352330ed"
+                    "uuid": "6083a77e-6157-4b9d-ad08-2290f9a41648"
                 },
                 {
                     "description": "Polygon of U1 on F.Silkscreen",
@@ -143,7 +97,7 @@
                         "x": 4.74,
                         "y": 0.25
                     },
-                    "uuid": "c303ea77-67e1-48ad-acd3-8c9585b554c8"
+                    "uuid": "53bad374-757e-41c5-bd65-b6ec60c8c9d2"
                 }
             ],
             "severity": "warning",
@@ -158,7 +112,7 @@
                         "x": 1.0,
                         "y": 1.0
                     },
-                    "uuid": "3713255b-355d-4e7a-bc24-b5e25172c5cd"
+                    "uuid": "39d6b074-9ee8-4e0a-9c2c-62ca1fd134c4"
                 },
                 {
                     "description": "Segment of J2 on F.Silkscreen",
@@ -166,7 +120,7 @@
                         "x": -0.14,
                         "y": 0.37
                     },
-                    "uuid": "5be317b5-1b2d-4578-aa5c-6d6b92214b7f"
+                    "uuid": "841cb42f-6ba2-4366-88ca-bf175f49df22"
                 }
             ],
             "severity": "warning",
@@ -181,7 +135,7 @@
                         "x": 0.0,
                         "y": 47.76
                     },
-                    "uuid": "67878a19-a6e1-44bd-ab2c-7854c0c5d7d4"
+                    "uuid": "09263f45-a3ac-4d77-945b-2346c25d6278"
                 },
                 {
                     "description": "Segment of J2 on F.Silkscreen",
@@ -189,7 +143,7 @@
                         "x": -0.14,
                         "y": 3.02
                     },
-                    "uuid": "2c5a754e-a53d-4f05-922e-2832de392306"
+                    "uuid": "810bbc61-6cfc-45f4-b85a-e50b9520b076"
                 }
             ],
             "severity": "warning",
@@ -204,7 +158,7 @@
                         "x": 26.94,
                         "y": 48.76
                     },
-                    "uuid": "d29506a0-459c-4368-bf3b-c6ce3f0b5382"
+                    "uuid": "d4c74fa0-121e-4cf0-b8e1-7c3e06fedbbd"
                 },
                 {
                     "description": "Segment of J2 on F.Silkscreen",
@@ -212,7 +166,53 @@
                         "x": 2.62,
                         "y": 3.02
                     },
-                    "uuid": "d5869218-5eb4-42e5-97c4-f358d1bfc8cb"
+                    "uuid": "648d9c2c-579d-46ac-8897-d9fb1940cf63"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 26.94,
+                        "y": 48.76
+                    },
+                    "uuid": "d4c74fa0-121e-4cf0-b8e1-7c3e06fedbbd"
+                },
+                {
+                    "description": "Segment of J1 on F.Silkscreen",
+                    "pos": {
+                        "x": 10.3,
+                        "y": 47.57
+                    },
+                    "uuid": "b90a07a1-65f0-4008-b9ac-1ba3feb37409"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 26.94,
+                        "y": 48.76
+                    },
+                    "uuid": "d4c74fa0-121e-4cf0-b8e1-7c3e06fedbbd"
+                },
+                {
+                    "description": "Segment of J1 on F.Silkscreen",
+                    "pos": {
+                        "x": 19.7,
+                        "y": 47.57
+                    },
+                    "uuid": "af933f9f-7e63-45a7-9e2c-4982754814a9"
                 }
             ],
             "severity": "warning",

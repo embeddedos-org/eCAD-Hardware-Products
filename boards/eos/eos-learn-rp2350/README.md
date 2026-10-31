@@ -39,6 +39,10 @@ licence. So everything around the chip is theirs, unchanged:
   board's own capacitor on ADC_AVDD), the crystal circuit, the USB resistors and the flash;
 - the copper between them: 124 tracks, 25 vias and 7 zones.
 
+One change: two of the 25 vias, ground vias beside the regulator capacitors, sat 0.05 mm from
+the C6 and C7 ground pads, where solder wicks down the open barrel. They move 0.11 mm and
+0.18 mm, still inside Raspberry Pi's ground pour, to clear both pads by at least 0.1 mm.
+
 `tests/unit/test_eos_boards.py` checks where those parts sit, and the copper between them, down
 to KiCad's 1 nm resolution, every time the test suite runs. It compares the board with the
 reference file. The reference file records the SHA-256 of the Raspberry Pi design it was taken
@@ -89,6 +93,9 @@ The four warnings:
   design rule checks; no hardware has been tested.
 - **No signal-integrity simulation.** USB and QSPI were not simulated; the QSPI routing is
   Raspberry Pi's own.
+- **USB D+ meets its ESD pad on a stub.** D+ from the connector and D+ from R3 join 0.7 mm from
+  the USBLC6's D+ pad, which hangs on a 1.37 mm stub instead of lying on the line. D+ is
+  32.05 mm and D− 25.85 mm, 6.19 mm apart. The link is Full Speed (12 Mbit/s).
 
 ## Rebuild
 

@@ -506,9 +506,10 @@ PLACEMENT = {
 #   cross the pair. B7 joins D- first, behind A6 (the short way round A6's back end, 0.3 mm behind
 #   the pad row, as EoS TM4C123's A6 tie does), which leaves B6 the only way left: a via pair in
 #   front of the pads, under both lines on the bottom layer, up onto D+.
-# * VOUT to VOUT through the TPS2116's body; MODE round its left end to R12's VBUS end, then on to
-#   the fuse; the LDO's FB line, and its EN to its IN pins, before NR/SS's capacitor is reached from
-#   inside that loop.
+# * VOUT to VOUT through the TPS2116's body; R12's PR1 end to R13, then PR1 (pin 4) to that
+#   node, before MODE. MODE then goes round the left end to R12's VBUS end, and R13's ground pad
+#   stays open to the pour. Then on to the fuse; the LDO's FB line, and its EN to its IN pins,
+#   before NR/SS's capacitor is reached from inside that loop.
 # * The crystals: each lower line first (XTAL_N, then XTAL_P over Y1's GND pad; XTAL32K_N, then
 #   XTAL32K_P beside it), chip to crystal pad, then crystal pad to its DNP load pad, so the load pad
 #   is last on the line (AN13033 4.2.1, 4.3.1: short, and not crossing other lines).
@@ -526,7 +527,9 @@ PRIORITY = [(("J2", "A7"), ("U2", "2")), (("J2", "A6"), ("U2", "3")),
             (("U6", "98"), ("R6", "2")), (("U6", "97"), ("R5", "2")),
             (("J1", "B7"), ("J1", "A7"), "join"), (("J1", "B6"), ("J1", "A6"), "join"),
             (("U4", "3"), ("R14", "2")),
-            (("U3", "2"), ("U3", "7")), (("U3", "5"), ("R12", "1")), (("R12", "1"), ("F2", "2")),
+            (("U3", "2"), ("U3", "7")),
+            (("R12", "2"), ("R13", "1")), (("U3", "4"), ("R13", "1")),
+            (("U3", "5"), ("R12", "1")), (("R12", "1"), ("F2", "2")),
             (("U4", "7"), ("U4", "9"), "join"),
             (("U6", "28"), ("Y1", "3")), (("U6", "29"), ("Y1", "1")),
             (("Y1", "3"), ("C36", "1")), (("Y1", "1"), ("C35", "1")),

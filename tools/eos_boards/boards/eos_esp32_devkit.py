@@ -289,6 +289,29 @@ assert not _unplaced, f"parts without a board position: {_unplaced}"
 for _p in PARTS:
     _p.pcb = PLACEMENT[_p.ref]
 
+# D- (U4 pin 4 to U2) is the outer line of the USB pair and goes before D+ (pin 3): a D+ track
+# laid first closes pin 4's only way off the package. C9's ground pad then joins U4 pin 2 under
+# the pair. C7's ground pad drops straight to C6's before anything walls it in: left for later,
+# it is a front-side ground fragment with no room for a via. C6's ground pad joins C8's, and
+# C6's +3V3 pad joins C7's. Pins 5 to 7 (+3V3) leave the package at 0.15 mm, as a 0.4 mm Power
+# track cannot between 0.5 mm-pitch pins: pin 5 north to R4, pin 7 into that line. Reset (pin 9
+# to R7) is next. VBUS from the receptacle's A9 contact rises to R8 through a 0.5 mm via at the
+# centre of R8 and R9's four pads (0.175 mm from each): the maze's own via lands in the pocket
+# between C7, R7 and U4 and leaves sense no way past it. Sense then runs on the front between
+# R7 and R8 to R8's other end. R7's +3V3 pad joins C7 last: earlier, it walls sense in.
+PRIORITY = [(("U4", "4"), ("U2", "2")),
+            (("U4", "3"), ("U2", "3")),
+            (("C9", "2"), ("U4", "2")),
+            (("C7", "2"), ("C6", "2")),
+            (("C6", "2"), ("C8", "2")),
+            (("C6", "1"), ("C7", "1")),
+            (("U4", "5"), ("R4", "2"), 0.15),
+            (("U4", "7"), ("U4", "6"), "join", 0.15),
+            (("U4", "9"), ("R7", "1")),
+            (("J1", "A9"), ("R8", "1"), {"via": [19.75, 35.2, 0.5, 0.25]}),
+            (("U4", "8"), ("R8", "2")),
+            (("C7", "1"), ("R7", "2"))]
+
 # Back silkscreen: header pin labels beside each pin (mirrored, read from the back), then the
 # name and copyright block below the module. The copyright line is the widest: it sits halfway
 # between two pin rows, clear of the labels above and below it and inside the header pads.
@@ -333,6 +356,7 @@ BOARD = Board(
     parts=PARTS,
     power_nets={"GND": "power:GND", "+3V3": "power:+3V3", "+5V": "power:+5V", "VBUS": "power:VBUS"},
     flagged_nets=["GND", "VBUS", "+5V"],
+    priority_routes=PRIORITY,
     headings=[((25, 75), "USB-C, ESD, fuse, Schottky, VBUS bleed"), ((200, 75), "3.3 V LDO (1 A)"), ((265, 75), "Power LED"),
               ((95, 180), "ESP32-WROOM-32E"), ((195, 180), "3V3 decoupling, EN delay, buttons (Espressif)"),
               ((265, 265), "User LED (IO4)"), ((340, 75), "CP2102N USB-UART (QFN-24)"),

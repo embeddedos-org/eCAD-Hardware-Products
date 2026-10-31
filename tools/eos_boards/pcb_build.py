@@ -178,6 +178,78 @@ def _in_bottom_keepout(spec, pos, margin):
     return False
 
 
+def pinned_via(board, spec, net, x, y, diameter, drill):
+    """Lay the via a priority route pins at (``x``, ``y``) mm, ``diameter``/``drill`` mm, and return
+    it locked. It is for a gap the maze grid cannot land in, such as the centre of four 0402
+    pads. The build stops unless it meets the board's via rules, keeps the board-edge, hole-to-hole
+    and every net class's clearance (plus ROUTER_MARGIN) from other nets' copper, and keeps
+    VIA_PAD_GAP from its own net's surface pads."""
+    r = spec["rules"]
+    where = f"pinned via ({x}, {y}) on {net.GetNetname()}"
+    if diameter < r["min_via"] or drill < r["min_drill"] or drill >= diameter:
+        raise SystemExit(f"{where}: {diameter}/{drill} mm is outside the board's via rules "
+                         f"(min via {r['min_via']} mm, min drill {r['min_drill']} mm)")
+    pos, rad = v(x, y), MM(diameter / 2)
+    widest = max([r["clearance"]] + [c.get("clearance", 0) for c in spec.get("netclasses", {}).values()])
+    clear = rad + MM(widest + ROUTER_MARGIN)
+    code = net.GetNetCode()
+    if not _inside(spec, pos, MM(r["edge_clearance"]) + rad):
+        raise SystemExit(f"{where}: too close to the board edge")
+    for k in spec.get("router_keepouts", []):
+        if MM(k[0]) - rad < pos.x < MM(k[2]) + rad and MM(k[1]) - rad < pos.y < MM(k[3]) + rad:
+            raise SystemExit(f"{where}: inside router keep-out {k}")
+    if not _hole_free(_holes(board), pos, MM(drill)):
+        raise SystemExit(f"{where}: within {HOLE_TO_HOLE} mm of another hole")
+    for fp in board.GetFootprints():
+        for pad in fp.Pads():
+            for layer in (P.F_Cu, P.B_Cu):
+                if not pad.IsOnLayer(layer):
+                    continue
+                own = pad.GetNetCode() == code and code > 0
+                if own and (pad.GetAttribute() != P.PAD_ATTRIB_SMD or _exposed_pad(fp, pad)):
+                    continue
+                if pad.GetEffectiveShape(layer).Collide(pos, rad + MM(VIA_PAD_GAP) if own else clear):
+                    raise SystemExit(f"{where}: too close to {fp.GetReference()}.{pad.GetNumber()} "
+                                     f"({pad.GetNetname()})")
+    for t in board.GetTracks():
+        if t.GetNetCode() == code:
+            continue
+        for layer in (P.F_Cu, P.B_Cu):
+            if (t.GetClass() == "PCB_VIA" or t.GetLayer() == layer) and \
+                    t.GetEffectiveShape(layer).Collide(pos, clear):
+                raise SystemExit(f"{where}: too close to {t.GetNetname()} copper on {board.GetLayerName(layer)}")
+    via = P.PCB_VIA(board)
+    via.SetPosition(pos)
+    via.SetWidth(MM(diameter))
+    via.SetDrill(MM(drill))
+    via.SetNet(net)
+    via.SetLocked(True)
+    board.Add(via)
+    return via
+
+
+def route_options(route):
+    """A priority route's extras after its two pads, as (join, width in mm or None, pinned via
+    [x, y, diameter, drill] or None): "join"; a track width that overrides the net class (a
+    0.4 mm Power track cannot leave a 0.5 mm-pitch pad; 0.15 mm can); and
+    {"via": [x, y, diameter, drill]}, a via the line must pass through (see pinned_via).
+    build.py checks them against the board's rules before KiCad starts; this refuses the rest."""
+    (ra, pa), (rb, pb) = route[0], route[1]
+    join, width_mm, via_at = False, None, None
+    for extra in route[2:]:
+        if isinstance(extra, str) and extra == "join":
+            join = True
+        elif isinstance(extra, (int, float)) and not isinstance(extra, bool) and extra > 0:
+            width_mm = float(extra)
+        elif isinstance(extra, dict) and set(extra) == {"via"} and len(extra["via"]) == 4:
+            via_at = [float(n) for n in extra["via"]]
+        else:
+            raise SystemExit(f"priority route {ra}.{pa} -> {rb}.{pb}: unknown option {extra!r}")
+    if join and via_at:
+        raise SystemExit(f"priority route {ra}.{pa} -> {rb}.{pb}: \"join\" and a pinned via together")
+    return join, width_mm, via_at
+
+
 def _exposed_pad(fp, pad):
     """A chip's exposed pad: the biggest pad of a part with at least four, over 1.5 mm across (a
     QFN-20's is 1.8 mm). A two-pad part's pad or a lone test pad is not one."""
@@ -426,10 +498,12 @@ def _keepout(board, layer, points):
 def reference_copper(board, spec, nets):
     """Lay down copper taken verbatim from a reference design (tracks, vias, small zones),
     placed relative to the part it was drawn around; see the reference file's own source line.
-    Tracks and vias are locked, so the autorouter treats them as fixed."""
+    Tracks and vias are locked, so the autorouter treats them as fixed. A via the board lists in
+    moved_vias goes to its new position instead."""
     ref = spec["reference_copper"]
     data = json.loads(Path(ref["file"]).read_text())
     ox, oy = ref["origin"]
+    moved = {(round(a[0], 6), round(a[1], 6)): b for a, b in ref.get("moved_vias", [])}
     for t in data["tracks"]:
         tr = P.PCB_TRACK(board)
         tr.SetStart(v(ox + t["a"][0], oy + t["a"][1]))
@@ -440,13 +514,16 @@ def reference_copper(board, spec, nets):
         tr.SetLocked(True)
         board.Add(tr)
     for d in data["vias"]:
+        x, y = moved.pop((round(d["x"], 6), round(d["y"], 6)), (d["x"], d["y"]))
         via = P.PCB_VIA(board)
-        via.SetPosition(v(ox + d["x"], oy + d["y"]))
+        via.SetPosition(v(ox + x, oy + y))
         via.SetWidth(MM(d["d"]))
         via.SetDrill(MM(d["drill"]))
         via.SetNet(nets[d["net"]])
         via.SetLocked(True)
         board.Add(via)
+    if moved:
+        raise SystemExit(f"moved_vias names vias the reference copper does not have: {sorted(moved)}")
     for zd in data["zones"]:
         z = P.ZONE(board)
         z.SetZoneName(REFERENCE_ZONE)
@@ -618,7 +695,7 @@ def place(spec, pcb_path, dsn_path):
             escapes.setdefault(e["net"], []).append(e)
     for route in spec.get("priority_routes", []):
         (ra, pa), (rb, pb) = route[0], route[1]
-        join = len(route) > 2 and route[2] == "join"
+        join, width_mm, via_at = route_options(route)
         pad_a = next(p for p in board.FindFootprintByReference(ra).Pads() if p.GetNumber() == pa)
         pad_b = next(p for p in board.FindFootprintByReference(rb).Pads() if p.GetNumber() == pb)
         net, start, laid = pad_a.GetNet(), pad_a.GetPosition(), []
@@ -635,7 +712,15 @@ def place(spec, pcb_path, dsn_path):
             # the escape's far end: the end of its chain furthest from the pad it starts at
             ends = [q for t in laid for q in (t.GetStart(), t.GetEnd())]
             start = max(ends, key=lambda q: (q.x - start.x) ** 2 + (q.y - start.y) ** 2)
-        got = maze(board, spec, net, start, pad_b.GetPosition(), track_width(spec, net), join=join)
+        width = MM(width_mm) if width_mm is not None else track_width(spec, net)
+        if via_at:
+            pin = pinned_via(board, spec, net, *via_at)
+            to_pin = maze(board, spec, net, start, pin.GetPosition(), width, via_first=True)
+            from_pin = maze(board, spec, net, pin.GetPosition(), pad_b.GetPosition(), width,
+                            via_first=True) if to_pin else []
+            got = to_pin + from_pin + [pin] if to_pin and from_pin else []
+        else:
+            got = maze(board, spec, net, start, pad_b.GetPosition(), width, join=join)
         if not got:
             raise SystemExit(f"priority route {ra}.{pa} -> {rb}.{pb}: no path")
         for item in laid + got:
@@ -807,17 +892,21 @@ def join_fragments(board, net, spec):
     return added
 
 
-def _endpoint_layers(board, net, pt):
-    """The outer copper layers of the net's item at ``pt``: a through-hole pad or via is on both."""
+def _endpoint_layers(board, net, pt, via_first=False):
+    """The outer copper layers of the net's item at ``pt``: a through-hole pad or via is on both.
+    Otherwise the first of the net's vias and track ends at ``pt``, in board order, decides; with
+    ``via_first`` a via there wins over a track ending on it, as at a pinned via, which the line
+    to it reaches on one layer and the line from it may leave on the other."""
     near = MM(0.002)
     for fp in board.GetFootprints():
         for pad in fp.Pads():
             if pad.GetNetCode() == net.GetNetCode() and abs(pad.GetPosition().x - pt.x) <= near \
                     and abs(pad.GetPosition().y - pt.y) <= near:
                 return [layer for layer in (P.F_Cu, P.B_Cu) if pad.IsOnLayer(layer)]
-    for t in board.GetTracks():
-        if t.GetNetCode() != net.GetNetCode():
-            continue
+    tracks = [t for t in board.GetTracks() if t.GetNetCode() == net.GetNetCode()]
+    if via_first:
+        tracks.sort(key=lambda t: t.GetClass() != "PCB_VIA")
+    for t in tracks:
         if t.GetClass() == "PCB_VIA":
             if abs(t.GetPosition().x - pt.x) <= near and abs(t.GetPosition().y - pt.y) <= near:
                 return [P.F_Cu, P.B_Cu]
@@ -826,14 +915,14 @@ def _endpoint_layers(board, net, pt):
     return [P.F_Cu]
 
 
-def maze(board, spec, net, a, b, width, join=False):
+def maze(board, spec, net, a, b, width, join=False, via_first=False):
     """Join points ``a`` and ``b`` of ``net`` through the gaps the autorouter could not find.
 
     A grid search (A*, 0.05 mm cells, eight directions) on the two outer layers, with a via
     wherever one fits. Every other net's pads, tracks, vias and fixed zones are obstacles,
     grown by the clearance; the board's ground pours are not, since they are refilled around
     the new copper. The router keep-outs stay closed. Returns the tracks and vias it laid
-    (an empty list when there is no way through).
+    (an empty list when there is no way through). ``via_first`` is passed to _endpoint_layers.
     """
     import heapq
     import math
@@ -991,7 +1080,7 @@ def maze(board, spec, net, a, b, width, join=False):
         return int(round((pt.x - x0) / g)), int(round((pt.y - y0) / g))
 
     sa, sb = cell(a), cell(b)
-    la, lb = _endpoint_layers(board, net, a), _endpoint_layers(board, net, b)
+    la, lb = _endpoint_layers(board, net, a, via_first), _endpoint_layers(board, net, b, via_first)
     goals = {(sb[0], sb[1], layers.index(l)) for l in lb}
     joinable = None
     if join:
@@ -1423,15 +1512,24 @@ def ease_vias(board, spec):
     return moved, left
 
 
-def prune_dangling(board):
+def prune_dangling(board, counts=None):
     """Remove the router's vias and track stubs that lead nowhere (connected on one layer, or an
-    end touching nothing), until none are left. Locked copper (a reference design's) stays."""
+    end touching nothing), until none are left. Locked copper (a reference design's) stays.
+
+    KiCad 10.0.6: once this drops its connectivity data and the pour is refilled, or once the
+    board is saved, ``GetTracks()`` raises TypeError (``Tracks()`` comes back as a bare
+    SwigPyObject). When ``counts`` is a list, the clean pass records ``[segments, vias]``
+    from the track list already in hand, before that happens."""
     removed = 0
     for _ in range(20):
         board.BuildConnectivity()
         conn = board.GetConnectivity()
-        dead = [t for t in board.GetTracks() if not t.IsLocked() and conn.TestTrackEndpointDangling(t, False)]
+        tracks = [t for t in board.GetTracks()]
+        dead = [t for t in tracks if not t.IsLocked() and conn.TestTrackEndpointDangling(t, False)]
         if not dead:
+            if counts is not None:
+                vias = sum(1 for t in tracks if t.GetClass() == "PCB_VIA")
+                counts[:] = [len(tracks) - vias, vias]
             break
         for t in dead:
             board.Remove(t)
@@ -1480,14 +1578,16 @@ def finish(spec, pcb_path, ses_path):
                 break
             print(f"fragment vias on {z['net']}: {added}")
             filler.Fill(board.Zones())
-    pruned = prune_dangling(board)
+    counts = []
+    pruned = prune_dangling(board, counts)
     if pruned:
         print(f"removed {pruned} dangling via(s) and track stub(s)")
         filler.Fill(board.Zones())
     P.SaveBoard(pcb_path, board)
-    tracks = [t for t in board.GetTracks()]
-    vias = [t for t in tracks if t.GetClass() == "PCB_VIA"]
-    print(f"routed: {len(tracks) - len(vias)} track segments, {len(vias)} vias -> {pcb_path}")
+    if len(counts) == 2:
+        print(f"routed: {counts[0]} track segments, {counts[1]} vias -> {pcb_path}")
+    else:
+        print(f"routed: track count unavailable after {pruned} dangling removal(s) -> {pcb_path}")
 
 
 if __name__ == "__main__":
