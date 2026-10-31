@@ -230,6 +230,7 @@ class SpecTest(_Lib):
                 build.spec_for(self.board(parts, **kw), self.lib, Path(self.tmp.name), [])
 
     def test_a_pinned_via_reaches_the_board_spec_within_the_via_rules(self):
+        """A legal pinned via is copied into the spec. One outside the via rules is refused."""
         parts = [Part("U1", "T:M", "M", "fp", (5, 5), {"GND": "GND", "A/B": NC})]
         route = (("U1", "1"), ("U1", "3"), {"via": [6.0, 6.0, 0.5, 0.25]})
         spec = build.spec_for(self.board(parts, priority_routes=[route]), self.lib, Path(self.tmp.name), [])
@@ -242,6 +243,7 @@ class SpecTest(_Lib):
                                self.lib, Path(self.tmp.name), [])
 
     def test_route_options_are_checked_against_the_board_rules(self):
+        """Legal route options pass. A repeated, non-finite, or undersized option is refused."""
         rules = build.board_rules(self.board([]))
         pads = (("U1", "1"), ("U1", "3"))
         for ok in ((), ("join",), (0.15,), (1,), ("join", 0.15), (0.15, {"via": [6.0, 6.0, 0.5, 0.25]})):
@@ -259,6 +261,7 @@ class SpecTest(_Lib):
                 build.check_route_options("t", pads + extras, rules)
 
     def test_a_bad_route_option_stops_the_build_before_kicad_runs(self):
+        """``True`` as a route option raises SystemExit, and KiCad is not started."""
         import types
         from unittest import mock
         parts = [Part("U1", "T:M", "M", "fp", (5, 5), {"GND": "GND", "A/B": NC})]
@@ -273,6 +276,8 @@ class SpecTest(_Lib):
         kicad.assert_not_called()
 
     def test_a_moved_reference_via_must_be_a_reference_via_and_stay_close(self):
+        """A short move of a reference via reaches the spec. A via that is not in the reference, or a
+        move past the limit, is refused."""
         parts = [Part("U1", "T:M", "M", "fp", (5, 5), {"GND": "GND", "A/B": NC})]
         ref = Path(self.tmp.name, "ref.json")
         ref.write_text(json.dumps({"footprints": {}, "vias": [{"net": "GND", "x": 3.1, "y": -5.5, "d": 0.6, "drill": 0.25}]}))
@@ -1005,6 +1010,7 @@ class PcbBuildKiCadTest(unittest.TestCase):
     KiCad's own Python against a board made in memory: see eos_pcb_build_kicad.py."""
 
     def test_pcb_build_checks_pass_in_kicads_python(self):
+        """Every check in eos_pcb_build_kicad.py prints ``ok`` and the process exits 0."""
         from eos_boards import kicad_env
         r = subprocess.run([kicad_env.python(), str(Path(__file__).with_name("eos_pcb_build_kicad.py"))],
                            capture_output=True, text=True, timeout=300)
@@ -1034,6 +1040,7 @@ class EsdFlowKiCadTest(unittest.TestCase):
                ("eos-learn-rp2350", "U2.1/6")}
 
     def test_esd_parts_lie_on_their_lines(self):
+        """Every EoS board is checked, and the stubs printed are exactly STUBBED."""
         from eos_boards import kicad_env
         r = subprocess.run([kicad_env.python(), str(Path(__file__).with_name("eos_esd_flow_kicad.py"))],
                            capture_output=True, text=True, timeout=300)
@@ -1847,6 +1854,8 @@ class RobustRoutingTest(_Lib):
                 build.spec_for(self.board(parts, priority_routes=routes), self.lib, Path(self.tmp.name), [])
 
     def test_the_router_cannot_take_the_fanout_and_repairs_rejoin_pour_fragments(self):
+        """Fan-out vias stay locked, repairs rejoin pour fragments, and a pinned via is placed from
+        its route option."""
         # pcbnew code, read as source: these steps cannot run without KiCad
         source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
         fanout = source[source.index("def fanout("):source.index("REFERENCE_ZONE = ")]

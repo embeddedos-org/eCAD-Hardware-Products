@@ -18,6 +18,7 @@ PAIRS = {"USBLC6-2SC6": [("1", "6"), ("3", "4")],
 
 
 def _touches(item, pad):
+    """True when the via or track meets the pad on a copper layer they both occupy."""
     for layer in (P.F_Cu, P.B_Cu):
         if not pad.IsOnLayer(layer):
             continue
@@ -64,6 +65,8 @@ def _centre_inside(start, end, shape):
 
 
 def _boundary(inside, lo, hi, entering):
+    """The parameter between ``lo`` and ``hi`` where ``inside`` changes.
+    ``entering`` is the value of ``inside`` on the high side of that span."""
     for _ in range(50):
         mid = (lo + hi) / 2
         if inside(mid) == entering:
@@ -74,6 +77,7 @@ def _boundary(inside, lo, hi, entering):
 
 
 def _seed(inside, start, end, shape, lo, hi, depth=0):
+    """A parameter in (``lo``, ``hi``) whose centre lies inside ``shape``, or None."""
     mid = (lo + hi) / 2
     if inside(mid):
         return mid
@@ -89,6 +93,7 @@ def _seed(inside, start, end, shape, lo, hi, depth=0):
 
 
 def _merge(spans):
+    """Overlapping (t0, t1) spans joined into one sorted list."""
     out = []
     for a, b in sorted(spans):
         if not out or a > out[-1][1]:
@@ -99,6 +104,7 @@ def _merge(spans):
 
 
 def _outside(spans):
+    """The parts of the segment from 0 to 1 that no span covers."""
     gaps, cursor = [], 0.0
     for a, b in spans:
         if a > cursor:
@@ -110,6 +116,7 @@ def _outside(spans):
 
 
 def _centre_in_pad(pos, pad):
+    """True when ``pos`` lies inside the pad on F.Cu or B.Cu."""
     for layer in (P.F_Cu, P.B_Cu):
         if pad.IsOnLayer(layer) and pad.GetEffectiveShape(layer).Collide(pos, 0):
             return True
@@ -152,6 +159,7 @@ def bypasses(board, fp, a, b):
     if code != esd[1].GetNetCode():
         # An unused channel (both pads no-connect) is not a line. A signal split across the two pads is.
         def bare(pad):
+            """True when the pad has no net, or KiCad left it unconnected."""
             return pad.GetNetCode() <= 0 or pad.GetNetname().startswith("unconnected")
         if bare(esd[0]) and bare(esd[1]):
             return False
@@ -165,6 +173,7 @@ def bypasses(board, fp, a, b):
     group = list(range(len(items) + len(ends)))
 
     def root(i):
+        """The union-find root of item ``i``, with the path compressed."""
         while group[i] != i:
             group[i] = group[group[i]]
             i = group[i]
@@ -252,6 +261,7 @@ def check_branch_shaped_stub_is_not_hidden():
 
 
 def main():
+    """Check the branch-shaped fixture, then print each stub on every EoS board."""
     check_branch_shaped_stub_is_not_hidden()
     for pcb in sorted(BOARDS.glob("*/hardware/*.kicad_pcb")):
         board = P.LoadBoard(str(pcb))

@@ -810,6 +810,7 @@ def place_fiducials(board, spec):
 
 
 def place(spec, pcb_path, dsn_path):
+    """Place the footprints, rules, pours and priority routes, save the board, and write the Specctra DSN."""
     board = P.CreateEmptyBoard()
     rules(board, spec)
     outline(board, spec["width"], spec["height"], spec["corner_radius"])
@@ -1821,6 +1822,8 @@ def prune_dangling(board, spec=None, counts=None):
 
 
 def finish(spec, pcb_path, ses_path):
+    """Import the routed session, widen necks to the minimum track, refill the pours, drop dangling
+    copper, and save the board."""
     board = P.LoadBoard(pcb_path)
     if not P.ImportSpecctraSES(board, ses_path):
         raise SystemExit("Specctra SES import failed")

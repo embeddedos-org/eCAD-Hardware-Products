@@ -324,6 +324,7 @@ def board_rules(board: Board) -> Dict[str, Any]:
 
 
 def check_priority_routes(board: Board, rules: Dict[str, Any]) -> None:
+    """Refuse a priority route whose options break ``rules``, before KiCad starts."""
     for route in board.priority_routes:
         check_route_options(board.name, route, rules)
 
@@ -394,6 +395,7 @@ def pad_numbers(number: str) -> List[str]:
 
 
 def spec_for(board: Board, lib: Library, footprint_dir: Path, texts: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """The placement spec: parts, nets, rules, routes, and the fabrication settings the board declares."""
     check_shunts(board)
     parts, nets = [], set()
     for part in board.parts:
@@ -596,6 +598,8 @@ def violations(report: Path) -> List[Dict[str, Any]]:
 
 
 def main() -> int:
+    """Build the board named on the command line. Return 0 when DRC reports no errors, unconnected
+    items, or schematic-parity mismatches."""
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("board")
     ap.add_argument("--out", type=Path, default=None)

@@ -70,6 +70,7 @@ def via(board, net, x, y, locked=False):
 
 
 def refused(fn):
+    """The SystemExit text from ``fn``. Fails when ``fn`` returns instead."""
     try:
         fn()
     except SystemExit as e:
@@ -78,6 +79,7 @@ def refused(fn):
 
 
 def check_pinned_via_lays_a_locked_via_where_asked():
+    """A locked GND via of the asked size is placed at the asked point, and nowhere else."""
     board, nets = new_board()
     got = B.pinned_via(board, SPEC, nets["GND"], 8.0, 8.0, 0.5, 0.25)
     assert got.IsLocked() and got.GetNetname() == "GND", "not a locked GND via"
@@ -87,6 +89,8 @@ def check_pinned_via_lays_a_locked_via_where_asked():
 
 
 def check_pinned_via_refuses_what_breaks_a_rule():
+    """A via below the size rules, off the board, in a keep-out, or too close to a pad is refused,
+    and no via is left on the board."""
     cases = {
         "below min via": ((8.0, 8.0, 0.45, 0.25), "via rules"),
         "below min drill": ((8.0, 8.0, 0.5, 0.2), "via rules"),
@@ -108,6 +112,7 @@ def check_pinned_via_refuses_what_breaks_a_rule():
 
 
 def check_pinned_via_keeps_hole_and_track_clearance():
+    """Another net's hole or track that is too close is refused. The via's own net is not."""
     board, nets = new_board()
     via(board, nets["SIG"], 8.0, 8.4)            # hole edges 0.4 - 0.125 - 0.15 = 0.125 mm apart
     assert "hole" in refused(lambda: B.pinned_via(board, SPEC, nets["GND"], 8.0, 8.0, 0.5, 0.25))
@@ -120,6 +125,8 @@ def check_pinned_via_keeps_hole_and_track_clearance():
 
 
 def check_route_options_parse_the_pinned_via_and_refuse_the_rest():
+    """``join``, a width, and a pinned via parse. A bad option, or both ``join`` and a via, raises
+    SystemExit."""
     pads = (("U4", "9"), ("R7", "1"))
     assert B.route_options(pads) == (False, None, None)
     assert B.route_options(pads + ("join", 0.15)) == (True, 0.15, None)
@@ -151,6 +158,7 @@ def check_endpoint_layers_by_board_order_unless_via_first():
 
 
 def _zone(board, net, layer, corners, name):
+    """Add a named zone of ``net`` on ``layer``, outlined by ``corners`` in millimetres."""
     z = P.ZONE(board)
     z.SetZoneName(name)
     z.SetLayer(layer)
@@ -193,6 +201,8 @@ def check_pinned_via_sees_inner_layers_and_reference_zones():
 
 
 def check_prune_dangling_counts_from_the_clean_pass():
+    """The dangling via and the stub go. The locked track stays, and the clean pass records one
+    segment and no via."""
     board, nets = new_board()
     track(board, nets["GND"], (11.0, 10.0), (5.0, 5.0), locked=True)   # R1.2 to U1.1: connected
     via(board, nets["GND"], 3.0, 15.0)                                  # leads nowhere
@@ -206,6 +216,7 @@ def check_prune_dangling_counts_from_the_clean_pass():
 
 
 def main():
+    """Run every ``check_*`` function. Return 1 when any fails."""
     failed = 0
     for name, fn in sorted((n, f) for n, f in globals().items() if n.startswith("check_")):
         try:
