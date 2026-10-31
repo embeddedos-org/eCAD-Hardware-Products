@@ -16,6 +16,8 @@ from pathlib import Path
 
 import pcbnew as P
 
+import fabrication   # this folder's own module (the script's directory is on sys.path)
+
 def MM(mm):
     """Millimetres to KiCad's internal nanometres, rounded. pcbnew.FromMM truncates, so 26.3 + 6.0
     (32.29999... in floating point) would land 1 nm short of 32.3 mm."""
@@ -24,6 +26,21 @@ def MM(mm):
 
 def v(x, y):
     return P.VECTOR2I(MM(x), MM(y))
+
+
+# Items taken off the board, kept referenced until the process exits. KiCad 10's SWIG proxies for
+# removed tracks and vias break the bindings when they are garbage-collected: the next
+# board.GetTracks() raises "TypeError: 'swig_runtime_data5.SwigPyObject' object is not iterable"
+# and the process ends with exit 139 (EoS Feather RP2040, 3 builds of 4). Holding them here avoids
+# it; the board's geometry is unchanged. Every removal goes through _remove (issue #70).
+_REMOVED = []
+
+
+def _remove(board, item):
+    """Take ``item`` off ``board`` and keep it referenced in _REMOVED, so Python never frees its
+    proxy while the board is in use. The item can still be added back (repair's all-or-nothing undo)."""
+    board.Remove(item)
+    _REMOVED.append(item)
 
 
 def outline(board, w, h, r):
@@ -110,6 +127,7 @@ def text(board, s, x, y, size, layer=P.F_SilkS, angle=0.0, bold=False, mirror=Fa
     t.SetTextThickness(MM(max(0.15, size * (0.2 if bold else 0.15))))
     t.SetTextAngleDegrees(angle)
     board.Add(t)
+    return t
 
 
 def _box(center, half):
@@ -133,12 +151,13 @@ def track_width(spec, net):
 def _inside(spec, pos, margin):
     """True when ``pos`` (nm) lies inside the board's rounded-rectangle outline by at least
     ``margin`` (nm), corners included, and at least ``margin`` from every copper keep-out (an
-    antenna cut-out): a rectangle test alone lets copper into a cut-away corner."""
+    antenna cut-out) and every fiducial's copper-free square: a rectangle test alone lets copper
+    into a cut-away corner."""
     w, h, r = MM(spec["width"]), MM(spec["height"]), MM(spec["corner_radius"])
     x, y = pos.x, pos.y
     if not (margin <= x <= w - margin and margin <= y <= h - margin):
         return False
-    for x_0, y_0, x_1, y_1 in spec.get("copper_keepouts", []):
+    for x_0, y_0, x_1, y_1 in spec.get("copper_keepouts", []) + [k[:4] for k in spec.get("fiducial_keepouts", [])]:
         if MM(x_0) - margin < x < MM(x_1) + margin and MM(y_0) - margin < y < MM(y_1) + margin:
             return False
     cx = r if x < r else w - r if x > w - r else None
@@ -146,6 +165,13 @@ def _inside(spec, pos, margin):
     if cx is None or cy is None:
         return True
     return (x - cx) ** 2 + (y - cy) ** 2 <= (r - margin) ** 2 if r > margin else False
+
+
+def _in_fiducial_keepout(spec, pos, margin):
+    """True when ``pos`` (nm) lies within ``margin`` of a fiducial's copper-free square (any side: the
+    generator keeps its own copper out of both layers there)."""
+    return any(MM(k[0]) - margin < pos.x < MM(k[2]) + margin and MM(k[1]) - margin < pos.y < MM(k[3]) + margin
+               for k in spec.get("fiducial_keepouts", []))
 
 
 def _holes(board):
@@ -182,8 +208,10 @@ def pinned_via(board, spec, net, x, y, diameter, drill):
     """Lay the via a priority route pins at (``x``, ``y``) mm, ``diameter``/``drill`` mm, and return
     it locked. It is for a gap the maze grid cannot land in, such as the centre of four 0402
     pads. The build stops unless it meets the board's via rules, keeps the board-edge, hole-to-hole
-    and every net class's clearance (plus ROUTER_MARGIN) from other nets' copper, and keeps
-    VIA_PAD_GAP from its own net's surface pads."""
+    and every net class's clearance (plus ROUTER_MARGIN) from other nets' copper on every copper
+    layer and from their reference zones, and keeps VIA_PAD_GAP from its own net's surface pads.
+    A board's own planes are not checked here: they are filled after the via is placed and open a
+    clearance around it. Treating their outline as copper would refuse every through via."""
     r = spec["rules"]
     where = f"pinned via ({x}, {y}) on {net.GetNetname()}"
     if diameter < r["min_via"] or drill < r["min_drill"] or drill >= diameter:
@@ -214,10 +242,17 @@ def pinned_via(board, spec, net, x, y, diameter, drill):
     for t in board.GetTracks():
         if t.GetNetCode() == code:
             continue
-        for layer in (P.F_Cu, P.B_Cu):
-            if (t.GetClass() == "PCB_VIA" or t.GetLayer() == layer) and \
-                    t.GetEffectiveShape(layer).Collide(pos, clear):
+        for layer in board.GetEnabledLayers().CuStack():
+            on_layer = t.IsOnLayer(layer) if t.GetClass() == "PCB_VIA" else t.GetLayer() == layer
+            if on_layer and t.GetEffectiveShape(layer).Collide(pos, clear):
                 raise SystemExit(f"{where}: too close to {t.GetNetname()} copper on {board.GetLayerName(layer)}")
+    # Reference zones are copper already on the board (a copied pour). The maze treats them as
+    # obstacles; a through via crosses every layer they occupy, inner layers included.
+    for z in board.Zones():
+        if z.GetIsRuleArea() or z.GetNetCode() == code or z.GetZoneName() != REFERENCE_ZONE:
+            continue
+        if z.Outline().Collide(pos, clear):
+            raise SystemExit(f"{where}: too close to {z.GetNetname()} zone on {board.GetLayerName(z.GetLayer())}")
     via = P.PCB_VIA(board)
     via.SetPosition(pos)
     via.SetWidth(MM(diameter))
@@ -326,8 +361,10 @@ def fanout(board, spec, only=None, exclude=(), beyond=0, inward=False):
         via.SetWidth(MM(r["via"]))
         via.SetDrill(MM(r["drill"]))
         via.SetNet(net)
+        via.SetLocked(True)      # fixed for the autorouter: Freerouting may otherwise delete or move it
         board.Add(via)
         obstacles.append((_box(pos, via_r), net.GetNetCode()))
+        spec.setdefault("fanout_copper", []).append([pos.x, pos.y])    # prune_dangling may still take it
 
     for fp in board.GetFootprints():
         if (only is not None and fp.GetReference() not in only) or fp.GetReference() in exclude:
@@ -404,6 +441,8 @@ def fanout(board, spec, only=None, exclude=(), beyond=0, inward=False):
                     if any(ob.Intersects(_box(q, tkeep)) and code != net.GetNetCode()
                            for q in path for ob, code in obstacles):
                         continue
+                    if any(_in_fiducial_keepout(spec, q, tkeep) for q in path):
+                        continue
                     if any(ob.Intersects(_box(pos, via_r)) and code == net.GetNetCode() and ob != size
                            for ob, code in obstacles):
                         continue
@@ -415,7 +454,9 @@ def fanout(board, spec, only=None, exclude=(), beyond=0, inward=False):
                     t.SetWidth(stub)
                     t.SetLayer(P.F_Cu if pad.IsOnLayer(P.F_Cu) else P.B_Cu)
                     t.SetNet(net)
+                    t.SetLocked(True)    # with its via: the pad's way into the plane stays as laid
                     board.Add(t)
+                    spec.setdefault("fanout_copper", []).append([c.x, c.y, pos.x, pos.y])
                     add_via(pos, net)
                     placed += 1
                     done = True
@@ -580,6 +621,8 @@ def preroute(board, spec):
                 box = _box(q, keep)
                 if any(ob.Intersects(box) and code != net.GetNetCode() for ob, code in others):
                     return False
+                if _in_fiducial_keepout(spec, q, keep):
+                    return False
             return True
 
         shapes = [[esc, cb], [esc, P.VECTOR2I(cb.x, esc.y), cb], [esc, P.VECTOR2I(esc.x, cb.y), cb]]
@@ -602,6 +645,168 @@ def preroute(board, spec):
             skipped += 1
             print(f"  preroute {ra}.{pa} -> {rb}.{pb}: no clear path, left to the router")
     return routed, skipped
+
+
+FIDUCIAL_KEEPOUT = "eos-fiducial-keepout"
+
+
+def _fiducial_obstacles(board, spec, side):
+    """What a fiducial on ``side`` ("F" or "B") must keep its copper-free square off, as (x0, y0, x1,
+    y1) mm boxes: the courtyards and silkscreen of that side's parts, every pad on that side and every
+    drilled pad, the side's board texts, copper already laid (reference copper, pre-routes) and the
+    design's keep-outs."""
+    cu, crtyd, silk = (P.F_Cu, P.F_CrtYd, P.F_SilkS) if side == "F" else (P.B_Cu, P.B_CrtYd, P.B_SilkS)
+
+    def mm_box(b):
+        return (P.ToMM(b.GetX()), P.ToMM(b.GetY()), P.ToMM(b.GetRight()), P.ToMM(b.GetBottom()))
+
+    out = []
+    for fp in board.GetFootprints():
+        fp.BuildCourtyardCaches()
+        cy = fp.GetCourtyard(crtyd)
+        if cy.OutlineCount():
+            out.append(mm_box(cy.BBox()))
+        for item in fp.GraphicalItems():
+            if item.GetLayer() == silk:
+                out.append(mm_box(item.GetBoundingBox()))
+        for pad in fp.Pads():
+            if pad.IsOnLayer(cu) or pad.HasHole():
+                out.append(mm_box(pad.GetBoundingBox()))
+    for d in board.GetDrawings():
+        if d.GetLayer() == silk:
+            out.append(mm_box(d.GetBoundingBox()))
+    for t in board.GetTracks():
+        if t.GetClass() == "PCB_VIA" or t.GetLayer() == cu:
+            out.append(mm_box(t.GetBoundingBox()))
+    for z in board.Zones():
+        if not z.GetIsRuleArea() and z.GetLayer() == cu:
+            out.append(mm_box(z.GetBoundingBox()))
+    out += [tuple(k[:4]) for k in spec.get("copper_keepouts", []) + spec.get("router_keepouts", [])
+            + spec.get("pour_keepouts", [])]
+    return out
+
+
+IDENTITY_PAD_GAP = 0.15      # mm from silkscreen to a pad: JLCPCB's "Pad To Silkscreen" minimum
+IDENTITY_EDGE_GAP = 0.3      # mm from silkscreen to the board edge
+IDENTITY_MIN_SIZE = 0.8      # mm: the smallest text the boards use (their ownership lines)
+
+
+def fit_identity(board, spec, item, t):
+    """Move or shrink the generator's identity line until it clears every pad of its side and every
+    drilled pad by IDENTITY_PAD_GAP, stays IDENTITY_EDGE_GAP inside the outline, and touches no other
+    silkscreen of its layer (board texts and drawings, footprint graphics and visible footprint texts)
+    that the design's own name line (``design_text``, where its designer checked it) did not already
+    touch (PR #74 review: a line moved down could land on the ownership line): first where the design
+    put it, then up or down in 0.25 mm steps (up to 2 mm), then the same at IDENTITY_MIN_SIZE. A line
+    that fits nowhere stops the build: fabs clip silkscreen off pads, and KiCad reports silk over
+    copper only as a warning. Every design text is on the board before this runs. Returns where it went."""
+    layer = item.GetLayer()
+    cu = P.B_Cu if layer == P.B_SilkS else P.F_Cu
+    gap = MM(IDENTITY_PAD_GAP)
+    pads, silk = [], {}
+    own = item.m_Uuid.AsString()
+    for fp in board.GetFootprints():
+        for pad in fp.Pads():
+            if pad.IsOnLayer(cu) or pad.HasHole():
+                b = pad.GetBoundingBox()
+                pads.append(P.BOX2I(P.VECTOR2I(b.GetX() - gap, b.GetY() - gap),
+                                    P.VECTOR2I(b.GetWidth() + 2 * gap, b.GetHeight() + 2 * gap)))
+        for g in list(fp.GraphicalItems()) + [fp.Reference(), fp.Value()]:
+            if g.GetLayer() == layer and (not hasattr(g, "IsVisible") or g.IsVisible()):
+                silk[g.m_Uuid.AsString()] = g.GetBoundingBox()
+    for d in board.GetDrawings():
+        if d.GetLayer() == layer and d.m_Uuid.AsString() != own:
+            silk[d.m_Uuid.AsString()] = d.GetBoundingBox()
+    allowed = set()
+    if t.get("design_text"):                        # what the design's line touched where it was drawn
+        item.SetText(t["design_text"])
+        item.SetPosition(v(t["x"], t["y"]))
+        allowed = {uid for uid, box in silk.items() if box.Intersects(item.GetBoundingBox())}
+        item.SetText(t["text"])
+    sizes = [t["size"]] + ([IDENTITY_MIN_SIZE] if t["size"] > IDENTITY_MIN_SIZE else [])
+    steps = [0.0] + [s * d for s in (0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0) for d in (-1, 1)]
+    for size in sizes:
+        item.SetTextSize(v(size, size))
+        item.SetTextThickness(MM(max(0.15, size * (0.2 if t.get("bold") else 0.15))))
+        for dy in steps:
+            item.SetPosition(v(t["x"], t["y"] + dy))
+            b = item.GetBoundingBox()
+            corners = [P.VECTOR2I(x, y) for x in (b.GetX(), b.GetRight()) for y in (b.GetY(), b.GetBottom())]
+            if all(_inside(dict(spec, copper_keepouts=[], fiducial_keepouts=[]), c, MM(IDENTITY_EDGE_GAP)) for c in corners) \
+                    and not any(p.Intersects(b) for p in pads) \
+                    and not any(box.Intersects(b) for uid, box in silk.items() if uid not in allowed):
+                return f"{size} mm at ({t['x']}, {round(t['y'] + dy, 2)})"
+    raise SystemExit(f"identity line {t['text']!r} clears no pad, edge or other silkscreen at {t['size']} or "
+                     f"{IDENTITY_MIN_SIZE} mm within 2 mm of ({t['x']}, {t['y']}); move the design's name line")
+
+
+def place_fiducials(board, spec):
+    """Fiducials on every side the assembler populates (fabrication.carries_smd_parts): positions from
+    the design's ``fiducials`` option for a side it names, else three chosen near three corners, or two
+    diagonally opposite where three do not fit (the reason goes into the spec's ``fiducial_notes``).
+    Each is a board-only footprint (no schematic symbol, no BOM line, in the placement file) with a
+    rule area round it that no track, via or pour may enter; the square also goes into the spec, so
+    every later step's own copper keeps out. Returns [(reference, side, x, y)]."""
+    def paste(pad):
+        return pad.IsOnLayer(P.F_Paste) or pad.IsOnLayer(P.B_Paste)
+    sides = [s for s, layer in (("F", P.F_Cu), ("B", P.B_Cu))
+             if any(fp.GetLayer() == layer and fabrication.carries_smd_parts(
+                 fp.IsDNP(), fp.IsExcludedFromPosFiles(), [(p.GetAttribute() == P.PAD_ATTRIB_SMD, paste(p)) for p in fp.Pads()])
+                 for fp in board.GetFootprints())]
+    given = spec.get("fiducials", {})
+    sides += [s for s in given if s not in sides]
+    lib, name = fabrication.FIDUCIAL_FOOTPRINT.split(":")
+    placed = []
+    for side in ("F", "B"):
+        if side not in sides:
+            continue
+        obstacles = _fiducial_obstacles(board, spec, side)
+        args = (spec["width"], spec["height"], spec["corner_radius"])
+        if side in given:
+            points = [tuple(p) for p in given[side]]
+            problems = fabrication.fiducial_problems(points, *args, obstacles)
+            if problems:
+                raise SystemExit(f"fiducials on {side} from the design: " + "; ".join(problems))
+        else:
+            try:
+                points, note = fabrication.choose_fiducials(*args, obstacles)
+            except ValueError as e:
+                raise SystemExit(f"{side} side: {e}")
+            if note:
+                spec.setdefault("fiducial_notes", {})[side] = note
+                print(f"  fiducials on {side}: {note}")
+        for x, y in points:
+            fp = P.FootprintLoad(str(Path(spec["footprint_dir"]) / f"{lib}.pretty"), name)
+            fp.SetFPIDAsString(fabrication.FIDUCIAL_FOOTPRINT)
+            ref = f"FID{len(placed) + 1}"
+            fp.SetReference(ref)
+            fp.SetValue("Fiducial")
+            board.Add(fp)
+            fp.SetPosition(v(x, y))
+            if side == "B":
+                fp.Flip(fp.GetPosition(), P.FLIP_DIRECTION_LEFT_RIGHT)
+            fp.SetBoardOnly(True)           # not in the schematic: parity leaves it alone
+            fp.SetExcludedFromBOM(True)     # not a BOM line, but in the placement file
+            fp.Reference().SetLayer(P.B_Fab if side == "B" else P.F_Fab)
+            x0, y0, x1, y1 = fabrication.fiducial_box(x, y)
+            area = P.ZONE(board)
+            area.SetIsRuleArea(True)
+            area.SetLayer(P.F_Cu if side == "F" else P.B_Cu)
+            area.SetZoneName(FIDUCIAL_KEEPOUT)
+            area.SetDoNotAllowTracks(True)
+            area.SetDoNotAllowVias(True)
+            area.SetDoNotAllowZoneFills(True)
+            area.SetDoNotAllowPads(False)
+            area.SetDoNotAllowFootprints(False)
+            o = area.Outline()
+            o.NewOutline()
+            for px, py in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):
+                o.Append(MM(px), MM(py))
+            board.Add(area)
+            spec.setdefault("fiducial_keepouts", []).append([x0, y0, x1, y1, side])
+            placed.append((ref, side, x, y))
+    spec["fiducials_placed"] = [list(p) for p in placed]
+    return placed
 
 
 def place(spec, pcb_path, dsn_path):
@@ -655,9 +860,20 @@ def place(spec, pcb_path, dsn_path):
             net = part["pads"].get(pad.GetNumber())
             if net:
                 pad.SetNet(nets[net])
-    for t in spec.get("texts", []):
-        text(board, t["text"], t["x"], t["y"], t["size"], getattr(P, t.get("layer", "F_SilkS")),
-             t.get("angle", 0.0), t.get("bold", False), t.get("mirror", False))
+    placed_texts = [(text(board, t["text"], t["x"], t["y"], t["size"], getattr(P, t.get("layer", "F_SilkS")),
+                          t.get("angle", 0.0), t.get("bold", False), t.get("mirror", False)), t)
+                    for t in spec.get("texts", [])]
+    for item, t in placed_texts:        # every design text is down before the name line is fitted round them
+        if t.get("identity"):
+            spec["identity_fit"] = fit_identity(board, spec, item, t)       # recorded in build-report.json
+            print(f"identity line: {spec['identity_fit']}")
+    tb = board.GetTitleBlock()       # as the schematic's: title, date, revision, owner and licence
+    tb.SetTitle(spec["title_block"]["title"])
+    tb.SetDate(spec["title_block"]["date"])
+    tb.SetRevision(spec["title_block"]["rev"])
+    tb.SetCompany(spec["title_block"]["company"])
+    for i, line in enumerate(spec["title_block"]["comments"]):
+        tb.SetComment(i, line)
     # Inner planes go in before routing: the autorouter then joins each plane net's pads to
     # its plane with a via instead of routing them as tracks.
     for pl in spec.get("planes", []):
@@ -728,6 +944,10 @@ def place(spec, pcb_path, dsn_path):
                 item.SetLocked(True)
         print(f"priority route {ra}.{pa} -> {rb}.{pb} ({net.GetNetname()}): "
               f"{len(laid)} escape segment(s) from the reference, then {len(got)} item(s)")
+    # Fiducials after the reference copper, pre-routes and priority routes, the copper a designer lays
+    # first (they take the free spots round it), and before the main fan-out, which then keeps its vias
+    # out of the fiducials' squares, as every later step does.
+    print(f"fiducials: {place_fiducials(board, spec)}")
     placed, left = fanout(board, spec, exclude=early | first)   # two layers: the exposed pads' vias only
     if placed or left:
         print(f"plane fan-out: {placed} vias, {left} pads left to the router")
@@ -739,6 +959,9 @@ def place(spec, pcb_path, dsn_path):
     if board.Zones():
         P.ZONE_FILLER(board).Fill(board.Zones())
     P.SaveBoard(pcb_path, board)
+    # the fab's stack-up, written into the saved file: KiCad 10's Python does not wrap BOARD_STACKUP
+    saved = Path(pcb_path)
+    saved.write_text(fabrication.insert_stackup(saved.read_text(encoding="utf-8"), spec["stackup"]), encoding="utf-8")
     # From here on the changes reach the router's input only, never the saved board.
     # Freerouting works on a grid and can leave a track a fraction of a micrometre inside the
     # clearance (0.1491 mm against 0.15 mm, on EoS ESP32 DevKit). The router sees a little more
@@ -757,11 +980,11 @@ def place(spec, pcb_path, dsn_path):
         layer = P.B_Cu if len(k) > 4 and k[4] == "B.Cu" else P.F_Cu
         _keepout(board, layer, [(MM(x0), MM(y0)), (MM(x1), MM(y0)), (MM(x1), MM(y1)), (MM(x0), MM(y1))])
     for z in [z for z in board.Zones() if z.GetZoneName() == POUR_KEEPOUT]:
-        board.Remove(z)                  # KiCad would export a fill-only rule area as a full keep-out
+        _remove(board, z)                # KiCad would export a fill-only rule area as a full keep-out
     for z in [z for z in board.Zones() if z.GetZoneName() == REFERENCE_ZONE]:
         o = z.Outline()
         _keepout(board, z.GetLayer(), [(o.CVertex(i).x, o.CVertex(i).y) for i in range(o.TotalVertices())])
-        board.Remove(z)
+        _remove(board, z)
     if not P.ExportSpecctraDSN(board, dsn_path):
         raise SystemExit("Specctra DSN export failed")
     # Freerouting may not put a via on a surface pad: 2.4.1's default, stated here so that a
@@ -820,6 +1043,20 @@ def stitch(board, net, spec, pitch=2.54, margin=1.2):
     return placed
 
 
+def join_all_fragments(board, spec, filler):
+    """join_fragments on every poured net, refilling after each round, up to three rounds a net. Run
+    after the pours are first filled (finish) and again after each repair, whose new tracks can cut a
+    pour into pieces that no via reaches."""
+    for z in spec.get("zones", []):
+        net = board.FindNet(z["net"])
+        for _ in range(3):
+            added = join_fragments(board, net, spec)
+            if not added:
+                break
+            print(f"fragment vias on {z['net']}: {added}")
+            filler.Fill(board.Zones())
+
+
 def join_fragments(board, net, spec):
     """Give every outer-layer pour fragment of ``net`` that has no via or through-hole pad a
     via into the inner plane: a fragment whose only link is a surface pad (VREG_PGND, say)
@@ -876,6 +1113,7 @@ def join_fragments(board, net, spec):
                     if outline.PointInside(c) and all(outline.PointInside(q) for q in ring) \
                             and not any(pb.Intersects(vb) for pb in pads) and _hole_free(holes, c, MM(r["drill"])) \
                             and not _in_pour_keepout(spec, c, radius) and clear_of_others(c) \
+                            and not _in_fiducial_keepout(spec, c, radius) \
                             and not any(sh.Collide(c, MM(r["via"] / 2 + VIA_PAD_GAP)) for sh in smd):
                         holes.append((c, MM(r["drill"]) // 2))
                         via = P.PCB_VIA(board)
@@ -1054,14 +1292,24 @@ def maze(board, spec, net, a, b, width, join=False, via_first=False):
             track_block[layers.index(P.F_Cu)][j * nx + i] = 1
     # outside the board outline (its rounded corners included) is closed to tracks and vias
     t_edge, v_edge = edge + hw + margin, edge + via_r + margin
+    no_fiducials = dict(spec, fiducial_keepouts=[])
     for j in range(ny):
         for i in range(nx):
             pt = P.VECTOR2I(x0 + i * g, y0 + j * g)
-            if not _inside(spec, pt, v_edge):
+            if not _inside(spec, pt, v_edge):              # a via spans every layer: any fiducial's square
                 via_block[j * nx + i] = 1
-                if not _inside(spec, pt, t_edge):
+                if not _inside(no_fiducials, pt, t_edge):
                     track_block[0][j * nx + i] = 1
                     track_block[1][j * nx + i] = 1
+    # a fiducial's square closes tracks on its own layer only: its rule area is on that layer, and a
+    # track on the other side may pass under it
+    for k in spec.get("fiducial_keepouts", []):
+        li = 0 if k[4] == "F" else 1
+        grow = hw + margin
+        box = P.BOX2I(P.VECTOR2I(MM(k[0]) - grow, MM(k[1]) - grow), P.VECTOR2I(MM(k[2] - k[0]) + 2 * grow, MM(k[3] - k[1]) + 2 * grow))
+        if box.Intersects(search):
+            for i, j, pt in cells(box):
+                track_block[li][j * nx + i] = 1
     # drilled holes of any net, this one's included: a new via keeps HOLE_TO_HOLE from each
     for c, rad in _holes(board):
         reach_h = rad + MM(r["drill"]) // 2 + MM(HOLE_TO_HOLE) + margin
@@ -1227,7 +1475,7 @@ def _lift_near(board, spec, net, points, radius):
                 cx, cy = st.x + k * dx, st.y + k * dy
                 near = near or (cx - q.x) ** 2 + (cy - q.y) ** 2 <= radius ** 2
         if near:
-            board.Remove(t)
+            _remove(board, t)
             lifted.append(t)
     return lifted
 
@@ -1262,16 +1510,32 @@ def ripup(spec, pcb_path, clashes_path):
     board = P.LoadBoard(pcb_path)
     clashes = json.loads(Path(clashes_path).read_text())
     lifted = 0
-    for c in clashes:
-        at = v(*c["pos"])
+
+    def lift(net, pos):
+        at, n = v(*pos), 0
         for t in list(board.GetTracks()):
-            if t.IsLocked() or t.GetNetname() != c["net"]:
+            if t.IsLocked() or t.GetNetname() != net:
                 continue
             box = t.GetBoundingBox()
             box.Inflate(MM(1.0))
             if box.Contains(at):
-                board.Remove(t)
-                lifted += 1
+                _remove(board, t)
+                n += 1
+        return n
+
+    def fixed(item):
+        # the named item is locked copper: a locked via, or a locked track of its length, of its net at its spot
+        at = v(*item["pos"])
+        for t in board.GetTracks():
+            via = t.GetClass() == "PCB_VIA"
+            if t.IsLocked() and t.GetNetname() == item["net"] and via == item.get("via", False) \
+                    and t.HitTest(at, MM(0.005)) and (via or abs(P.ToMM(t.GetLength()) - item.get("length", 0.0)) < 0.001):
+                return True
+        return False
+
+    for c in clashes:
+        # the named item, or what it clashes with when the named one is fixed copper (a locked fan-out via)
+        lifted += fabrication.lift_with_fallback(c, lift, fixed)
     if lifted:
         P.ZONE_FILLER(board).Fill(board.Zones())
     P.SaveBoard(pcb_path, board)
@@ -1308,6 +1572,8 @@ def repair(spec, pcb_path, pairs_path):
             for k in range(n + 1):
                 q = P.VECTOR2I(int(p0.x + (p1.x - p0.x) * k / n), int(p0.y + (p1.y - p0.y) * k / n))
                 if any(ob.Intersects(_box(q, keep)) and code != net.GetNetCode() for ob, code in others):
+                    return False
+                if _in_fiducial_keepout(spec, q, keep):
                     return False
             return True
 
@@ -1391,15 +1657,17 @@ def repair(spec, pcb_path, pairs_path):
                 done = True
                 break
             for item in added:
-                board.Remove(item)
+                _remove(board, item)
             for t in lifted:
                 board.Add(t)
         fixed += 1 if done else 0
         if not done:
             print(f"  repair: could not close {pair['net']} at {pair['a']} - {pair['b']}")
-    P.ZONE_FILLER(board).Fill(board.Zones())
-    if prune_dangling(board):
-        P.ZONE_FILLER(board).Fill(board.Zones())
+    filler = P.ZONE_FILLER(board)
+    filler.Fill(board.Zones())
+    join_all_fragments(board, spec, filler)       # the new copper can leave a pour fragment with no via
+    if prune_dangling(board, spec):
+        filler.Fill(board.Zones())
     P.SaveBoard(pcb_path, board)
     print(f"repaired {fixed} of {len(pairs)} open connection(s)")
 
@@ -1512,27 +1780,42 @@ def ease_vias(board, spec):
     return moved, left
 
 
-def prune_dangling(board, counts=None):
+def _fanout_item(t, fanout):
+    """True when ``t`` is a fan-out via or stub that place() recorded (``spec["fanout_copper"]``: a via
+    as [x, y], a stub as [x0, y0, x1, y1], in nm)."""
+    if t.GetClass() == "PCB_VIA":
+        return (t.GetPosition().x, t.GetPosition().y) in fanout
+    a, b = t.GetStart(), t.GetEnd()
+    return (a.x, a.y, b.x, b.y) in fanout or (b.x, b.y, a.x, a.y) in fanout
+
+
+def prune_dangling(board, spec=None, counts=None):
     """Remove the router's vias and track stubs that lead nowhere (connected on one layer, or an
-    end touching nothing), until none are left. Locked copper (a reference design's) stays.
+    end touching nothing), until none are left, and the fan-out's own locked vias and stubs that do.
+    Other locked copper (a reference design's, the priority routes) stays.
 
     KiCad 10.0.6: once this drops its connectivity data and the pour is refilled, or once the
     board is saved, ``GetTracks()`` raises TypeError (``Tracks()`` comes back as a bare
-    SwigPyObject). When ``counts`` is a list, the clean pass records ``[segments, vias]``
-    from the track list already in hand, before that happens."""
+    SwigPyObject). The clean pass reads the track list already in hand. When ``counts`` is a
+    list, that pass records ``[segments, vias]`` from it."""
+    fanout = {tuple(x) for x in (spec or {}).get("fanout_copper", [])}
+    prune_dangling.counts = None
     removed = 0
     for _ in range(20):
         board.BuildConnectivity()
         conn = board.GetConnectivity()
         tracks = [t for t in board.GetTracks()]
-        dead = [t for t in tracks if not t.IsLocked() and conn.TestTrackEndpointDangling(t, False)]
+        dead = [t for t in tracks if (not t.IsLocked() or _fanout_item(t, fanout))
+                and conn.TestTrackEndpointDangling(t, False)]
         if not dead:
+            vias = sum(1 for t in tracks if t.GetClass() == "PCB_VIA")
+            recorded = [len(tracks) - vias, vias]
+            prune_dangling.counts = recorded
             if counts is not None:
-                vias = sum(1 for t in tracks if t.GetClass() == "PCB_VIA")
-                counts[:] = [len(tracks) - vias, vias]
+                counts[:] = recorded
             break
         for t in dead:
-            board.Remove(t)
+            _remove(board, t)          # see _REMOVED: freeing their proxies breaks the bindings
         removed += len(dead)
     return removed
 
@@ -1559,7 +1842,7 @@ def finish(spec, pcb_path, ses_path):
     done = set(spec.get("complete_nets", []))
     extra = [t for t in board.GetTracks() if not t.IsLocked() and t.GetNetname() in done]
     for t in extra:
-        board.Remove(t)
+        _remove(board, t)
     if extra:
         print(f"removed {len(extra)} router item(s) on nets the reference copper already completes")
     nets = {n.GetNetname(): n for n in board.GetNetsByName().values()} if hasattr(board, "GetNetsByName") else {}
@@ -1570,16 +1853,9 @@ def finish(spec, pcb_path, ses_path):
         print(f"stitching vias on {z['net']}: {stitch(board, net, spec)}")
     filler = P.ZONE_FILLER(board)
     filler.Fill(board.Zones())
-    for z in spec.get("zones", []):
-        net = board.FindNet(z["net"])
-        for _ in range(3):
-            added = join_fragments(board, net, spec)
-            if not added:
-                break
-            print(f"fragment vias on {z['net']}: {added}")
-            filler.Fill(board.Zones())
-    counts = []
-    pruned = prune_dangling(board, counts)
+    join_all_fragments(board, spec, filler)
+    pruned = prune_dangling(board, spec)
+    counts = prune_dangling.counts or []
     if pruned:
         print(f"removed {pruned} dangling via(s) and track stub(s)")
         filler.Fill(board.Zones())
@@ -1594,3 +1870,6 @@ if __name__ == "__main__":
     mode, spec_path, pcb, other = sys.argv[1:5]
     spec = json.loads(Path(spec_path).read_text())
     {"place": place, "finish": finish, "repair": repair, "ripup": ripup}[mode](spec, pcb, other)
+    if mode == "place":
+        # the fiducials placed and their copper-free squares, which finish, repair and rip-up honour
+        Path(spec_path).write_text(json.dumps(spec, indent=1))

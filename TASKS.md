@@ -9,11 +9,59 @@ Status is one of: `todo`, `in-progress`, `blocked`, `review`, `done`.
 
 ## Active
 
-### EoS original boards — batch 3 (campaign #55)
+### EoS Feather RP2040 (campaign #55)
+
+Owner: implementation and independent review assigned separately
+Mode: Review
+Status: review
+
+Scope: EoS Feather RP2040 (catalogue entry `adafruit:feather`), its generated artifacts and
+documentation; the `prune_dangling` crash fix in `tools/eos_boards/pcb_build.py`.
+
+Acceptance criteria (verbatim from the campaign handoff)
+: - "Never open or use a vendor's design files (schematic, layout, Gerbers, BOM)."
+  - "A board passes only at: ERC 0, DRC errors 0, unconnected 0, schematic parity 0."
+  - "Independent review by a different agent or person: check pins, power, USB, headers, BOM, layout and docs, and grade findings BLOCKER, MAJOR or MINOR."
+  - "Fix the findings, rebuild, then have the fixes verified by another reviewer on the routed board."
+  - "Previews in every PR"
+
+State (2026-10-24): full build 13 passes (ERC 0, DRC errors 0, unconnected 0, parity 0;
+7 silkscreen-to-edge warnings). Independent review: 0 blocker, 0 major, 9 minor; generator fix
+accepted. The fixes were README and comment changes only, so no rebuild was needed; the board files
+are byte-identical to build 13. Every finding that needs a rebuild is listed in the README's "Rev B
+follow-ups". A second reviewer checked the fixes (two rounds). Board tests: 59 run, 1 skipped.
+Open: the owner's decision on the battery connector's position (the Feather specification puts it
+0.425 in from the left edge; this board has it at the right end); the other `board.Remove()` sites
+in `pcb_build.py` (follow-up issue).
+
+### EoS original boards — batch 4: EoS TM4C1294 Board (campaign #55)
 
 Owner: implementation and independent review assigned per board
 Mode: Review
 Status: review
+
+Scope: the EoS TM4C1294 Board; its generic MCU symbol, 2x49 connector symbol and footprint,
+generated artifacts, evidence and documentation.
+
+Acceptance criteria (verbatim from the campaign handoff)
+: - "Never open or use a vendor's design files (schematic, layout, Gerbers, BOM)."
+  - "Replace on-board debug probes."
+  - "A board passes only at: ERC 0, DRC errors 0, unconnected 0, schematic parity 0."
+  - "Independent review by a different agent or person: check pins, power, USB, headers, BOM, layout and docs, and grade findings BLOCKER, MAJOR or MINOR."
+  - "Fix the findings, rebuild, then have the fixes verified by another reviewer on the routed board."
+  - "Previews in every PR"
+
+State (2026-10-22): build 20 at 0/0/0/0 (19 silkscreen-at-edge warnings). Independent full
+review: 0 BLOCKER, 2 MAJOR, 13 MINOR; fix verification on build 20: 0 BLOCKER, 0 MAJOR, 9 MINOR
+open, all disclosed in the board README; acceptable for rev A. Deferred to a library/generator
+change: an FTSH-105 land pattern (shared by eight boards), the stack-up written into the board
+file, and BOM lines for jumper shunts.
+
+### EoS original boards — batch 3 (campaign #55)
+
+Owner: implementation and independent review assigned per board
+Mode: Review
+Status: done (merged as #64, 2026-10-20)
 
 Scope: EoS RA4M2 Board, EoS RL78G13 Board and EoS F280049C Board;
 their generic MCU symbols, generated artifacts, evidence and documentation.
@@ -46,6 +94,38 @@ tests pass in normal and ISO8859-1 locales (59 run, 1 skipped); the evidence
 bundle validates and verifies; the full suite's one error is the existing
 `pytest` import in `tests/unit/test_validation_schemas.py`. Remaining: PR, previews
 and CI.
+
+### EoS original boards — rebuild the ten built before the via rule (campaign #55)
+
+Owner: implementation; independent verification by a different agent
+Mode: Review
+Status: review
+
+Scope: the ten boards `ViaInPadTest` listed as built before the no-via-in-pad rule;
+board-file routing options only (no part, value, net or position change); the test.
+
+Acceptance criteria (verbatim from the verification brief)
+: - "A board passes only at: ERC 0, DRC errors 0, unconnected 0, schematic parity 0."
+  - "No via in a non-exposed surface pad, and every via ≥ `VIA_PAD_GAP` from same-net pads: `ViaInPadTest` passes for each rebuilt board with the board removed from `BUILT_BEFORE_THE_RULE`."
+  - "Only copper changed: nets, pads, footprints, positions, values and the schematic identical to the merged build, unless the notes declare a design-file change, which you must then review on its merits."
+  - "No regression in the routes the earlier reviews graded: every priority route still connected, with its length, vias and layers compared old → new; plane fan-out not longer; no new pour island or single-link GND fragment that holds a pad."
+  - "README \"Build results\" match each `build-report.json` / `drc.json`; any README sentence about vias, pads or routed lengths that the rebuild made false is listed."
+
+State (2026-10-21): all ten rebuilt at 0/0/0/0 with the batch-3 generator, on master `23aa853`
+(PR #64 merged); DRC warnings identical to the merged builds; board tests 59 run, 1 skipped.
+Design-file changes are routing options only (priority routes, `fanout_first`, `ground_vias`,
+a bottom-layer router keep-out on the KL25 crystal). Independent verification: three rounds.
+
+Owner decision (2026-10-22): adopted, for two-layer boards, the verifier's wording below in place
+of "no new pour island or single-link GND fragment that holds a pad":
+: "On a two-layer board, a via-less pour island or single-link GND group that holds a pad is acceptable when, for each pad it holds, the track path to the nearest GND via is no longer than master's plus 1 mm, or the pad is a strap or logic tie; a decoupling, analog or oscillator ground pad that becomes single-linked must not have a longer path than master's. Exceptions are listed in the README."
+
+Waivers recorded with it: EoS CM4 Base (a 0.37 mm² via-less sliver beside U7.9, a logic tie
+joined under the package); EoS CM5 Base (a 2.3 mm² sliver along C7.2's unchanged ground track,
+C1.2 on its own fan-out via, the USB host pair's skew 0.57 → 2.81 mm); both four-layer boards with
+an inner ground plane. Listed exception: EoS STM32 64's VSS 47, 6.4 mm of track from a via
+(master 1.3 mm), because its capacitor's supply pad sits between pin and ground pad; fixing it
+needs a placement change.
 
 | ID | Task | Owner | Mode | Status | Depends on |
 |----|------|-------|------|--------|------------|

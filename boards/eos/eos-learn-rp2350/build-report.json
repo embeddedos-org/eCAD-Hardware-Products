@@ -2,7 +2,7 @@
  "board": "eos-learn-rp2350",
  "kicad": "10.0.6",
  "erc_violations": 0,
- "repair_rounds": 1,
+ "repair_rounds": 2,
  "drc": {
   "violations": 4,
   "unconnected_items": 0,

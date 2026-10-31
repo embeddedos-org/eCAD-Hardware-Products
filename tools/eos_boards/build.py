@@ -33,8 +33,8 @@ from typing import Any, Dict, List
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 
-from eos_boards import kicad_env, schematic  # noqa: E402
-from eos_boards.design import ALL_RIGHTS_RESERVED, NC, Board, resolve  # noqa: E402
+from eos_boards import fabrication, kicad_env, metrics, schematic  # noqa: E402
+from eos_boards.design import ALL_RIGHTS_RESERVED, NC, Board, Part, resolve  # noqa: E402
 from eos_boards.kicad_lib import Library  # noqa: E402
 from eos_boards.sexpr import find, find_all  # noqa: E402
 
@@ -48,6 +48,19 @@ MAX_VIA_MOVE = 0.25
 def run(cmd: List[str], **kw: Any) -> subprocess.CompletedProcess:
     print("$", " ".join(str(c) for c in cmd), flush=True)
     return subprocess.run([str(c) for c in cmd], capture_output=True, text=True, **kw)
+
+
+def pcb_step(mode: str, *args: Any, tail: int = 2000) -> subprocess.CompletedProcess:
+    """Run one ``pcb_build.py`` step (place, finish, repair or ripup) with KiCad's Python and stop the
+    build if it did not finish. KiCad 10's bindings can crash such a step (exit 139, or -11 from a
+    signal); unchecked, a crashed repair or rip-up round would pass for one that found nothing to do,
+    and the next DRC round would see the same problems without a word (issue #70)."""
+    r = run([kicad_env.python(), HERE / "pcb_build.py", mode, *args])
+    print(r.stdout[-tail:], r.stderr[-tail:])
+    if r.returncode:
+        raise SystemExit(f"pcb_build.py {mode} failed (exit {r.returncode}); see the output above. "
+                         "The board file holds what the last finished step saved.")
+    return r
 
 
 def board_net(board: Board, net: str) -> str:
@@ -107,8 +120,11 @@ def licence_text(board, module=""):
 
 def clearance_clashes(drc):
     """The clearance errors between two pieces of routed copper (track or via), from KiCad's DRC
-    report, as {net, pos}: the via if one is involved, else the shorter track. That is the item to
-    lift and route again. A clash with a pad or a zone is left for the build to fail on."""
+    report, as {net, pos, via, length, other}: the via if one is involved, else the shorter track. That
+    is the item to lift and route again (``via`` says which kind it is and ``length`` a track's length
+    in mm, so rip-up can tell whether it is locked copper); ``other`` (the same keys) is the item it
+    clashes with, which rip-up lifts instead when the first is fixed copper (a locked fan-out via). A
+    clash with a pad or a zone is left for the build to fail on."""
     out = []
     for v in drc.get("violations", []):
         items = v.get("items", [])
@@ -120,9 +136,153 @@ def clearance_clashes(drc):
             m = re.search(r"length ([0-9.]+) mm", i["description"])
             return float(m.group(1)) if m else 0.0       # a via has no length: lift it first
         item = min(items, key=length)
-        out.append({"net": item["description"].split("[", 1)[1].split("]", 1)[0],
-                    "pos": [item["pos"]["x"], item["pos"]["y"]]})
+        other = items[1] if item is items[0] else items[0]
+        def named(i):
+            return {"net": i["description"].split("[", 1)[1].split("]", 1)[0], "pos": [i["pos"]["x"], i["pos"]["y"]],
+                    "via": i["description"].startswith("Via ["), "length": length(i)}
+        out.append(dict(named(item), other=named(other)))
     return out
+
+
+def dangling_via_problems(drc: Dict[str, Any]) -> List[str]:
+    """DRC via_dangling findings: a via that joins nothing on one side. KiCad grades them as warnings;
+    the build treats them as errors (no committed board has one), since the fan-out's locked vias are
+    no longer pruned by the router."""
+    return [f"via_dangling: {i['description']}" for v in drc.get("violations", []) if v.get("type") == "via_dangling"
+            for i in v.get("items", [])[:1]]
+
+
+def one_revision(board: Board, texts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """The texts with every other hand-drawn name line, one ending in "rev <letter or number>" (a front
+    name line beside the identity line on the back, say), given the board's revision, so the board
+    never shows two (PR #74 review). The rest of each line stays as drawn."""
+    return [dict(t, text=re.sub(r"\brev [A-Z0-9]+$", f"rev {board.revision}", t["text"]))
+            if re.search(r"\brev [A-Z0-9]+$", t["text"]) else t for t in texts]
+
+
+def identity_texts(board: Board, texts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """The design's silkscreen texts with the board's identity line, "<title>  rev <revision>  <year>",
+    beside its ownership line ("(c) <year> <owner>"), on the same layer and mirrored as it is. A design
+    line on that layer ending in "rev <letter or number>" (the name line every design drew by hand, of
+    any revision) is replaced in place; otherwise the line goes 2 mm above the ownership line. The line
+    is marked ``identity``: the placement step moves or shrinks it until it clears every pad and the
+    board edge, or stops the build. A design without an ownership line is refused: there is nowhere to
+    put the identity beside it."""
+    year = board.date[:4]
+    owner = f"(c) {year} {board.company}"
+    found = [t for t in texts if t["text"] == owner]
+    if len(found) != 1:
+        raise SystemExit(f"{board.name}: needs one ownership line {owner!r} in TEXTS (found {len(found)}) to put "
+                         "the board's identity beside")
+    own = found[0]
+    layer = own.get("layer", "F_SilkS")
+    identity = f"{board.title}  rev {board.revision}  {year}"
+    old = [t for t in texts if t.get("layer", "F_SilkS") == layer and re.search(r"\brev [A-Z0-9]+$", t["text"])]
+    if len(old) > 1:
+        raise SystemExit(f"{board.name}: {len(old)} name lines ending in 'rev <revision>' on {layer}; keep one")
+    line = dict(old[0]) if old else {"x": own["x"], "y": round(own["y"] - 2.0, 4), "size": 1.0, "bold": True,
+                                     "layer": layer, "mirror": own.get("mirror", False)}
+    line["text"] = identity
+    line["identity"] = True
+    line["design_text"] = old[0]["text"] if old else ""     # the design's line, which fit_identity starts from
+    if old:
+        return [line if t is old[0] else t for t in texts]
+    return list(texts) + [line]
+
+
+# The shunt a 2.54 mm jumper header ships with (BENCH-READY B3): Samtec SNT-100-BK-G, a 2-position
+# 2.54 mm shunt with gold contacts, "Active" at DigiKey (read 24 Oct 2026). Second source (B1, a
+# single-source part names a fallback): Sullins QPC02SXGN-RC, 2-position 2.54 mm, gold, open top,
+# "Active" at DigiKey (read 29 Oct 2026). On the schematic it is a BOM-only symbol (KiCad's pinless
+# Mechanical:Housing, on_board no): a BOM line, no footprint, so the board and its parity check are
+# unchanged. Its BOM line says it is loose (the Assembly column), so an assembler matching BOM lines to
+# placement rows does not look for it on the board.
+SHUNT_FIELDS = {"Manufacturer": "Samtec", "MPN": "SNT-100-BK-G",
+                "Assembly": "Loose: supplied with the board, not placed"}
+SHUNT_SECOND_SOURCE = "Sullins QPC02SXGN-RC"
+SHUNT_SYMBOL = "Mechanical:Housing"
+JUMPER_SYMBOLS = ("Jumper:Jumper_2_", "Jumper:Jumper_3_")     # header jumpers, which take a shunt
+BOM_FIELDS = ("Reference,Value,Footprint,Manufacturer,MPN,Description,Assembly,${QUANTITY},${DNP}",
+              "Refs,Value,Footprint,Manufacturer,MPN,Description,Assembly,Qty,DNP")
+
+
+def _takes_shunt(part: Part) -> bool:
+    """A 2.54 mm pin header: what the generator's 2.54 mm shunt fits."""
+    return "PinHeader" in part.footprint and "P2.54mm" in part.footprint
+
+
+def check_shunts(board: Board) -> None:
+    """Refuse a ``shunts`` entry for a part the board does not have, with a count that is not a whole
+    number of shunts, or with shunts for anything but a 2.54 mm pin header (0, "none supplied", is
+    accepted for any part); and a jumper symbol drawn on a pin header of another pitch that the entry
+    does not settle: no 2.54 mm shunt fits it, so the design must say ``shunts={ref: 0}`` and name its
+    shunt in the README (PR #74 review: the automatic count skipped the pitch check)."""
+    by_ref = {p.ref: p for p in board.parts}
+    for ref, n in board.shunts.items():
+        if ref not in by_ref:
+            raise SystemExit(f"{board.name}: shunts names {ref}, which the board does not have")
+        if not isinstance(n, int) or isinstance(n, bool) or n < 0 or (n and not _takes_shunt(by_ref[ref])):
+            raise SystemExit(f"{board.name}: shunts {ref}: {n!r}; give a count of 2.54 mm shunts for a 2.54 mm pin header")
+    for p in board.parts:
+        if p.lib_id.startswith(JUMPER_SYMBOLS) and "PinHeader" in p.footprint and not _takes_shunt(p) \
+                and p.ref not in board.shunts:
+            raise SystemExit(f"{board.name}: {p.ref} is a jumper on {p.footprint}, which no 2.54 mm shunt fits; "
+                             f"give shunts={{{p.ref!r}: 0}} and name its shunt in the README")
+
+
+def shunt_parts(board: Board) -> List[Part]:
+    """The jumper shunts supplied with the board, as BOM-only parts JS1, JS2 ...: one for each
+    ``Jumper:Jumper_2_*``/``Jumper_3_*`` symbol drawn on a 2.54 mm pin header, and the number the
+    design's ``shunts`` option gives for any other jumper header (a 2 x 2 header taking two, say;
+    0 for none)."""
+    check_shunts(board)
+    count = {}
+    for part in board.parts:
+        if part.lib_id.startswith(JUMPER_SYMBOLS) and _takes_shunt(part):
+            count[part.ref] = 1
+    count.update(board.shunts)
+    taken = sorted(p.ref for p in board.parts if re.fullmatch(r"JS\d+", p.ref))
+    if taken and any(count.values()):
+        raise SystemExit(f"{board.name}: {taken} use the JS references the generator gives jumper shunts")
+    headers = [ref for ref in sorted(count, key=lambda r: (len(r), r)) if count[ref]]
+    description = ("Jumper shunt, 2.54 mm, 2 positions, gold, supplied for "
+                   + ", ".join(f"{ref} ({count[ref]})" for ref in headers) + "; where to fit them: the README. "
+                   + f"Second source: {SHUNT_SECOND_SOURCE}")
+    px, py = board.power_block
+    out = []
+    for ref in headers:
+        for _ in range(count[ref]):
+            n = len(out)
+            out.append(Part(f"JS{n + 1}", SHUNT_SYMBOL, "Shunt 2.54 mm", "", (round(px + 15.24 * n, 2), round(py + 30.48, 2)),
+                            {}, fields=dict(SHUNT_FIELDS, Description=description), on_board=False))
+    return out
+
+
+def generated_silk_problems(drc: Dict[str, Any], texts: List[Dict[str, Any]]) -> List[str]:
+    """DRC findings that name silkscreen the generator placed (the identity line) over copper, at the
+    board edge or over other silkscreen (PR #74 review: a moved name line could land on the ownership
+    line). KiCad grades them as warnings; the build treats them as errors, so a clipped or overprinted
+    board name never reaches a fab."""
+    ours = [t["text"] for t in texts if t.get("identity")]
+    out = []
+    for v in drc.get("violations", []):
+        if v.get("type") not in ("silk_over_copper", "silk_edge_clearance", "silk_overlap"):
+            continue
+        for i in v.get("items", []):
+            if any(f"'{text}'" in i.get("description", "") for text in ours):
+                out.append(f"{v['type']}: {i['description']}")
+    return out
+
+
+def title_block(board: Board) -> Dict[str, Any]:
+    """The board file's title block: what the schematic's says (title, date, revision, owner, copyright
+    and licence), and for an all-rights-reserved board whom to ask for permission."""
+    comments = [f"Copyright (c) {board.date[:4]} {board.company}. Licence: {board.licence}",
+                "Generated by tools/eos_boards from the board's design file"]
+    if board.licence == ALL_RIGHTS_RESERVED:
+        comments.append(f"All rights reserved: see LICENSE.txt; permission from {board.contact.strip()}")
+    return {"title": board.title, "date": board.date, "rev": board.revision, "company": board.company,
+            "comments": comments}
 
 
 def check_reference(board, lib, parts):
@@ -185,7 +345,7 @@ def check_route_options(name: str, route: tuple, rules: Dict[str, Any]) -> None:
             kind = "join"
         elif _number(extra):
             if extra < rules["min_track"]:
-                raise SystemExit(f"{where}: width {extra} mm is below the board's min_track "
+                raise SystemExit(f"{where}: width {extra} mm is below the board's minimum track "
                                  f"({rules['min_track']} mm)")
             kind = "width"
         elif isinstance(extra, dict):
@@ -198,7 +358,7 @@ def check_route_options(name: str, route: tuple, rules: Dict[str, Any]) -> None:
                                  f"(min via {rules['min_via']} mm, min drill {rules['min_drill']} mm)")
             kind = "via"
         else:
-            raise SystemExit(f"{where}: unknown option {extra!r}")
+            raise SystemExit(f"{where}: unknown option {extra!r}; after the pads give \"join\", a width, or a pinned via")
         if kind in seen:
             raise SystemExit(f"{where}: {kind} given twice")
         seen.add(kind)
@@ -234,8 +394,13 @@ def pad_numbers(number: str) -> List[str]:
 
 
 def spec_for(board: Board, lib: Library, footprint_dir: Path, texts: List[Dict[str, Any]]) -> Dict[str, Any]:
+    check_shunts(board)
     parts, nets = [], set()
     for part in board.parts:
+        if not part.on_board:
+            if resolve(part, lib):         # a part with pins left off the board would vanish from it silently
+                raise SystemExit(f"{board.name}: {part.ref} has pins, so it cannot be a BOM-only part (on_board=False)")
+            continue                       # a BOM-only item (a jumper shunt): no footprint
         pads = {}
         for num, (pin, net) in resolve(part, lib).items():
             for pad in pad_numbers(num):
@@ -266,6 +431,14 @@ def spec_for(board: Board, lib: Library, footprint_dir: Path, texts: List[Dict[s
     if board.reference_copper:
         check_reference(board, lib, parts)
     rules = board_rules(board)
+    try:
+        stackup = fabrication.stackup_for(board.layers, board.thickness, board.stackup)
+    except ValueError as e:
+        raise SystemExit(f"{board.name}: {e}")
+    for side, points in board.fiducials.items():
+        if side not in ("F", "B") or len(points) not in (2, 3) or not all(len(p) == 2 for p in points):
+            raise SystemExit(f'{board.name}: fiducials {side!r}: {points!r}; give "F" or "B" and three (x, y) '
+                             "positions, or two diagonally opposite ones")
     check_priority_routes(board, rules)
     return {"name": board.name, "width": board.width, "height": board.height, "thickness": board.thickness,
             "corner_radius": board.corner_radius, "layers": board.layers, "rules": rules,
@@ -287,7 +460,127 @@ def spec_for(board: Board, lib: Library, footprint_dir: Path, texts: List[Dict[s
             "priority_routes": [[list(r[0]), list(r[1]), *r[2:]] for r in board.priority_routes],
             "escape_footprints": board.escape_footprints,
             "maze_via_cost_mm": board.maze_via_cost_mm,
-            "zones": [{"net": board_net(board, n), "layers": layers} for n, layers in board.pours], "texts": texts}
+            "zones": [{"net": board_net(board, n), "layers": layers} for n, layers in board.pours], "texts": texts,
+            "stackup": stackup, "title_block": title_block(board),
+            "fiducials": {side: [list(p) for p in points] for side, points in board.fiducials.items()}}
+
+
+ROUTE_ATTEMPTS = 3      # Freerouting runs at most, when the repair rounds leave repairable connections open
+
+# Freerouting 2.4.1 routes a DSN the same way every time (the same board after every pass), and takes
+# no seed. A retry therefore changes the auto-router's own costs (its CLI sets any router setting as
+# --router.<path>=<value>): run 2 doubles the cost of a via (default 50), run 3 triples the cost of
+# ripping up routed copper to start a route (default 100). On EoS Learn RP2350's placement the four
+# runs (default, via cost 100, via cost 25, start rip-up 300) wrote four different sessions, and the
+# via-cost-100 run left 4 connections open on +3V3 where the default left 5 on +3V3 and /GPIO5
+# (campaign folder work/bench-ready-p3/fr-retry/, 29 Oct 2026).
+RETRY_SETTINGS = ([], ["--router.scoring.via_costs=100"], ["--router.scoring.start_ripup_costs=300"])
+
+
+def freerouting_args(attempt: int) -> List[str]:
+    """Freerouting options for run ``attempt`` (0 first): Freerouting's defaults, then RETRY_SETTINGS."""
+    return list(RETRY_SETTINGS[attempt])
+
+
+def freeroute(dsn: Path, ses: Path, passes: int, attempt: int, work: Path) -> None:
+    """One headless Freerouting run, DSN in, session file out; its log in .build/freerouting.log
+    (freerouting-2.log, -3 for retries)."""
+    java = os.environ.get("JAVA", "/opt/homebrew/opt/openjdk/bin/java")
+    jar = os.environ.get("FREEROUTING_JAR", str(Path.home() / "Desktop/task/tools/freerouting/freerouting-2.4.1.jar"))
+    if ses.exists():
+        ses.unlink()                       # never import an earlier run's session
+    r = run([java, "-Djava.awt.headless=true", "-jar", jar, "-de", dsn, "-do", ses, "-mp", passes,
+             *freerouting_args(attempt), "--gui.enabled=false"], timeout=3600)
+    (work / ("freerouting.log" if attempt == 0 else f"freerouting-{attempt + 1}.log")).write_text(r.stdout + r.stderr)
+    if not ses.is_file():
+        print(r.stdout[-3000:], r.stderr[-3000:])
+        raise SystemExit("Freerouting produced no session file")
+
+
+def kicad_check(cmd: List[Any], report: Path) -> Dict[str, Any]:
+    """Run a kicad-cli check (ERC or DRC) that writes a JSON report, and read it. The old report is
+    deleted first and the exit code checked: a kicad-cli that crashed before writing would otherwise
+    leave the last good build's clean report in place, and the build would pass its gate unchecked."""
+    report.unlink(missing_ok=True)
+    r = run([*cmd[:-1], "-o", report, cmd[-1]])          # the input file last
+    if r.returncode or not report.is_file():
+        print(r.stdout[-2000:], r.stderr[-2000:])
+        raise SystemExit(f"{' '.join(str(c) for c in cmd[1:3])} failed (exit {r.returncode}"
+                         f"{'' if report.is_file() else ', no report written'}); the board was not checked")
+    return json.loads(report.read_text())
+
+
+def run_drc(cli: str, pcb: Path, out: Path) -> Dict[str, Any]:
+    """KiCad's DRC with schematic parity, every severity, as JSON (also left in out/drc.json)."""
+    return kicad_check([cli, "pcb", "drc", "--schematic-parity", "--format", "json", "--severity-all", pcb], out / "drc.json")
+
+
+def repairable_opens(drc: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """The open connections the repair step works on: two located items, neither a zone. A zone island
+    left unconnected is not a routing gap; no repair or new route closes it."""
+    pairs = []
+    for u in drc.get("unconnected_items", []):
+        items = u.get("items", [])
+        if len(items) == 2 and all("pos" in i for i in items) \
+                and not any(i["description"].startswith("Zone") for i in items):
+            net = items[0]["description"].split("[", 1)[-1].split("]", 1)[0]
+            pairs.append({"net": net, "a": [items[0]["pos"]["x"], items[0]["pos"]["y"]],
+                          "b": [items[1]["pos"]["x"], items[1]["pos"]["y"]]})
+    return pairs
+
+
+def check_and_repair(cli: str, spec: Path, pcb: Path, work: Path, out: Path):
+    """DRC; close what the autorouter left open (repair) or lift what it left too close (ripup), and
+    check again, up to six rounds. Returns (the last DRC report, the rounds run)."""
+    for attempt in range(6):
+        drc = run_drc(cli, pcb, out)
+        pairs = repairable_opens(drc)
+        clashes = clearance_clashes(drc)
+        if not (pairs or clashes) or attempt == 5:
+            break
+        if clashes:
+            # the autorouter can leave a via or track inside another net's clearance: lift that
+            # net's copper there, so this round's DRC lists it as open and the repair re-routes it
+            (work / "clashes.json").write_text(json.dumps(clashes, indent=1))
+            pcb_step("ripup", spec, pcb, work / "clashes.json", tail=1500)
+            continue
+        (work / "open.json").write_text(json.dumps(pairs, indent=1))
+        pcb_step("repair", spec, pcb, work / "open.json", tail=1500)
+    return drc, attempt
+
+
+def route(cli: str, spec: Path, pcb: Path, dsn: Path, ses: Path, work: Path, out: Path, passes: int,
+          attempts: int = ROUTE_ATTEMPTS):
+    """Route with Freerouting, finish, then DRC and repair. When the repair rounds still leave
+    repairable connections open, start again from the placed board with Freerouting's costs changed
+    (RETRY_SETTINGS), up to ``attempts`` runs, and keep the run that left the fewest connections open
+    (the earliest on a tie). Returns (its DRC report, its repair rounds, the runs made, the run kept,
+    1 first)."""
+    placed, kept = work / "placed.kicad_pcb", work / "best-routed.kicad_pcb"
+    shutil.copyfile(pcb, placed)
+    best = None
+    for attempt in range(attempts):
+        if attempt:
+            shutil.copyfile(placed, pcb)
+            print(f"routing again, run {attempt + 1} of {attempts} ({' '.join(freerouting_args(attempt))}): "
+                  f"{len(repairable_opens(drc))} repairable connection(s) were still open", flush=True)
+        freeroute(dsn, ses, passes, attempt, work)
+        pcb_step("finish", spec, pcb, ses)
+        drc, rounds = check_and_repair(cli, spec, pcb, work, out)
+        opens = len(drc.get("unconnected_items", []))
+        if best is None or opens < best[0]:
+            best = (opens, attempt, drc, rounds)
+            shutil.copyfile(pcb, kept)
+            shutil.copyfile(ses, work / "best-routed.ses")
+        if not opens or not repairable_opens(drc):
+            break                          # done, or only what a new route would not change (a zone island)
+    runs = attempt + 1
+    if best[1] != attempt:                 # an earlier run did better: its board and session, checked again
+        shutil.copyfile(kept, pcb)
+        shutil.copyfile(work / "best-routed.ses", ses)    # .build/<name>.ses must be the kept board's (review n2)
+        print(f"keeping run {best[1] + 1}: {best[0]} connection(s) open, against {opens} in run {runs}", flush=True)
+        drc = run_drc(cli, pcb, out)
+    return drc, best[3], runs, best[1] + 1
 
 
 def project_file(name: str) -> str:
@@ -313,7 +606,7 @@ def main() -> int:
 
     module = importlib.import_module(f"eos_boards.boards.{args.board}")
     board: Board = module.BOARD
-    texts = getattr(module, "TEXTS", [])
+    texts = one_revision(board, identity_texts(board, getattr(module, "TEXTS", [])))
     check_priority_routes(board, board_rules(board))      # a mistyped route option stops here, before KiCad runs
     lib = Library(kicad_env.symbols(), (HERE / "symbols",))
     out = args.out or HERE.parents[1] / "boards" / "eos" / board.name
@@ -325,6 +618,7 @@ def main() -> int:
 
     # 1. schematic + ERC
     sch, pcb = hw / f"{board.name}.kicad_sch", hw / f"{board.name}.kicad_pcb"
+    board.parts = board.parts + shunt_parts(board)      # BOM lines for the jumper shunts (BENCH-READY B3)
     sch.write_text(schematic.write(board, lib))
     (hw / f"{board.name}.kicad_pro").write_text(project_file(board.name))
     (out / "LICENSE.txt").write_text(licence_text(board, args.board))
@@ -351,7 +645,7 @@ def main() -> int:
                 shutil.copy(licence, hw / "footprints" / licence.name)
             rows.append(f'  (lib (name "{name}") (type "KiCad") (uri "${{KIPRJMOD}}/footprints/{name}.pretty") (options "") (descr ""))')
         (hw / "fp-lib-table").write_text("(fp_lib_table\n  (version 7)\n" + "\n".join(rows) + "\n)\n")
-    run([cli, "sch", "erc", "--format", "json", "--severity-all", "-o", out / "erc.json", sch])
+    kicad_check([cli, "sch", "erc", "--format", "json", "--severity-all", sch], out / "erc.json")
     erc = violations(out / "erc.json")
     report["erc_violations"] = len(erc)
     if erc:
@@ -364,12 +658,12 @@ def main() -> int:
     spec = work / "spec.json"
     spec.write_text(json.dumps(spec_for(board, lib, kicad_env.footprints(), texts), indent=1))
     dsn, ses = work / f"{board.name}.dsn", work / f"{board.name}.ses"
-    r = run([kicad_env.python(), HERE / "pcb_build.py", "place", spec, pcb, dsn])
-    print(r.stdout[-2000:], r.stderr[-2000:])
-    if r.returncode:
-        raise SystemExit("placement failed")
-    run([cli, "pcb", "drc", "--format", "json", "--severity-error", "-o", work / "place-drc.json", pcb])
-    placed = json.loads((work / "place-drc.json").read_text())
+    pcb_step("place", spec, pcb, dsn)
+    placed = kicad_check([cli, "pcb", "drc", "--format", "json", "--severity-error", pcb], work / "place-drc.json")
+    placed_spec = json.loads(spec.read_text())       # place records its fiducials, and why a side has two
+    report["fiducials"] = placed_spec.get("fiducials_placed", [])
+    report["fiducial_notes"] = placed_spec.get("fiducial_notes", {})
+    report["identity_line"] = placed_spec.get("identity_fit", "")
     if board.reference_copper:
         # nets the reference copper completes on its own, which the router must leave alone
         ref = json.loads((HERE / board.reference_copper["file"]).read_text())
@@ -389,46 +683,10 @@ def main() -> int:
             print(f"  {v['type']}: {[i['description'] for i in v['items']]}")
         print(f"placement: {len(found)} overlap/clearance problem(s)")
         return 1 if found else 0
-    java = os.environ.get("JAVA", "/opt/homebrew/opt/openjdk/bin/java")
-    jar = os.environ.get("FREEROUTING_JAR", str(Path.home() / "Desktop/task/tools/freerouting/freerouting-2.4.1.jar"))
-    r = run([java, "-Djava.awt.headless=true", "-jar", jar, "-de", dsn, "-do", ses, "-mp", args.passes,
-             "--gui.enabled=false"], timeout=3600)
-    (work / "freerouting.log").write_text(r.stdout + r.stderr)
-    if not ses.is_file():
-        print(r.stdout[-3000:], r.stderr[-3000:])
-        raise SystemExit("Freerouting produced no session file")
-    r = run([kicad_env.python(), HERE / "pcb_build.py", "finish", spec, pcb, ses])
-    print(r.stdout[-2000:], r.stderr[-2000:])
-    if r.returncode:
-        raise SystemExit("finishing failed")
-
-    # 5. DRC with schematic parity; close what the autorouter left open, then check again
-    for attempt in range(6):
-        run([cli, "pcb", "drc", "--schematic-parity", "--format", "json", "--severity-all",
-             "-o", out / "drc.json", pcb])
-        drc = json.loads((out / "drc.json").read_text())
-        pairs = []
-        for u in drc.get("unconnected_items", []):
-            items = u.get("items", [])
-            if len(items) == 2 and all("pos" in i for i in items) \
-                    and not any(i["description"].startswith("Zone") for i in items):
-                net = items[0]["description"].split("[", 1)[-1].split("]", 1)[0]
-                pairs.append({"net": net, "a": [items[0]["pos"]["x"], items[0]["pos"]["y"]],
-                              "b": [items[1]["pos"]["x"], items[1]["pos"]["y"]]})
-        clashes = clearance_clashes(drc)
-        if not (pairs or clashes) or attempt == 5:
-            break
-        if clashes:
-            # the autorouter can leave a via or track inside another net's clearance: lift that
-            # net's copper there, so this round's DRC lists it as open and the repair re-routes it
-            (work / "clashes.json").write_text(json.dumps(clashes, indent=1))
-            r = run([kicad_env.python(), HERE / "pcb_build.py", "ripup", spec, pcb, work / "clashes.json"])
-            print(r.stdout[-1500:])
-            continue
-        (work / "open.json").write_text(json.dumps(pairs, indent=1))
-        r = run([kicad_env.python(), HERE / "pcb_build.py", "repair", spec, pcb, work / "open.json"])
-        print(r.stdout[-1500:])
-    report["repair_rounds"] = attempt
+    drc, rounds, runs, kept = route(cli, spec, pcb, dsn, ses, work, out, args.passes)
+    report["repair_rounds"] = rounds
+    report["routing_runs"] = runs
+    report["routing_run_kept"] = kept
     report["drc"] = {k: len(drc.get(k, [])) for k in ("violations", "unconnected_items", "schematic_parity")}
     report["drc_errors"] = sum(1 for v in drc.get("violations", []) if v.get("severity") == "error")
     report["drc_warnings"] = sum(1 for v in drc.get("violations", []) if v.get("severity") == "warning")
@@ -438,6 +696,14 @@ def main() -> int:
         print(json.dumps({k: report[k] for k in ("erc_violations", "drc", "drc_errors", "drc_warnings")}, indent=1))
         raise SystemExit(f"DRC failed; fabrication outputs left as they were, hardware/ holds this attempt. "
                          f"See {out / 'drc.json'} and {work / 'build-report.json'}")
+    # what a fab or an assembler would reject, read back from the saved board: its stack-up, and three
+    # fiducials on each side with surface-mount parts
+    problems = metrics.fab_problems(metrics.board_metrics(out, board.name, report), board.width, board.height,
+                                    board.corner_radius) + generated_silk_problems(drc, texts) + dangling_via_problems(drc)
+    report["fab_problems"] = problems
+    if problems:
+        (work / "build-report.json").write_text(json.dumps(report, indent=1) + "\n")
+        raise SystemExit("fabrication check failed; outputs left as they were: " + "; ".join(problems))
 
     # 6. outputs
     gerbers = fab / "gerbers"
@@ -452,8 +718,7 @@ def main() -> int:
          "--generate-map", "--map-format", "pdf", "-o", str(gerbers) + "/", pcb])
     run([cli, "pcb", "export", "pos", "--format", "csv", "--units", "mm", "--side", "both",
          "-o", fab / f"{board.name}-placement.csv", pcb])
-    run([cli, "sch", "export", "bom", "--fields", "Reference,Value,Footprint,Manufacturer,MPN,Description,${QUANTITY},${DNP}",
-         "--labels", "Refs,Value,Footprint,Manufacturer,MPN,Description,Qty,DNP", "--group-by", "Value,Footprint,MPN",
+    run([cli, "sch", "export", "bom", "--fields", BOM_FIELDS[0], "--labels", BOM_FIELDS[1], "--group-by", "Value,Footprint,MPN",
          "--exclude-dnp", "-o", fab / f"{board.name}-bom.csv", sch])
     run([cli, "pcb", "export", "step", "--subst-models", "--force", "-o", fab / f"{board.name}.step", pcb])
     run([cli, "sch", "export", "pdf", "-o", out / f"{board.name}-schematic.pdf", sch])
@@ -465,6 +730,7 @@ def main() -> int:
          "--width", "2400", "--height", "1600", "--background", "opaque", "-o", img / f"{board.name}-iso.png", pcb])
     run([cli, "pcb", "export", "svg", "--layers", "F.Cu,B.Cu,F.SilkS,Edge.Cuts", "--mode-single",
          "--exclude-drawing-sheet", "-o", img / f"{board.name}-copper.svg", pcb])
+    metrics.write(out, board.name, report)        # metrics.json: the board's fabrication numbers
     report["outputs"] = sorted(str(p.relative_to(out)) for p in out.rglob("*")
                                if p.is_file() and ".build" not in p.parts)
     (out / "build-report.json").write_text(json.dumps(report, indent=1) + "\n")

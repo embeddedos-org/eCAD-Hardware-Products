@@ -1,6 +1,7 @@
 """Write the footprints KiCad's own libraries do not have (part of the MIT generator).
 
-EoS_Packages.pretty: NXP HLQFP-100 (SOT1570-3), which KiCad 10 does not ship.
+EoS_Packages.pretty: NXP HLQFP-100 (SOT1570-3), which KiCad 10 does not ship, a 2 x 49 pin header,
+and Samtec's FTSH-105 (1.27 mm, 2 x 5, surface mount) on Samtec's own recommended land pattern.
 
 The LPC55S69JBD100's package has an exposed pad of only 3.21-3.61 mm (data sheet Figure 32,
 "VIEW J-J"), and on this package that pad is the chip's only VSS connection (Table 3). KiCad
@@ -23,8 +24,31 @@ a 2 x 2 array of vias into any exposed pad on a plane net (pcb_build.fanout). Co
 mm outside the pads, as KiCad's own QFP footprints. 3D model: KiCad's LQFP-100 14 x 14 mm body
 (the same 14 x 14 x 1.4 mm outline; HLQFP's 1.45 mm maximum height is within it).
 
+It also holds a 2 x 49 (98-hole) straight 2.54 mm header, PinHeader_2x49_P2.54mm_Vertical: KiCad's
+Connector_PinHeader_2.54mm library stops at 2 x 40. It is drawn exactly as KiCad's own generated pin
+headers (PinHeader_2x40_P2.54mm_Vertical, KiCad 10): 1.7 mm pads on 1.0 mm drills, pad 1 square,
+odd pads in the first column and even pads in the second, the silkscreen outline 1.38 mm outside the
+pad centres with the pin-1 corner open, the courtyard 1.77 mm out, the fabrication outline 1.27 mm out
+with a chamfer at pin 1. KiCad ships no 3D model of this length, so none is referenced.
+
+The Samtec FTSH-105-xx-x-DV (the 10-pin Arm Cortex debug header, FTSH-105-01-L-DV-K and the like)
+is drawn to Samtec's "Recommended PCB layout for FTSH-1XX-XX-XXX-DV-XXX", Revision H, 27 Aug 2019,
+ECN-364793 (https://suddendocs.samtec.com/prints/ftsh-1xx-xx-xxx-dv-xxx-footprint.pdf), Fig 1, read on
+24 Oct 2026: pads 0.74 x 2.79 mm (.029 x .110 in) on a 1.27 mm (.050 in) pitch, 6.86 mm (.270 in)
+from the outer end of one row's pads to the other's, so the pad centres are 2.035 mm either side of
+the centreline. Table 1: the -K (keyed) option adds no alignment hole, so -K and plain parts share
+this pattern; -A (alignment pins) does not, and is not drawn. Fig 2: the stencil opening is the pad
+(0.152 mm stencil). The connector body is 3.43 mm (.135 in) across (Samtec's FTSH-1XX-XX-XXX-DV-XXX
+print) and 5 x 1.27 mm long. KiCad's generic PinHeader_2x05_P1.27mm_Vertical_SMD has 2.4 mm pads at
+1.95 mm; this footprint keeps its pad order and orientation (odd pads on the left, pad 1 at the top),
+so a design switches to it without turning the part, and takes its 3D model (a generic 1.27 mm SMD
+header of the same pitch and rows). Courtyard 0.5 mm outside the pads and the body, as KiCad's
+connectors; silkscreen along the body's ends, 0.3 mm clear of the pads, with pad 1's end marked.
+
 usage: python3 tools/eos_boards/footprints/generate.py
-   writes tools/eos_boards/footprints/EoS_Packages.pretty/HLQFP-100-1EP_14x14mm_P0.5mm_EP3.21x3.21mm.kicad_mod
+   writes tools/eos_boards/footprints/EoS_Packages.pretty/HLQFP-100-1EP_14x14mm_P0.5mm_EP3.21x3.21mm.kicad_mod,
+   tools/eos_boards/footprints/EoS_Packages.pretty/PinHeader_2x49_P2.54mm_Vertical.kicad_mod
+   and tools/eos_boards/footprints/EoS_Packages.pretty/Samtec_FTSH-105-xx-x-DV_2x05_P1.27mm_Vertical_SMD.kicad_mod
 """
 
 from __future__ import annotations
@@ -130,13 +154,111 @@ def check() -> None:
     assert EP_PASTE_OFF + EP_PASTE / 2 <= EP / 2
 
 
+HEADER_ROWS = 49
+HEADER_NAME = f"PinHeader_2x{HEADER_ROWS}_P2.54mm_Vertical"
+
+
+def header_2x49() -> list:
+    """2 x 49 straight pin header, 2.54 mm pitch, drawn as KiCad's generated PinHeader_2xNN (see above):
+    pad n at column (n - 1) % 2, row (n - 1) // 2, pad 1 at the origin."""
+    p, end = 2.54, round(2.54 * (HEADER_ROWS - 1), 2)
+    fp = [Sym("footprint"), HEADER_NAME, [Sym("version"), 20241229], [Sym("generator"), "eos_boards"],
+          [Sym("layer"), "F.Cu"],
+          [Sym("descr"), f"Through hole straight pin header, 2x{HEADER_ROWS}, 2.54mm pitch, double rows (drawn as "
+                         "KiCad's generated pin headers; KiCad's library stops at 2x40)"],
+          [Sym("tags"), f"Through hole pin header THT 2x{HEADER_ROWS} 2.54mm double row"],
+          _prop("Reference", "REF**", 1.27, -2.38, "F.SilkS"),
+          _prop("Value", HEADER_NAME, 1.27, round(end + 2.38, 2), "F.Fab"),
+          [Sym("attr"), Sym("through_hole")]]
+    s, c, f = 1.38, 1.77, 1.27
+    fp += [_line((-s, -s), (0, -s), "F.SilkS", 0.12), _line((-s, 0), (-s, -s), "F.SilkS", 0.12),
+           _line((-s, f), (-s, round(end + s, 2)), "F.SilkS", 0.12), _line((-s, f), (f, f), "F.SilkS", 0.12),
+           _line((-s, round(end + s, 2)), (round(p + s, 2), round(end + s, 2)), "F.SilkS", 0.12),
+           _line((f, -s), (round(p + s, 2), -s), "F.SilkS", 0.12), _line((f, f), (f, -s), "F.SilkS", 0.12),
+           _line((round(p + s, 2), -s), (round(p + s, 2), round(end + s, 2)), "F.SilkS", 0.12)]
+    fp += _poly([(-c, -c), (round(p + c, 2), -c), (round(p + c, 2), round(end + c, 2)), (-c, round(end + c, 2))], "F.CrtYd", 0.05)
+    fp += _poly([(-f, 0), (0, -f), (round(p + f, 2), -f), (round(p + f, 2), round(end + f, 2)), (-f, round(end + f, 2))],
+                "F.Fab", 0.1)
+    fp.append([Sym("fp_text"), Sym("user"), "${REFERENCE}", [Sym("at"), 1.27, round(end / 2, 2), 90], [Sym("layer"), "F.Fab"],
+               _font()])
+    for n in range(1, 2 * HEADER_ROWS + 1):
+        x, y = round(p * ((n - 1) % 2), 2), round(p * ((n - 1) // 2), 2)
+        fp.append([Sym("pad"), str(n), Sym("thru_hole"), Sym("rect" if n == 1 else "circle"), [Sym("at"), x, y],
+                   [Sym("size"), 1.7, 1.7], [Sym("drill"), 1.0], [Sym("layers"), "*.Cu", "*.Mask"],
+                   [Sym("remove_unused_layers"), Sym("no")]])
+    fp.append([Sym("embedded_fonts"), Sym("no")])
+    return fp
+
+
+def check_header() -> None:
+    pads = [q for q in header_2x49() if isinstance(q, list) and str(q[0]) == "pad"]
+    assert [str(q[1]) for q in pads] == [str(n) for n in range(1, 2 * HEADER_ROWS + 1)]
+    xy = {(q[4][1], q[4][2]) for q in pads}
+    assert len(xy) == 2 * HEADER_ROWS and max(y for _, y in xy) == round(2.54 * (HEADER_ROWS - 1), 2)
+
+
+FTSH_NAME = "Samtec_FTSH-105-xx-x-DV_2x05_P1.27mm_Vertical_SMD"
+FTSH_PITCH, FTSH_PAD_W, FTSH_PAD_L, FTSH_SPAN = 1.27, 0.74, 2.79, 6.86      # Fig 1: .050, .029, .110, .270 in
+FTSH_ROW = round(FTSH_SPAN / 2 - FTSH_PAD_L / 2, 3)                          # 2.035 mm, pad centre to centreline
+FTSH_BODY_W, FTSH_BODY_L = 3.43, 5 * 1.27                                    # .135 in across; 5 positions long
+
+
+def ftsh_pad_xy(n: int):
+    """Centre of pad n (1-10): odd pads on the left, even on the right, pad 1 at the top, as KiCad's
+    PinHeader_2x05_P1.27mm_Vertical_SMD."""
+    return (-FTSH_ROW if n % 2 else FTSH_ROW, round(FTSH_PITCH * ((n - 1) // 2 - 2), 3))
+
+
+def ftsh_105() -> list:
+    """Samtec FTSH-105-xx-x-DV on Samtec's recommended land pattern (see the module notes)."""
+    bx, by = FTSH_BODY_W / 2, round(FTSH_BODY_L / 2, 3)                       # 1.715, 3.175
+    pad_x = round(FTSH_ROW + FTSH_PAD_L / 2, 3)                                # 3.43, the pads' outer ends
+    court_x, court_y = round(pad_x + 0.5, 2), round(by + 0.5, 2)               # 3.93, 3.68
+    silk_x, silk_y = round(bx + 0.11, 3), round(by + 0.11, 3)                  # 0.11 outside the body
+    fp = [Sym("footprint"), FTSH_NAME, [Sym("version"), 20241229], [Sym("generator"), "eos_boards"], [Sym("layer"), "F.Cu"],
+          [Sym("descr"), "Samtec FTSH-105-xx-x-DV(-K), 2 x 5, 1.27 mm pitch, surface mount: land pattern from Samtec's "
+                         "Recommended PCB layout for FTSH-1XX-XX-XXX-DV-XXX, Rev H (27 Aug 2019), Fig 1 and 2"],
+          [Sym("tags"), "Samtec FTSH 1.27mm 2x05 SMD Cortex debug"],
+          _prop("Reference", "REF**", 0, round(-court_y - 0.9, 2), "F.SilkS"),
+          _prop("Value", FTSH_NAME, 0, round(court_y + 0.9, 2), "F.Fab"),
+          _prop("Datasheet", "https://suddendocs.samtec.com/prints/ftsh-1xx-xx-xxx-dv-xxx-footprint.pdf", 0, 0, "F.Fab", True),
+          _prop("Description", "Samtec FTSH-105 (1.27 mm, 2 x 5, SMD) on Samtec's recommended land pattern", 0, 0, "F.Fab", True),
+          [Sym("attr"), Sym("smd")]]
+    c = 0.8
+    fp += _poly([(-bx + c, -by), (bx, -by), (bx, by), (-bx, by), (-bx, -by + c)], "F.Fab", 0.1)
+    fp.append(_line((-pad_x, -silk_y), (silk_x, -silk_y), "F.SilkS", 0.12))     # top end, run out over pad 1's row
+    fp.append(_line((-silk_x, silk_y), (silk_x, silk_y), "F.SilkS", 0.12))      # bottom end
+    fp += _poly([(-court_x, -court_y), (court_x, -court_y), (court_x, court_y), (-court_x, court_y)], "F.CrtYd", 0.05)
+    fp.append([Sym("fp_text"), Sym("user"), "${REFERENCE}", [Sym("at"), 0, 0, 90], [Sym("layer"), "F.Fab"], _font(0.8)])
+    for n in range(1, 11):
+        x, y = ftsh_pad_xy(n)
+        fp.append([Sym("pad"), str(n), Sym("smd"), Sym("rect"), [Sym("at"), x, y], [Sym("size"), FTSH_PAD_L, FTSH_PAD_W],
+                   [Sym("layers"), "F.Cu", "F.Mask", "F.Paste"]])
+    fp.append([Sym("embedded_fonts"), Sym("no")])
+    fp.append([Sym("model"), "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_1.27mm.3dshapes/PinHeader_2x05_P1.27mm_Vertical_SMD.step",
+               [Sym("offset"), [Sym("xyz"), 0, 0, 0]], [Sym("scale"), [Sym("xyz"), 1, 1, 1]],
+               [Sym("rotate"), [Sym("xyz"), 0, 0, 0]]])
+    return fp
+
+
+def check_ftsh() -> None:
+    assert FTSH_ROW == 2.035
+    xs = [ftsh_pad_xy(n) for n in range(1, 11)]
+    assert len(set(xs)) == 10 and ftsh_pad_xy(1) == (-2.035, -2.54) and ftsh_pad_xy(10) == (2.035, 2.54)
+    assert round(2 * (FTSH_ROW + FTSH_PAD_L / 2), 3) == FTSH_SPAN       # Fig 1's .270 in across both rows
+    assert round(FTSH_PITCH - FTSH_PAD_W, 3) == 0.53                    # copper gap between neighbours
+
+
 def main() -> int:
     out = HERE / "EoS_Packages.pretty"
     check()
+    check_header()
+    check_ftsh()
     out.mkdir(parents=True, exist_ok=True)
-    path = out / f"{NAME}.kicad_mod"
-    path.write_text(dumps(footprint()) + "\n")
-    print(path)
+    for name, fp in ((NAME, footprint()), (HEADER_NAME, header_2x49()), (FTSH_NAME, ftsh_105())):
+        path = out / f"{name}.kicad_mod"
+        path.write_text(dumps(fp) + "\n")
+        print(path)
     return 0
 
 

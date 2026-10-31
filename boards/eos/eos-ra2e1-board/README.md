@@ -174,7 +174,7 @@ the board's net classes):
   only where one fits inside it. A fragment that holds a pad but has no room for a via (VSS pin 40's,
   in the previous build) reaches the ground only through its tracks. Taking D0, D1, TXD9 and RXD9
   off the bottom layer under the chip leaves RXD9 as the only pre-laid net crossing under it.
-- **One USB join changes layer.** B7 reaches A7 through two vias (3.6 mm), in the signal path only
+- **One USB join changes layer.** B7 reaches A7 through two vias (3.7 mm), in the signal path only
   with the plug the other way up; no single-layer path exists for that join (see the design file).
 - **Not verified:** the Pmod socket (Sullins PPPC062LJBN-RC) is drawn with KiCad's generic 2×6
   right-angle 2.54 mm socket footprint (8.51 mm body); Sullins' drawing could not be downloaded, so

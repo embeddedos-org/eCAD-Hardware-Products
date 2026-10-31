@@ -32,6 +32,7 @@ class Part:
     dnp: bool = False
     sch_rotation: int = 0                    # 0, 90, 180 or 270
     model: Optional[Tuple[str, Tuple[float, float, float]]] = None   # 3D model in place of the footprint's: path, offset (mm)
+    on_board: bool = True                    # False: a BOM-only item with no footprint (a jumper shunt)
 
 
 ALL_RIGHTS_RESERVED = "All rights reserved"   # a closed board: its owner's terms file, see Board.licence_terms
@@ -47,7 +48,6 @@ USB_C_EDGE = 3.19
 class Board:
     name: str
     title: str
-    revision: str
     date: str
     company: str
     licence: str
@@ -56,6 +56,7 @@ class Board:
     parts: List[Part]
     power_nets: Dict[str, str]               # net -> power symbol lib_id
     flagged_nets: List[str]                  # nets that need a PWR_FLAG (driven through a passive)
+    revision: str = "A"                      # on the silkscreen identity line, the title blocks and the licence
     notes: List[Tuple[Tuple[float, float], str]] = field(default_factory=list)
     headings: List[Tuple[Tuple[float, float], str]] = field(default_factory=list)
     power_block: Tuple[float, float] = (40.64, 330.2)   # schematic origin of the power symbols
@@ -85,6 +86,9 @@ class Board:
     rules: Dict[str, float] = field(default_factory=dict)              # design-rule overrides, e.g. a smaller drill a module footprint needs
     escape_footprints: List[str] = field(default_factory=list)          # fine-pitch connectors whose pads keep a clear way out (maze router)
     maze_via_cost_mm: float = 1.2                                        # maze router: a via costs as much as this much track
+    stackup: Dict[str, object] = field(default_factory=dict)            # overrides of the fab stack-up (fabrication.stackup_for)
+    fiducials: Dict[str, List[Tuple[float, float]]] = field(default_factory=dict)  # {"F"|"B": [(x, y) x 3]}: where the automatic choice cannot fit
+    shunts: Dict[str, int] = field(default_factory=dict)                # jumper header ref -> 2.54 mm shunts supplied for it (BOM lines)
 
 
 def resolve(part: Part, lib: Library) -> Dict[str, Tuple[Pin, str]]:

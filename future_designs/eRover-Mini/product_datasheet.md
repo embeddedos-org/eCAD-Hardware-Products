@@ -1,8 +1,9 @@
 # 🚙 eRover-Mini — Concept Datasheet
 
-> **Status:** Concept (chassis CAD + ROS-2 bridge ported on eos TBD)
+> **Status:** Concept (chassis CAD + EoSim ROS-2 sim bridge landed; on-device micro-ROS path TBD)
 > **Category:** Robotics, Education, Research
-> **EmbeddedOS components:** eos (kernel + drivers), eAI (SLAM + object detection), eIPC (ROS-2 bridge), ebuild (cross-compile)
+> **EmbeddedOS components:** eos (kernel + drivers), eAI (SLAM + object detection), EoSim (ROS-2 sim bridge), eNI (robot nodes), ebuild (cross-compile)
+> **Note:** eIPC carries no ROS-2 role in the code (verified 2026-10-29: no `ros2`, `cmd_vel`, or `odom` hits in eIPC; the single `rcl` hit is a CSS file). Its transport role, if any, is unassigned.
 
 ## Tagline
 
@@ -35,7 +36,7 @@ $2 K — equip a university robotics lab with 5 rovers for one term.
 
 - eos (kernel + drivers)
 - eAI (SLAM + object detection)
-- eIPC (ROS-2 bridge)
+- EoSim (ROS-2 sim bridge, cmd_vel/odom)
 - ebuild (cross-compile)
 
 ## BOM target

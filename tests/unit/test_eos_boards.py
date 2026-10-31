@@ -8,7 +8,9 @@ is read as text. The exactness check compares in integer nanometres (KiCad's own
 
 from __future__ import annotations
 
+import contextlib
 import importlib
+import io
 import json
 import math
 import os
@@ -22,7 +24,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "tools"))
 
-from eos_boards import build, design, schematic  # noqa: E402
+from eos_boards import build, design, fabrication, metrics, schematic  # noqa: E402
 from eos_boards.design import NC, Board, Part  # noqa: E402
 from eos_boards.kicad_lib import Library, pins  # noqa: E402
 from eos_boards.reference import extract_rpi_minimal as extract  # noqa: E402
@@ -71,8 +73,10 @@ class _Lib(unittest.TestCase):
         self.tmp.cleanup()
 
     def board(self, parts, **kw):
-        return Board(name="t", title="T", revision="A", date="2026-10-11", company="Kartikeydheer Srivastava",
-                     licence="MIT", width=10, height=10, parts=parts, power_nets={}, flagged_nets=[], **kw)
+        args = dict(name="t", title="T", date="2026-10-11", company="Kartikeydheer Srivastava", licence="MIT",
+                    width=10, height=10, parts=parts, power_nets={}, flagged_nets=[])     # revision: the default, "A"
+        args.update(kw)
+        return Board(**args)
 
 
 class SexprTest(unittest.TestCase):
@@ -96,7 +100,8 @@ class Batch3SymbolTest(unittest.TestCase):
 
     def test_supply_and_debug_pin_numbers(self):
         # Renesas R01DS0367 Table 1.17, R01DS0131 section 1.3.11;
-        # TI SPRS945H Table 5-1, 100 PZ column. A shifted supply pin can damage hardware.
+        # TI SPRS945H Table 5-1, 100 PZ column; TI SPMS433B Table 26-3 (128-pin TQFP).
+        # A shifted supply pin can damage hardware.
         expected = {
             "R7FA4M2AD3CFP": (100, {
                 "9": ("VCL", "power_out"), "15": ("VCC", "power_in"),
@@ -116,6 +121,13 @@ class Batch3SymbolTest(unittest.TestCase):
                 "71": ("VDD", "power_in"), "73": ("VREGENZ", "input"),
                 "80": ("VDDIO_SW", "power_in"), "82": ("VSS_SW", "power_in"),
                 "87": ("VDD", "power_in"),
+            }),
+            "TM4C1294NCPDT": (128, {
+                "7": ("VDD", "power_in"), "8": ("VDDA", "power_in"), "9": ("VREFA+", "power_in"),
+                "10": ("GNDA", "power_in"), "17": ("GND", "power_in"), "65": ("~{HIB}", "output"),
+                "68": ("VBAT", "power_in"), "70": ("~{RST}", "input"), "87": ("VDDC", "power_in"),
+                "97": ("PC3/TDO/SWO", "bidirectional"), "99": ("PC1/TMS/SWDIO", "bidirectional"),
+                "100": ("PC0/TCK/SWCLK", "bidirectional"), "115": ("VDDC", "power_in"),
             }),
         }
         library = Library(REPO_ROOT / "tools" / "eos_boards" / "symbols")
@@ -200,6 +212,13 @@ class SpecTest(_Lib):
                            pour_keepouts=[(3, 3, 4, 4, "B.Cu")])
         self.assertEqual(build.spec_for(board, self.lib, Path(self.tmp.name), [])["pour_keepouts"], [[3, 3, 4, 4, "B.Cu"]])
 
+    def test_the_spec_carries_the_stackup_and_refuses_a_board_without_one(self):
+        parts = [Part("U1", "T:M", "M", "fp", (5, 5), {"GND": "GND", "A/B": NC})]
+        spec = build.spec_for(self.board(parts), self.lib, Path(self.tmp.name), [])
+        self.assertEqual([r["name"] for r in spec["stackup"]["layers"] if r["type"] == "copper"], ["F.Cu", "B.Cu"])
+        with self.assertRaisesRegex(SystemExit, "t: stack-up: no published standard stack-up for 2 layers at 0.8 mm"):
+            build.spec_for(self.board(parts, thickness=0.8), self.lib, Path(self.tmp.name), [])
+
     def test_a_mistyped_keepout_layer_or_ground_via_part_is_refused(self):
         # "B_Cu" is how the same file names silk layers ("B_SilkS"): taken silently, it would
         # keep the top layer clear instead of the bottom
@@ -281,7 +300,48 @@ class ClashTest(unittest.TestCase):
              "items": [item("Pad 3 [/C] of U1 on F.Cu", 3.0), item("Track [/D] on F.Cu, length 1.0 mm", 4.0)]},
             {"type": "silk_edge_clearance", "severity": "warning", "items": [item("Track [/E] on F.Cu, length 1 mm", 5.0)] * 2},
         ]}
-        self.assertEqual(build.clearance_clashes(drc), [{"net": "/PH0", "pos": [30.09, 1.0]}, {"net": "/B", "pos": [2.0, 1.0]}])
+        self.assertEqual(build.clearance_clashes(drc), [
+            {"net": "/PH0", "pos": [30.09, 1.0], "via": True, "length": 0.0,
+             "other": {"net": "/PA1", "pos": [30.08, 1.0], "via": False, "length": 5.2445}},
+            {"net": "/B", "pos": [2.0, 1.0], "via": False, "length": 0.4,
+             "other": {"net": "/A", "pos": [1.0, 1.0], "via": False, "length": 9.0}}])
+
+    def test_locked_fanout_copper_can_be_lifted_round_and_pruned(self):
+        # review m10/D5: a clash naming a locked fan-out via lifts the other item; a dangling fan-out via
+        # or stub is pruned; a via_dangling warning fails the build
+        source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
+        ripup = source[source.index("def ripup("):source.index("def repair(")]
+        self.assertIn("fabrication.lift_with_fallback(c, lift, fixed)", ripup)
+        self.assertIn('t.IsLocked() and t.GetNetname() == item["net"] and via == item.get("via", False)', ripup)
+        # the behaviour (review n3, N14): the named item first, the other only when the first lifts nothing
+        calls = []
+
+        def lift(net, pos, fixed=("GND",)):
+            calls.append(net)
+            return 0 if net in fixed else 3
+        clash = {"net": "GND", "pos": [1.0, 2.0], "other": {"net": "/A", "pos": [1.0, 2.2]}}
+        self.assertEqual((fabrication.lift_with_fallback(clash, lift), calls), (3, ["GND", "/A"]))
+        calls.clear()
+        self.assertEqual((fabrication.lift_with_fallback(dict(clash, net="/B"), lift), calls), (3, ["/B"]))
+        calls.clear()
+        self.assertEqual((fabrication.lift_with_fallback({"net": "GND", "pos": [0, 0]}, lift), calls), (0, ["GND"]))
+        # PR #74 review (coderabbit): a locked named item is never lifted round, even when its net has
+        # loose copper nearby that lift() would take; the item it clashes with goes instead
+        calls.clear()
+        locked = dict(clash, net="/B", via=True)
+        self.assertEqual((fabrication.lift_with_fallback(locked, lift, lambda item: item.get("via")), calls), (3, ["/A"]))
+        calls.clear()
+        self.assertEqual((fabrication.lift_with_fallback(dict(locked, via=False), lift, lambda item: item.get("via")), calls),
+                         (3, ["/B"]))
+        fanout = source[source.index("def fanout("):source.index("REFERENCE_ZONE = ")]
+        self.assertEqual(fanout.count('spec.setdefault("fanout_copper", []).append('), 2)      # its vias and stubs
+        prune = source[source.index("def prune_dangling("):source.index("def finish(")]
+        self.assertIn("(not t.IsLocked() or _fanout_item(t, fanout))", prune)
+        self.assertEqual(source.count("prune_dangling(board, spec)"), 2)                        # finish and repair
+        drc = {"violations": [{"type": "via_dangling", "severity": "warning", "items": [{"description": "Via [GND] on F.Cu - B.Cu"}]},
+                              {"type": "track_dangling", "severity": "warning", "items": [{"description": "Track [+3V3] on F.Cu"}]}]}
+        self.assertEqual(build.dangling_via_problems(drc), ["via_dangling: Via [GND] on F.Cu - B.Cu"])
+        self.assertIn("+ dangling_via_problems(drc)", (REPO_ROOT / "tools" / "eos_boards" / "build.py").read_text(encoding="utf-8"))
 
 
 class LicenceTest(_Lib):
@@ -893,11 +953,12 @@ class ExposedPadTest(unittest.TestCase):
 VIA_PAD_GAP = 0.1   # mm of solder mask between a via and a surface pad (pcb_build.VIA_PAD_GAP)
 
 
-def _vias_in_pads(pcb):
+def _vias_in_pads(pcb, skip=()):
     """The surface pads, other than a chip's exposed pad, that some via's copper overlaps or comes
-    within VIA_PAD_GAP of."""
+    within VIA_PAD_GAP of. Vias centred at a position in ``skip`` (mm, to 0.001) are left out."""
     vias = [(float(find(v, "at")[1]), float(find(v, "at")[2]), float(find(v, "size")[1]) / 2)
-            for v in find_all(pcb, "via")]
+            for v in find_all(pcb, "via")
+            if (round(float(find(v, "at")[1]), 3), round(float(find(v, "at")[2]), 3)) not in skip]
     hits = set()
     for fp in find_all(pcb, "footprint"):
         ref = next(str(p[2]) for p in find_all(fp, "property") if str(p[1]) == "Reference")
@@ -962,7 +1023,11 @@ class EsdFlowKiCadTest(unittest.TestCase):
     STUBBED lists the known stubs. A line on it must still be a stub, so one fixed cannot stay
     listed."""
 
-    STUBBED = {("eos-cm5-base", "U1.1/6"), ("eos-cm5-base", "U1.3/4"),   # USB_P, USB_N: before issue #67
+    STUBBED = {
+               # USBH_DM. Dropping any track that touched a pad hid this stub; with only the copper
+               # inside the pad removed, the line's ends still meet beside U3. The rebuilt routing stays.
+               ("eos-cm4-base", "U3.3/4"),
+               ("eos-cm5-base", "U1.1/6"), ("eos-cm5-base", "U1.3/4"),   # USB_P, USB_N: before issue #67
                ("eos-probe-s3", "U1.3/4"),                                 # USB_D-: before issue #67
                # USB_D+, since issue #67's rebuild: the line's ends meet 0.7 mm from U2.1, leaving
                # a 1.37 mm stub on the Full Speed (12 Mbit/s) line
@@ -982,11 +1047,11 @@ class EsdFlowKiCadTest(unittest.TestCase):
 class ViaInPadTest(unittest.TestCase):
     """No via sits in a surface pad, or within VIA_PAD_GAP of one, except the vias a chip's exposed
     pad takes on purpose: solder wicks down an open barrel and starves the joint. Every board is
-    held to it. BUILT_BEFORE_THE_RULE named boards built before the generator kept vias off pads;
-    all were rebuilt under the rule (issue #67), so it is empty. A board on it must still have a via
-    in a pad, so a board rebuilt clean cannot stay exempt."""
+    held to it. Issue #67 rebuilt the boards that predated the rule and moved the two Learn RP2350
+    ground vias that sat in pads, so nothing is exempt. A position in REFERENCE_COPPER is skipped;
+    a via that has moved clear of its pad must not stay listed."""
 
-    BUILT_BEFORE_THE_RULE = set()
+    REFERENCE_COPPER = {}
 
     def test_the_gap_matches_the_generators(self):
         source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
@@ -997,12 +1062,10 @@ class ViaInPadTest(unittest.TestCase):
             pcb_path = folder / "hardware" / f"{folder.name}.kicad_pcb"
             if not pcb_path.is_file():
                 continue
-            hits = _vias_in_pads(loads(pcb_path.read_text(encoding="utf-8")))
+            hits = _vias_in_pads(loads(pcb_path.read_text(encoding="utf-8")),
+                                 skip=self.REFERENCE_COPPER.get(folder.name, set()))
             with self.subTest(board=folder.name):
-                if folder.name in self.BUILT_BEFORE_THE_RULE:
-                    self.assertTrue(hits, "rebuilt clean: take it off BUILT_BEFORE_THE_RULE")
-                else:
-                    self.assertFalse(hits, f"vias in {', '.join(sorted(hits))}")
+                self.assertFalse(hits, f"vias in {', '.join(sorted(hits))}")
 
 
 
@@ -1124,6 +1187,985 @@ class OwnershipTest(unittest.TestCase):
         notice = REPO_ROOT / "tools" / "eos_boards" / "footprints" / "EoS_Connectors.NOTICE.txt"
         self.assertIn("All rights reserved", notice.read_text(encoding="utf-8"))
         self.assertFalse((notice.parent / "EoS_Connectors.LICENSE.txt").exists())   # would be listed as third-party
+
+def pcb_stackup(pcb):
+    """(copper layer names of the board's layer table, its stack-up's rows as (name, type, thickness),
+    copper finish) read from a parsed .kicad_pcb; the rows are [] when it has no stack-up."""
+    table = [str(item[1]) for item in find(pcb, "layers")[1:] if isinstance(item, list) and str(item[1]).endswith(".Cu")]
+    stack = find(find(pcb, "setup"), "stackup")
+    if stack is None:
+        return table, [], None
+    rows = [(str(r[1]), str(find(r, "type")[1]), float(find(r, "thickness")[1]) if find(r, "thickness") else None)
+            for r in find_all(stack, "layer")]
+    return table, rows, str(find(stack, "copper_finish")[1])
+
+
+# Boards built before the P3 stage 1 generator (stack-up, fiducials, identity line, PCB title block);
+# P4 rebuilds every board and takes it out of this set. The tests check the set too: a listed board
+# that already has a stack-up fails them, so the set cannot go stale.
+BUILT_BEFORE_P3 = {
+    "eos-atmega328p-board", "eos-cm4-base", "eos-cm5-base", "eos-esp32-devkit", "eos-f280049c-board",
+    "eos-feather-rp2040", "eos-ke16z-board", "eos-kl25-board", "eos-learn-rp2350", "eos-lpc55s69-board",
+    "eos-motion-wing", "eos-msp430g2-board", "eos-probe-s3", "eos-ra2e1-board", "eos-ra4m2-board",
+    "eos-rl78g13-board", "eos-sense-cape", "eos-stm32-64", "eos-tm4c123-board", "eos-tm4c1294-board"}
+
+
+# Designs whose README tabulates a stack-up other than the one the generator writes (TM4C1294 asks for a
+# ~0.10 mm top prepreg and 1 oz inner copper; the generator now writes JLC06161H-2116B, 0.5 oz inner).
+# P4 sets the design's stackup option (impedance_controlled), settles the inner copper (widen the inner
+# 5 V tracks for 0.5 oz, or order 1 oz) and rewrites the README's table; then this set empties.
+STACKUP_TO_DECLARE = {"eos-tm4c1294-board"}
+
+
+class StackupTest(unittest.TestCase):
+    """A1: the board file carries the fab's stack-up (JLCPCB's published 1.6 mm stack-ups)."""
+
+    def test_jlcpcb_numbers_as_published(self):
+        rows = {n: [(r["type"], r["thickness"], r.get("epsilon_r")) for r in fabrication.STACKUPS[n]["layers"]] for n in (2, 4, 6)}
+        cu, inner, p7628, core = ("copper", 0.035, None), ("copper", 0.0152, None), ("prepreg", 0.2104, 4.4), ("core", 1.065, 4.6)
+        self.assertEqual(rows[4], [cu, p7628, inner, core, inner, p7628, cu])                  # JLC04161H-7628
+        p2116 = ("prepreg", 0.1164, 4.16)
+        self.assertEqual(rows[6], [cu, p2116, inner, ("core", 0.5, 4.6), inner, ("prepreg", 0.1528, 3.91), inner,
+                                   ("core", 0.5, 4.6), inner, p2116, cu])                       # JLC06161H-2116B (1080 x 2 in the middle)
+        self.assertEqual(rows[2], [cu, ("core", 1.51, 4.5), cu])
+        for n in (2, 4, 6):
+            with self.subTest(layers=n):
+                st = fabrication.stackup_for(n, 1.6)
+                self.assertEqual([r["name"] for r in st["layers"] if r["type"] == "copper"], fabrication.copper_names(n))
+                self.assertAlmostEqual(fabrication.stackup_thickness(st), 1.6, delta=0.16)     # JLCPCB: +-10 %
+                self.assertEqual((st["finish"], st["mask_color"], st["silk_color"]), ("ENIG", "Green", "White"))
+                self.assertIn("jlcpcb.com", st["source"])
+
+    def test_overrides_and_refusals(self):
+        self.assertEqual(fabrication.stackup_for(2, 1.6, {"finish": "HAL lead-free"})["finish"], "HAL lead-free")
+        own = {"source": "Fab X standard 4-layer, read 2026-10-24", "layers": [
+            {"type": "copper", "name": n, "thickness": 0.035} if i % 2 == 0 else
+            {"type": "core", "thickness": 0.5, "material": "FR4", "epsilon_r": 4.3}
+            for i, n in enumerate(["F.Cu", None, "In1.Cu", None, "In2.Cu", None, "B.Cu"])]}
+        self.assertEqual(fabrication.stackup_for(4, 1.6, own)["source"], own["source"])
+        bad = [((2, 1.0, None), "no published standard"), ((4, 1.6, {"layers": own["layers"]}), "needs a source"),
+               ((2, 1.6, own), "copper layers"), ((2, 1.6, {"finish": "Gold"}), "finish"),
+               ((2, 1.6, {"colour": "Red"}), "unknown option"),
+               ((4, 1.6, dict(own, layers=own["layers"][:1] + [own["layers"][1]] * 2 + own["layers"][2:])), "copper layers|alternate"),
+               # JLCPCB holds 1.6 mm boards to +-10 %: a 1.0 mm core makes 1.09 mm, a 2.0 mm one 2.09 mm
+               ((2, 1.6, {"source": "x", "layers": [own["layers"][0], dict(own["layers"][1], thickness=1.0), dict(own["layers"][0], name="B.Cu")]}),
+                "adds up to 1.0900 mm, outside 1.6 mm"),
+               ((2, 1.6, {"source": "x", "layers": [own["layers"][0], dict(own["layers"][1], thickness=2.0), dict(own["layers"][0], name="B.Cu")]}),
+                "adds up to 2.0900 mm"),
+               ((2, 1.6, {"impedance_controlled": "yes"}), "impedance_controlled")]
+        ok = {"source": "x", "layers": [own["layers"][0], dict(own["layers"][1], thickness=1.45), dict(own["layers"][0], name="B.Cu")]}
+        self.assertAlmostEqual(fabrication.stackup_thickness(fabrication.stackup_for(2, 1.6, ok)), 1.54)   # inside +-10 %
+        for args, message in bad:
+            with self.subTest(args=str(args)[:60]), self.assertRaisesRegex(ValueError, message):
+                fabrication.stackup_for(*args)
+
+    def test_an_impedance_controlled_board_puts_er_in_the_job_file(self):
+        # KiCad copies er, loss tangent and "ImpedanceControlled" into the job file only with this flag (review m2)
+        self.assertIn("(dielectric_constraints no)", fabrication.stackup_text(fabrication.stackup_for(6, 1.6)))
+        self.assertIn("(dielectric_constraints yes)",
+                      fabrication.stackup_text(fabrication.stackup_for(6, 1.6, {"impedance_controlled": True})))
+
+    def test_a_readme_stack_up_table_names_the_stackup_the_board_carries(self):
+        # A README that tabulates its stack-up must name the JLCPCB stack-up the generator writes, so the
+        # README and the board file cannot ask the fab for two different boards (review MAJOR-1).
+        found = set()
+        for name, module in EOS_BOARDS.items():
+            text = (EOS_DIR / name / "README.md").read_text(encoding="utf-8")
+            if not re.search(r"^\| (F|In\d|B)\.Cu \|", text, re.M):
+                continue
+            board = importlib.import_module(f"eos_boards.boards.{module}").BOARD
+            source = fabrication.stackup_for(board.layers, board.thickness, board.stackup)["source"]
+            named = re.findall(r"JLC0\d{4}H-[0-9A-Z]+", text)
+            if not named or any(n not in source for n in named):
+                found.add(name)
+        self.assertEqual(found, STACKUP_TO_DECLARE)
+
+    def test_inserted_stackup_reads_back_as_kicad_writes_it(self):
+        board = '(kicad_pcb\n\t(version 20260206)\n\t(layers\n\t\t(0 "F.Cu" signal)\n\t\t(4 "In1.Cu" signal)\n' \
+                '\t\t(6 "In2.Cu" signal)\n\t\t(2 "B.Cu" signal)\n\t)\n\t(setup\n\t\t(pad_to_mask_clearance 0)\n\t)\n)\n'
+        text = fabrication.insert_stackup(board, fabrication.stackup_for(4, 1.6))
+        table, rows, finish = pcb_stackup(loads(text))
+        self.assertEqual([n for n, kind, _ in rows if kind == "copper"], table)
+        self.assertEqual(finish, "ENIG")
+        self.assertEqual([t for _, kind, t in rows if kind in ("prepreg", "core")], [0.2104, 1.065, 0.2104])
+        with self.assertRaises(ValueError):                     # never two stack-ups
+            fabrication.insert_stackup(text, fabrication.stackup_for(4, 1.6))
+
+    def test_every_design_gets_a_stackup_for_its_layers(self):
+        for path in sorted((REPO_ROOT / "tools" / "eos_boards" / "boards").glob("eos_*.py")):
+            board = importlib.import_module(f"eos_boards.boards.{path.stem}").BOARD
+            with self.subTest(board=path.stem):
+                st = fabrication.stackup_for(board.layers, board.thickness, board.stackup)
+                self.assertEqual(len([r for r in st["layers"] if r["type"] == "copper"]), board.layers)
+
+    def test_every_built_board_carries_a_stackup_matching_its_layers(self):
+        for name in EOS_BOARDS:
+            pcb = loads((EOS_DIR / name / "hardware" / f"{name}.kicad_pcb").read_text(encoding="utf-8"))
+            table, rows, _ = pcb_stackup(pcb)
+            with self.subTest(board=name):
+                if name in BUILT_BEFORE_P3:
+                    self.assertEqual(rows, [], "has a stack-up now: take it out of BUILT_BEFORE_P3")
+                else:
+                    self.assertEqual([n for n, kind, _ in rows if kind == "copper"], table)
+
+
+class IdentityTest(_Lib):
+    """A3: the board's name, revision and year on the silkscreen beside its ownership line, and the
+    board file's title block with the owner and the all-rights-reserved notice."""
+
+    OWN = [{"text": "(c) 2026 Kartikeydheer Srivastava", "x": 10.0, "y": 8.0, "size": 0.8, "layer": "B_SilkS", "mirror": True},
+           {"text": "All rights reserved", "x": 10.0, "y": 9.4, "size": 0.8, "layer": "B_SilkS", "mirror": True}]
+
+    def test_every_design_gets_one_identity_line_beside_its_ownership_line(self):
+        for path in sorted((REPO_ROOT / "tools" / "eos_boards" / "boards").glob("eos_*.py")):
+            module = importlib.import_module(f"eos_boards.boards.{path.stem}")
+            board, texts = module.BOARD, module.TEXTS
+            out = build.identity_texts(board, texts)
+            own = next(t for t in out if t["text"] == "(c) 2026 Kartikeydheer Srivastava")
+            mine = [t for t in out if t["text"] == f"{board.title}  rev {board.revision}  2026"]
+            with self.subTest(board=path.stem):
+                self.assertEqual(len(mine), 1)
+                self.assertEqual((mine[0]["layer"], mine[0].get("mirror")), (own["layer"], own.get("mirror")))
+                self.assertLess(abs(mine[0]["y"] - own["y"]), 2.6)               # beside it: the line above
+                self.assertFalse([t for t in out if t.get("layer") == own["layer"] and t["text"].endswith("rev A")])
+                self.assertEqual(len(out), len(texts))                           # the hand-drawn name line replaced
+
+    def test_identity_line_without_a_name_line_and_refusals(self):
+        board = self.board([], revision="B", date="2027-01-05")
+        board.title = "EoS Test"
+        own = [dict(t, text=t["text"].replace("2026", "2027")) for t in self.OWN]
+        out = build.identity_texts(board, own)
+        self.assertEqual(out[-1], {"text": "EoS Test  rev B  2027", "x": 10.0, "y": 6.0, "size": 1.0, "bold": True,
+                                   "layer": "B_SilkS", "mirror": True, "identity": True, "design_text": ""})
+        # review m6: a later revision replaces the old hand-drawn "rev A" line, it does not sit beside it
+        out = build.identity_texts(board, own + [dict(own[0], text="EoS Test  rev A", y=5.0)])
+        self.assertEqual([t["text"] for t in out if "rev" in t["text"]], ["EoS Test  rev B  2027"])
+        self.assertEqual(out[-1]["y"], 5.0)
+        self.assertEqual(self.board([]).revision, "A")                            # the default revision
+        with self.assertRaisesRegex(SystemExit, "needs one ownership line"):
+            build.identity_texts(self.board([]), [])
+        with self.assertRaisesRegex(SystemExit, "2 name lines"):
+            build.identity_texts(self.board([]), self.OWN + [dict(self.OWN[0], text="T  rev A"), dict(self.OWN[0], text="X  rev A")])
+
+    def test_generated_silk_over_copper_or_the_edge_fails_the_build(self):
+        texts = [{"text": "EoS Test  rev A  2026", "identity": True}, {"text": "J1"}]
+        drc = {"violations": [
+            {"type": "silk_over_copper", "severity": "warning",
+             "items": [{"description": "PCB text 'EoS Test  rev A  2026' on B.Silkscreen"}, {"description": "PTH pad 8 [GND] of J1"}]},
+            {"type": "silk_over_copper", "severity": "warning", "items": [{"description": "PCB text 'J1' on F.Silkscreen"}]},
+            {"type": "silk_edge_clearance", "severity": "warning",
+             "items": [{"description": "Segment on Edge.Cuts"}, {"description": "PCB text 'EoS Test  rev A  2026' on B.Silkscreen"}]},
+            {"type": "silk_overlap", "severity": "warning", "items": [{"description": "PCB text 'EoS Test  rev A  2026' on B.Silkscreen"}]}]}
+        self.assertEqual(build.generated_silk_problems(drc, texts),
+                         ["silk_over_copper: PCB text 'EoS Test  rev A  2026' on B.Silkscreen",
+                          "silk_edge_clearance: PCB text 'EoS Test  rev A  2026' on B.Silkscreen",
+                          "silk_overlap: PCB text 'EoS Test  rev A  2026' on B.Silkscreen"])     # PR #74 review
+        source = (REPO_ROOT / "tools" / "eos_boards" / "build.py").read_text(encoding="utf-8")
+        self.assertIn("+ generated_silk_problems(drc, texts)", source)
+        pcb = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
+        self.assertIn('if t.get("identity"):', pcb)            # the placement step fits the line or stops
+
+    def test_title_block_carries_owner_and_rights(self):
+        board = self.board([], contact="kartikeydheer@gmail.com", licence_terms="boards/licence_terms.txt")
+        board.licence = design.ALL_RIGHTS_RESERVED
+        self.assertEqual(build.title_block(board), {
+            "title": "T", "date": "2026-10-11", "rev": "A", "company": "Kartikeydheer Srivastava",
+            "comments": ["Copyright (c) 2026 Kartikeydheer Srivastava. Licence: All rights reserved",
+                         "Generated by tools/eos_boards from the board's design file",
+                         "All rights reserved: see LICENSE.txt; permission from kartikeydheer@gmail.com"]})
+        self.assertEqual(len(build.title_block(self.board([]))["comments"]), 2)       # an MIT board: no permission line
+        spec = build.spec_for(board, self.lib, Path(self.tmp.name), [])
+        self.assertEqual(spec["title_block"], build.title_block(board))
+
+    def test_every_built_board_carries_its_identity_and_title_block(self):
+        for name, module in EOS_BOARDS.items():
+            if name in BUILT_BEFORE_P3:
+                continue
+            board = importlib.import_module(f"eos_boards.boards.{module}").BOARD
+            pcb = loads((EOS_DIR / name / "hardware" / f"{name}.kicad_pcb").read_text(encoding="utf-8"))
+            with self.subTest(board=name):
+                silk = [str(t[1]) for t in find_all(pcb, "gr_text") if str(find(t, "layer")[1]) == "B.SilkS"]
+                self.assertIn(f"{board.title}  rev {board.revision}  {board.date[:4]}", silk)
+                tb = find(pcb, "title_block")
+                self.assertEqual(str(find(tb, "company")[1]), board.company)
+                self.assertEqual([str(c[2]) for c in find_all(tb, "comment")], build.title_block(board)["comments"])
+
+
+class FiducialTest(_Lib):
+    """A2: three fiducials per side the assembler populates, near three corners and spread, not in a line,
+    their mask openings 3 mm or more from the edge, their copper-free squares clear of everything; two
+    diagonally opposite where three do not fit."""
+
+    def test_free_board_gets_three_corners(self):
+        points, note = fabrication.choose_fiducials(30.0, 20.0, 1.0, [])
+        self.assertEqual((points, note), ([(4.0, 4.0), (26.0, 4.0), (4.0, 16.0)], ""))
+        self.assertEqual(fabrication.fiducial_problems(points, 30.0, 20.0, 1.0, []), [])
+
+    def test_blocked_corners_are_avoided(self):
+        # a FeatherWing: headers along both long edges, holes in the corners (motion wing's courtyards)
+        obstacles = [(0, -0.5, 50.8, 3.04), (0, 19.82, 50.8, 23.4), (0, 0, 5.3, 5.3), (45.5, 0, 50.8, 5.3),
+                     (0, 17.5, 5.3, 22.9), (45.5, 17.5, 50.8, 22.9), (3.0, 3.0, 9.0, 9.0)]
+        points, note = fabrication.choose_fiducials(50.8, 22.86, 2.54, obstacles)
+        self.assertEqual((note, fabrication.fiducial_problems(points, 50.8, 22.86, 2.54, obstacles)), ("", []))
+        self.assertEqual(len({(x < 25.4, y < 11.43) for x, y in points}), 3)          # three different corners
+
+    def test_crowded_corners_still_spread_the_three(self):
+        # review m5: the free spot nearest each corner can sit near the middle (Feather RP2040's three were
+        # within 17 x 15 mm); the trio is chosen among each corner's 25 nearest free spots for its spread
+        obstacles = [(0, 0, 15, 9), (36, 0, 50.8, 3), (0, 14, 25, 22.86), (30, 15, 50.8, 22.86)]
+        points, note = fabrication.choose_fiducials(50.8, 22.86, 2.54, obstacles)
+        self.assertEqual(note, "")
+        self.assertEqual(fabrication.fiducial_problems(points, 50.8, 22.86, 2.54, obstacles), [])
+        self.assertGreaterEqual(fabrication._min_distance(points), 9.0)
+        self.assertGreaterEqual(max(x for x, _ in points) - min(x for x, _ in points), 40.0)   # across the board
+
+    def test_the_widest_trio_wins_over_the_first(self):
+        # review n3 (N12): with the top-left corner blocked, the nearest trio (top-left, top-right,
+        # bottom-left) has its closest pair 22.5 mm apart; leaving out bottom-left for bottom-right
+        # spreads it to 32 mm, and the chooser must prefer that (by more than its 0.5 mm hysteresis)
+        points, note = fabrication.choose_fiducials(60.0, 40.0, 1.0, [(0, 0, 20, 12)])
+        self.assertEqual((points, note), ([(4.0, 13.5), (56.0, 4.0), (56.0, 36.0)], ""))
+        self.assertEqual(fabrication._min_distance(points), 32.0)
+        nearest = [(4.0, 13.5), (56.0, 4.0), (4.0, 36.0)]
+        self.assertEqual(fabrication._min_distance(nearest), 22.5)
+
+    def test_two_diagonally_opposite_where_three_do_not_fit(self):
+        # ESP32 DevKit's case (review m4): the module and its antenna keep-out fill the top half
+        obstacles = [(0, 0, 27.94, 24.0), (0, 0, 2.5, 48.76), (25.4, 0, 27.94, 48.76)]
+        points, note = fabrication.choose_fiducials(27.94, 48.76, 1.0, obstacles)
+        self.assertEqual(len(points), 2)
+        self.assertIn("two diagonally opposite fiducials", note)
+        self.assertIn("only 2 corner quarter(s) have room", note)
+        self.assertGreaterEqual(fabrication._diagonal(points), fabrication.FIDUCIAL_SPREAD)
+        self.assertEqual(fabrication.fiducial_problems(points, 27.94, 48.76, 1.0, obstacles), [])
+
+    def test_no_room_is_refused_with_the_way_out(self):
+        with self.assertRaisesRegex(ValueError, "near only 0 corner.*fiducials option"):
+            fabrication.choose_fiducials(30.0, 20.0, 1.0, [(0, 0, 30, 20)])
+        with self.assertRaisesRegex(ValueError, "no two diagonally opposite"):     # a strip too thin to go diagonal
+            fabrication.choose_fiducials(40.0, 9.0, 1.0, [(0, 0, 40, 3.5)])
+
+    def test_problems_are_named(self):
+        args = (30.0, 20.0, 1.0)
+        self.assertIn("three are needed", fabrication.fiducial_problems([(5, 5)], *args, [])[0])
+        self.assertIn("not diagonally apart", fabrication.fiducial_problems([(5, 5), (25, 7)], *args, [])[0])
+        self.assertEqual(fabrication.fiducial_problems([(5, 5), (25, 15)], *args, []), [])
+        self.assertIn("under 3.0 mm from the board edge", fabrication.fiducial_problems([(3.5, 5), (25, 5), (5, 15)], *args, [])[0])
+        self.assertIn("meets 1 item", fabrication.fiducial_problems([(5, 5), (25, 5), (5, 15)], *args, [(5.5, 5.5, 7, 7)])[0])
+        self.assertIn("of a line", fabrication.fiducial_problems([(5, 5), (15, 7), (25, 9)], *args, [])[0])
+
+    def test_one_definition_of_an_assembled_side(self):
+        # review m3/D1: fitted, in the position file, and a pad that gets paste
+        self.assertTrue(fabrication.carries_smd_parts(False, False, [(True, True), (True, True)]))
+        for dnp, excluded, pads in ((True, False, [(True, True)]), (False, True, [(True, True)]),
+                                    (False, False, [(True, False)]), (False, False, [(False, False)])):
+            with self.subTest(dnp=dnp, excluded=excluded, pads=pads):
+                self.assertFalse(fabrication.carries_smd_parts(dnp, excluded, pads))
+        source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
+        place = source[source.index("def place_fiducials("):source.index("def place(")]
+        self.assertIn("fabrication.carries_smd_parts(", place)
+        self.assertIn("fp.SetBoardOnly(True)", place)
+        self.assertIn("fp.SetExcludedFromBOM(True)", place)
+        self.assertIn("fabrication.carries_smd_parts(", (REPO_ROOT / "tools" / "eos_boards" / "metrics.py").read_text(encoding="utf-8"))
+        # STM32 64's bottom: two fitted-nothing test pads (dnp, exclude_from_pos_files, no paste)
+        self.assertEqual(metrics.board_metrics(EOS_DIR / "eos-stm32-64")["smd_sides"], ["top"])
+        self.assertEqual(metrics.board_metrics(EOS_DIR / "eos-cm5-base")["smd_sides"], ["bottom", "top"])   # BT1 on the bottom
+
+    def test_design_positions_reach_the_spec_and_bad_ones_are_refused(self):
+        parts = [Part("U1", "T:M", "M", "fp", (5, 5), {"GND": "GND", "A/B": NC})]
+        spec = build.spec_for(self.board(parts, fiducials={"B": [(4, 4), (6, 4), (4, 6)]}), self.lib, Path(self.tmp.name), [])
+        self.assertEqual(spec["fiducials"], {"B": [[4, 4], [6, 4], [4, 6]]})
+        spec = build.spec_for(self.board(parts, fiducials={"F": [(4, 4), (6, 6)]}), self.lib, Path(self.tmp.name), [])
+        self.assertEqual(spec["fiducials"], {"F": [[4, 4], [6, 6]]})                 # two: checked for diagonal in place
+        for bad in ({"T": [(1, 1)] * 3}, {"F": [(1, 1)]}, {"F": [(1, 1, 0)] * 3}, {"F": [(1, 1)] * 4}):
+            with self.subTest(bad=bad), self.assertRaisesRegex(SystemExit, "three"):
+                build.spec_for(self.board(parts, fiducials=bad), self.lib, Path(self.tmp.name), [])
+
+    def test_the_placement_step_keeps_generator_copper_out_of_the_squares(self):
+        source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
+        inside = source[source.index("def _inside("):source.index("def _in_fiducial_keepout(")]
+        self.assertIn('spec.get("fiducial_keepouts", [])', inside)          # fan-out, stitching, maze, repair vias
+        self.assertEqual(source.count("_in_fiducial_keepout(spec, "), 5)    # its definition; fan-out stub, pre-route, repair track, fragment via
+        maze = source[source.index("def maze("):source.index("def _track(")]
+        self.assertIn('li = 0 if k[4] == "F" else 1', maze)                 # tracks: the fiducial's own layer only
+        self.assertIn("_inside(no_fiducials, pt, t_edge)", maze)
+        place = source[source.index("def place("):source.index("def stitch(")]
+        self.assertLess(place.index("for route in spec.get(\"priority_routes\""), place.index("place_fiducials(board, spec)"))
+        self.assertLess(place.index("place_fiducials(board, spec)"), place.index("fanout(board, spec, exclude=early | first)"))
+
+    def test_every_built_board_has_fiducials_on_each_assembled_side(self):
+        for name in EOS_BOARDS:
+            if name in BUILT_BEFORE_P3:
+                continue
+            folder = EOS_DIR / name
+            pcb = loads((folder / "hardware" / f"{name}.kicad_pcb").read_text(encoding="utf-8"))
+            board = importlib.import_module(f"eos_boards.boards.{EOS_BOARDS[name]}").BOARD
+            m = metrics.board_metrics(folder)
+            areas = [z for z in find_all(pcb, "zone") if find(z, "name") and str(find(z, "name")[1]) == "eos-fiducial-keepout"]
+            with self.subTest(board=name):
+                self.assertEqual(sorted(m["fiducials"]), m["smd_sides"])           # fiducials on, and only on, assembled sides
+                self.assertEqual(m["fiducial_flags"], [])                           # board-only, out of the BOM
+                for side, points in m["fiducials"].items():
+                    self.assertEqual(fabrication.fiducial_problems([tuple(q) for q in points], board.width, board.height,
+                                                                   board.corner_radius, []), [])
+                    if len(points) == 2:                                            # A2: the README says why
+                        self.assertIn("two fiducials", (folder / "README.md").read_text(encoding="utf-8").lower())
+                self.assertEqual(len(areas), sum(len(p) for p in m["fiducials"].values()))
+                placement = (folder / "fab" / f"{name}-placement.csv").read_text(encoding="utf-8")
+                bom = (folder / "fab" / f"{name}-bom.csv").read_text(encoding="utf-8")
+                self.assertIn('"FID1"', placement)
+                self.assertNotIn("FID1", bom)
+
+
+# Designs whose SWD header is a Samtec FTSH-105 (by MPN) but still on KiCad's generic 1.27 mm SMD
+# header footprint; each switches to EoS_Packages:Samtec_FTSH-105-... (and lists EoS_Packages in its
+# local_footprints) when P4 rebuilds it, and leaves this set.
+FTSH_TO_SWITCH = {("eos_ke16z_board", "J2"), ("eos_kl25_board", "J7"), ("eos_lpc55s69_board", "J3"),
+                  ("eos_probe_s3", "J2"), ("eos_ra2e1_board", "J2"), ("eos_ra4m2_board", "J9"),
+                  ("eos_stm32_64", "J3"), ("eos_tm4c123_board", "J7"), ("eos_tm4c1294_board", "J9")}
+
+
+class OneRevisionTest(_Lib):
+    """PR #74 review (qodo): a hand-drawn name line on the other side kept its own revision, so a board
+    raised to rev B would show rev B on one side and rev A on the other."""
+
+    def test_every_name_line_carries_the_board_revision(self):
+        board = self.board([], revision="B")
+        board.title = "EoS Sense Cape for PocketBeagle"
+        texts = [{"text": "EoS Sense Cape  rev A", "x": 27.5, "y": 37.2, "size": 1.0, "bold": True},
+                 {"text": "EoS Sense Cape for PocketBeagle  rev A", "x": 27.5, "y": 44.0, "size": 1.0,
+                  "layer": "B_SilkS", "bold": True, "mirror": True},
+                 {"text": "(c) 2026 Kartikeydheer Srivastava", "x": 27.5, "y": 46.0, "size": 0.8, "layer": "B_SilkS", "mirror": True},
+                 {"text": "PWR", "x": 3.0, "y": 3.0, "size": 0.8}]
+        out = build.one_revision(board, build.identity_texts(board, texts))
+        self.assertEqual(out[0], dict(texts[0], text="EoS Sense Cape  rev B"))     # moved nowhere, resized never
+        self.assertFalse([t["text"] for t in out if "rev A" in t["text"]])
+        self.assertEqual(out[3], texts[3])
+        source = (REPO_ROOT / "tools" / "eos_boards" / "build.py").read_text(encoding="utf-8")
+        self.assertIn('texts = one_revision(board, identity_texts(board, getattr(module, "TEXTS", [])))', source)
+
+    def test_designs_show_one_revision(self):
+        for path in sorted((REPO_ROOT / "tools" / "eos_boards" / "boards").glob("eos_*.py")):
+            module = importlib.import_module(f"eos_boards.boards.{path.stem}")
+            out = build.one_revision(module.BOARD, build.identity_texts(module.BOARD, module.TEXTS))
+            revs = {m.group(1) for t in out for m in [re.search(r"\brev ([A-Z0-9]+)\b", t["text"])] if m}
+            with self.subTest(board=path.stem):
+                self.assertEqual(revs, {module.BOARD.revision})
+
+
+class GeneratedSilkGateTest(unittest.TestCase):
+    """PR #74 review (greptile, qodo): the name line over other silkscreen fails the build, as it does
+    over copper or at the edge; findings on the design's own texts stay warnings."""
+
+    def test_the_name_line_over_other_silk_fails_the_build(self):
+        texts = [{"text": "EoS T  rev A  2026", "identity": True}, {"text": "(c) 2026 Kartikeydheer Srivastava"}]
+        def drc(kind, first):
+            return {"violations": [{"type": kind, "severity": "warning", "items": [
+                {"description": f"PCB text '{first}' on B.Silkscreen"},
+                {"description": "PCB text '(c) 2026 Kartikeydheer Srivastava' on B.Silkscreen"}]}]}
+        self.assertEqual(build.generated_silk_problems(drc("silk_overlap", "EoS T  rev A  2026"), texts),
+                         ["silk_overlap: PCB text 'EoS T  rev A  2026' on B.Silkscreen"])
+        self.assertEqual(build.generated_silk_problems(drc("silk_overlap", "PWR"), texts), [])
+        for kind in ("silk_over_copper", "silk_edge_clearance"):
+            self.assertEqual(len(build.generated_silk_problems(drc(kind, "EoS T  rev A  2026"), texts)), 1)
+
+
+FIT_SCRIPT = """
+import json, sys
+sys.path.insert(0, sys.argv[1])
+import pcbnew as P
+import pcb_build
+v = pcb_build.v
+board = P.BOARD()
+spec = {"width": 40.0, "height": 20.0, "corner_radius": 0.0}
+for x in (12.0, 16.0, 20.0, 24.0, 28.0):         # 4 mm pads under the name line and every spot above it
+    fp = P.FootprintLoad(sys.argv[2] + "/TestPoint.pretty", "TestPoint_Pad_4.0x4.0mm")
+    board.Add(fp)
+    fp.SetPosition(v(x, 6.3))
+own = pcb_build.text(board, "(c) 2026 Kartikeydheer Srivastava", 20.0, float(sys.argv[3]), 0.8, P.F_SilkS)
+t = {"text": "EoS T  rev A  2026", "x": 20.0, "y": 8.0, "size": 1.0, "bold": True, "identity": True, "design_text": ""}
+item = pcb_build.text(board, t["text"], t["x"], t["y"], t["size"], P.F_SilkS, 0.0, True)
+try:
+    where = pcb_build.fit_identity(board, spec, item, t)
+except SystemExit as e:
+    where = "stopped: " + str(e)
+print(json.dumps({"where": where, "on_ownership": item.GetBoundingBox().Intersects(own.GetBoundingBox())}))
+"""
+
+
+class IdentityFitTest(unittest.TestCase):
+    """PR #74 review (greptile, qodo): the name line, moved off pads, must not land on the ownership
+    line (or other silkscreen), and every design text is down before it is fitted."""
+
+    def test_the_fitter_checks_other_silk_after_every_text_is_down(self):
+        source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
+        fit = source[source.index("def fit_identity("):source.index("def place_fiducials(")]
+        self.assertIn("and not any(box.Intersects(b) for uid, box in silk.items() if uid not in allowed)", fit)
+        place = source[source.index("def place(spec"):]
+        self.assertLess(place.index("placed_texts = [(text(board"), place.index("fit_identity(board, spec, item, t)"))
+        self.assertIn('line["design_text"] = old[0]["text"] if old else ""',
+                      (REPO_ROOT / "tools" / "eos_boards" / "build.py").read_text(encoding="utf-8"))
+
+    @unittest.skipUnless(os.environ.get("EOS_KICAD_TESTS"), "set EOS_KICAD_TESTS=1 to run the KiCad-backed fit "
+                         "(one small KiCad job: run it through the campaign's locked.sh)")
+    def test_a_blocked_name_line_never_lands_on_the_ownership_line(self):
+        from eos_boards import kicad_env
+        with tempfile.TemporaryDirectory() as tmp:
+            script = Path(tmp, "fit.py")
+            script.write_text(FIT_SCRIPT, encoding="utf-8")
+            results = {}
+            for own_y in (10.0, 13.0):           # the ownership line just below, or out of the way
+                run = subprocess.run([kicad_env.python(), str(script), str(REPO_ROOT / "tools" / "eos_boards"),
+                                      str(kicad_env.footprints()), str(own_y)], capture_output=True, text=True, timeout=300)
+                self.assertEqual(run.returncode, 0, run.stderr[-2000:])
+                results[own_y] = json.loads(run.stdout.strip().splitlines()[-1])
+        # just below: no spot within 2 mm clears both, so the build stops (before the fix: 1.0 mm on top of it)
+        self.assertTrue(results[10.0]["where"].startswith("stopped: identity line 'EoS T  rev A  2026' clears no pad, "
+                                                          "edge or other silkscreen"), results[10.0])
+        self.assertFalse(results[13.0]["where"].startswith("stopped"), results[13.0])   # room below the pads: it goes there
+        self.assertFalse(results[13.0]["on_ownership"])
+
+
+class FtshFootprintTest(unittest.TestCase):
+    """Samtec FTSH-105 on Samtec's recommended land pattern (Rev H, Fig 1): pads 0.74 x 2.79 mm,
+    1.27 mm pitch, 6.86 mm across both rows; pad order as KiCad's generic 1.27 mm SMD header."""
+
+    def test_committed_footprints_are_what_the_generator_writes(self):
+        fp = importlib.import_module("eos_boards.footprints.generate")
+        folder = REPO_ROOT / "tools" / "eos_boards" / "footprints" / "EoS_Packages.pretty"
+        for name, node in ((fp.NAME, fp.footprint()), (fp.HEADER_NAME, fp.header_2x49()), (fp.FTSH_NAME, fp.ftsh_105())):
+            with self.subTest(footprint=name):
+                self.assertEqual(dumps(node) + "\n", (folder / f"{name}.kicad_mod").read_text(encoding="utf-8"))
+
+    def test_pads_follow_samtecs_land_pattern(self):
+        fp = importlib.import_module("eos_boards.footprints.generate")
+        node = loads((REPO_ROOT / "tools" / "eos_boards" / "footprints" / "EoS_Packages.pretty"
+                      / f"{fp.FTSH_NAME}.kicad_mod").read_text(encoding="utf-8"))
+        pads = {str(q[1]): (float(find(q, "at")[1]), float(find(q, "at")[2]), float(find(q, "size")[1]), float(find(q, "size")[2]),
+                            [str(x) for x in find(q, "layers")[1:]]) for q in find_all(node, "pad")}
+        self.assertEqual(sorted(pads, key=int), [str(n) for n in range(1, 11)])
+        for n, (x, y, w, h, layers) in pads.items():
+            with self.subTest(pad=n):
+                self.assertEqual((w, h), (2.79, 0.74))                                    # .110 x .029 in
+                self.assertEqual(x, -2.035 if int(n) % 2 else 2.035)                       # odd pads left, as KiCad's header
+                self.assertEqual(y, round(-2.54 + 1.27 * ((int(n) - 1) // 2), 3))           # pad 1 at the top
+                self.assertEqual(layers, ["F.Cu", "F.Mask", "F.Paste"])                    # Fig 2: paste = pad
+        self.assertEqual(round(max(x + w / 2 for x, _, w, _, _ in pads.values()) * 2, 3), 6.86)   # .270 in across
+        self.assertIn("suddendocs.samtec.com", (REPO_ROOT / "tools" / "eos_boards" / "footprints" / "generate.py").read_text(encoding="utf-8"))
+
+    def test_designs_still_to_switch_to_it(self):
+        found = set()
+        for path in sorted((REPO_ROOT / "tools" / "eos_boards" / "boards").glob("eos_*.py")):
+            board = importlib.import_module(f"eos_boards.boards.{path.stem}").BOARD
+            for part in board.parts:
+                if part.fields.get("MPN", "").startswith("FTSH-105") and not part.footprint.startswith("EoS_Packages:Samtec_FTSH"):
+                    found.add((path.stem, part.ref))
+        self.assertEqual(found, FTSH_TO_SWITCH)
+
+
+# 2.54 mm jumper headers (a JP reference, or a BOOT header) drawn with a connector symbol, whose design
+# does not yet say how many shunts come with them (Board.shunts); P4 declares each and empties this set.
+SHUNTS_TO_DECLARE = {("eos_cm4_base", "J9"), ("eos_cm5_base", "J9"), ("eos_f280049c_board", "JP1"),
+                     ("eos_msp430g2_board", "JP1"), ("eos_msp430g2_board", "JP2"), ("eos_msp430g2_board", "JP3"),
+                     ("eos_msp430g2_board", "JP4"), ("eos_rl78g13_board", "JP1"), ("eos_tm4c123_board", "JP1"),
+                     ("eos_tm4c1294_board", "JP1"), ("eos_tm4c1294_board", "JP2")}
+
+
+class ShuntTest(_Lib):
+    """B3: the shunts a 2.54 mm jumper header needs are BOM lines (BOM-only symbols, no footprint)."""
+
+    HOUSING = """(kicad_symbol_lib (version 20231120) (generator "test")
+  (symbol "Housing" (in_bom yes) (on_board yes)
+    (property "Reference" "N" (at 0 0 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "Housing" (at 0 0 0) (effects (font (size 1.27 1.27))))
+    (symbol "Housing_0_1" (rectangle (start -1 -1) (end 1 1) (stroke (width 0) (type default)) (fill (type none))))))
+"""
+
+    def setUp(self):
+        super().setUp()
+        Path(self.tmp.name, "Mechanical.kicad_sym").write_text(self.HOUSING)
+        self.lib = Library(Path(self.tmp.name))
+        self.jp = Part("JP1", "T:R", "MD", "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical", (50, 50), {"1": "A", "2": "B"})
+        self.jp.lib_id = "Jumper:Jumper_2_Open"          # as the RA2E1 draws its boot jumper
+        self.boot = Part("J9", "T:U", "BOOT", "Connector_PinHeader_2.54mm:PinHeader_2x02_P2.54mm_Vertical", (80, 50),
+                         {"VDD": "A", "3": "B"})
+
+    def test_jumper_symbols_get_one_and_declared_headers_their_count(self):
+        shunts = build.shunt_parts(self.board([self.jp, self.boot], shunts={"J9": 2}))
+        self.assertEqual([(p.ref, p.lib_id, p.value, p.on_board) for p in shunts],
+                         [("JS1", "Mechanical:Housing", "Shunt 2.54 mm", False), ("JS2", "Mechanical:Housing", "Shunt 2.54 mm", False),
+                          ("JS3", "Mechanical:Housing", "Shunt 2.54 mm", False)])
+        self.assertEqual({p.fields["MPN"] for p in shunts}, {"SNT-100-BK-G"})
+        self.assertIn("supplied for J9 (2), JP1 (1)", shunts[0].fields["Description"])
+        self.assertEqual(build.shunt_parts(self.board([self.jp], shunts={"JP1": 0})), [])     # a design can say none
+
+    def test_refusals(self):
+        smd = Part("J4", "T:R", "X", "Connector_PinHeader_1.27mm:PinHeader_1x02_P1.27mm_Vertical", (50, 50), {"1": "A", "2": "B"})
+        for parts, shunts, message in (([self.jp], {"J5": 1}, "does not have"), ([smd], {"J4": 1}, "2.54 mm pin header"),
+                                       ([self.boot], {"J9": -1}, "count"),
+                                       ([self.jp, Part("JS1", "T:R", "x", "fp", (9, 9), {"1": "A", "2": "B"})], {}, "JS references")):
+            with self.subTest(message=message), self.assertRaisesRegex(SystemExit, message):
+                build.shunt_parts(self.board(parts, shunts=shunts))
+
+    def test_a_jumper_on_a_finer_header_gets_no_2_54_mm_shunt(self):
+        # PR #74 review (greptile): the automatic count took any PinHeader, 1.27 mm too, past the pitch check
+        fine = Part("JP2", "T:R", "MD", "Connector_PinHeader_1.27mm:PinHeader_1x02_P1.27mm_Vertical", (50, 50),
+                    {"1": "A", "2": "B"})
+        fine.lib_id = "Jumper:Jumper_2_Open"
+        with self.assertRaisesRegex(SystemExit, r"JP2 is a jumper on .*P1\.27mm.*no 2\.54 mm shunt fits; give shunts=\{'JP2': 0\}"):
+            build.shunt_parts(self.board([fine]))
+        self.assertEqual(build.shunt_parts(self.board([fine], shunts={"JP2": 0})), [])    # the design says none
+        with self.assertRaisesRegex(SystemExit, "2.54 mm pin header"):
+            build.shunt_parts(self.board([fine], shunts={"JP2": 1}))
+        self.assertEqual([p.ref for p in build.shunt_parts(self.board([fine, self.jp], shunts={"JP2": 0}))], ["JS1"])
+
+    def test_the_spec_validates_shunts_and_bom_only_parts(self):
+        # review m8: spec_for itself refuses a bad shunts entry and a part with pins left off the board
+        for kw, message in (({"shunts": {"U1": 5}}, "U1 has pins|does not have|2.54 mm pin header"),
+                            ({"shunts": {"NOPE": 1}}, "does not have"), ({"shunts": {"J9": True}}, "count")):
+            with self.subTest(**{k: str(v) for k, v in kw.items()}), self.assertRaisesRegex(SystemExit, message):
+                build.spec_for(self.board([self.boot], **kw), self.lib, Path(self.tmp.name), [])
+        off = Part("R5", "T:R", "1k", "fp", (9, 9), {"1": "A", "2": "B"}, on_board=False)
+        with self.assertRaisesRegex(SystemExit, "R5 has pins"):
+            build.spec_for(self.board([self.boot, off]), self.lib, Path(self.tmp.name), [])
+        board = self.board([self.boot], shunts={"J9": 1})
+        board.parts = board.parts + build.shunt_parts(board)            # pinless and off the board: fine
+        self.assertEqual([p["ref"] for p in build.spec_for(board, self.lib, Path(self.tmp.name), [])["parts"]], ["J9"])
+
+    def test_a_shunt_line_says_it_is_loose_and_names_a_second_source(self):
+        # review m9: an assembler matching BOM lines to placement rows must not look for it; B1 fallback
+        shunt = build.shunt_parts(self.board([self.boot], shunts={"J9": 1}))[0]
+        self.assertEqual(shunt.fields["Assembly"], "Loose: supplied with the board, not placed")
+        self.assertIn("Second source: Sullins QPC02SXGN-RC", shunt.fields["Description"])
+        self.assertIn("Assembly", build.BOM_FIELDS[0].split(","))
+        self.assertEqual(len(build.BOM_FIELDS[0].split(",")), len(build.BOM_FIELDS[1].split(",")))
+        self.assertIn("BOM_FIELDS[0]", (REPO_ROOT / "tools" / "eos_boards" / "build.py").read_text(encoding="utf-8"))
+
+    def test_a_shunt_is_a_bom_line_in_the_schematic_and_off_the_board(self):
+        board = self.board([self.boot], shunts={"J9": 1})
+        board.parts = board.parts + build.shunt_parts(board)
+        sch = loads(schematic.write(board, self.lib))
+        js = next(n for n in find_all(sch, "symbol") if find(n, "lib_id") and any(
+            str(q[1]) == "Reference" and str(q[2]) == "JS1" for q in find_all(n, "property")))
+        self.assertEqual((str(find(js, "in_bom")[1]), str(find(js, "on_board")[1])), ("yes", "no"))
+        self.assertIn("SNT-100-BK-G", [str(q[2]) for q in find_all(js, "property")])
+        self.assertEqual([p["ref"] for p in build.spec_for(board, self.lib, Path(self.tmp.name), [])["parts"]], ["J9"])
+
+    def test_designs_with_shunts_and_those_still_to_declare(self):
+        auto, undeclared = {}, set()
+        for path in sorted((REPO_ROOT / "tools" / "eos_boards" / "boards").glob("eos_*.py")):
+            board = importlib.import_module(f"eos_boards.boards.{path.stem}").BOARD
+            shunts = build.shunt_parts(board)
+            if shunts:
+                auto[path.stem] = len(shunts)
+            counted = set(board.shunts) | {p.ref for p in board.parts if p.lib_id.startswith("Jumper:Jumper_")}
+            for p in board.parts:
+                if "PinHeader" in p.footprint and "P2.54mm" in p.footprint and (p.ref.startswith("JP") or p.value == "BOOT") \
+                        and p.ref not in counted:
+                    undeclared.add((path.stem, p.ref))
+        self.assertEqual(auto, {"eos_ra2e1_board": 1, "eos_ra4m2_board": 1})         # their boot-mode jumper (Jumper_2_Open)
+        self.assertEqual(undeclared, SHUNTS_TO_DECLARE)
+
+
+class RobustRoutingTest(_Lib):
+    """Deferred routing items: a new Freerouting run when repairs leave opens, a width per priority
+    route, fan-out vias fixed for the router, and pour fragments joined again after each repair."""
+
+    OPEN = {"items": [{"description": "Pad 1 [/A] of R1 on F.Cu", "pos": {"x": 1.0, "y": 1.0}},
+                      {"description": "Pad 2 [/A] of R2 on F.Cu", "pos": {"x": 2.0, "y": 1.0}}]}
+    ISLAND = {"items": [{"description": "Zone [GND] on B.Cu", "pos": {"x": 3.0, "y": 3.0}},
+                        {"description": "Zone [GND] on B.Cu", "pos": {"x": 4.0, "y": 3.0}}]}
+
+    def _route(self, opens, attempts=3):
+        """Run build.route with Freerouting, the pcb_build steps and DRC replaced: ``opens`` is, per
+        run, the unconnected items its last DRC reports (after a keep-the-best restore, the DRC is run
+        once more). Returns (result, the board text each finish step started from, the Freerouting
+        options of each run, the board file at the end)."""
+        from unittest import mock
+        out = Path(tempfile.mkdtemp(dir=self.tmp.name))
+        work = out / ".build"
+        work.mkdir()
+        pcb, ses = out / "b.kicad_pcb", work / "b.ses"
+        pcb.write_text("placed\n")
+        seen, runs, reports = [], [], iter(list(opens) + [opens[0]])
+
+        def step(mode, spec, board, other, tail=2000):
+            seen.append(Path(board).read_text())
+            Path(board).write_text(Path(board).read_text() + f"routed by run {len(runs)}\n")
+
+        def freeroute(dsn, ses_, passes, attempt, work_):
+            runs.append(build.freerouting_args(attempt))
+            ses_.write_text(f"session of run {len(runs)}")
+
+        def drc_round(cli, pcb_, out_):
+            return {"violations": [], "schematic_parity": [], "unconnected_items": next(reports)}
+
+        with mock.patch.object(build, "pcb_step", side_effect=step), mock.patch.object(build, "freeroute", side_effect=freeroute), \
+                mock.patch.object(build, "check_and_repair", side_effect=lambda *a: (drc_round(*a[:1], None, None), 0)), \
+                mock.patch.object(build, "run_drc", side_effect=drc_round), contextlib.redirect_stdout(io.StringIO()):
+            result = build.route("kicad-cli", "spec.json", pcb, "b.dsn", ses, work, out, 60, attempts)
+        self.session = ses.read_text()
+        return result, seen, runs, pcb.read_text()
+
+    def test_a_run_that_leaves_opens_is_routed_again_with_other_costs(self):
+        (drc, rounds, made, kept), seen, runs, board = self._route([[self.OPEN] * 2, []])
+        self.assertEqual((len(drc["unconnected_items"]), made, kept), (0, 2, 2))
+        self.assertEqual(seen, ["placed\n", "placed\n"])                 # the second run starts from the placement
+        self.assertEqual(runs, [[], ["--router.scoring.via_costs=100"]])   # with Freerouting's via cost changed
+
+    def test_the_best_run_is_kept_and_zone_islands_are_not_retried(self):
+        (drc, _, made, kept), _, runs, board = self._route([[self.OPEN], [self.OPEN] * 3, [self.OPEN] * 2])
+        self.assertEqual((made, kept, len(drc["unconnected_items"])), (3, 1, 1))
+        self.assertEqual(board, "placed\nrouted by run 1\n")                  # run 1's board, restored
+        self.assertEqual(self.session, "session of run 1")                    # and its session (review n2)
+        self.assertEqual(runs[2], ["--router.scoring.start_ripup_costs=300"])
+        (drc, _, made, kept), _, _, _ = self._route([[self.ISLAND]])           # nothing a new route would change
+        self.assertEqual((made, kept), (1, 1))
+        self.assertEqual(self._route([[]])[0][2], 1)                           # a clean first run is not repeated
+
+    def test_retry_settings_change_the_auto_router(self):
+        # review MAJOR-2: "-is random" only reordered the optimizer; each retry now changes a router cost
+        self.assertEqual([build.freerouting_args(i) for i in range(build.ROUTE_ATTEMPTS)],
+                         [[], ["--router.scoring.via_costs=100"], ["--router.scoring.start_ripup_costs=300"]])
+        self.assertEqual(len({tuple(a) for a in build.RETRY_SETTINGS}), build.ROUTE_ATTEMPTS)
+        self.assertEqual(build.repairable_opens({"unconnected_items": [self.OPEN, self.ISLAND]}),
+                         [{"net": "/A", "a": [1.0, 1.0], "b": [2.0, 1.0]}])
+
+    def test_priority_route_options(self):
+        self.assertEqual(fabrication.route_options((("U1", "1"), ("C1", "2"))), (False, None))
+        self.assertEqual(fabrication.route_options((("U1", "1"), ("C1", "2"), "join")), (True, None))
+        self.assertEqual(fabrication.route_options((("U1", "1"), ("C1", "2"), 0.4, "join")), (True, 0.4))
+        for bad in ("joins", 0, -0.2, True, ("join", "join"), (0.3, 0.4)):
+            extra = bad if isinstance(bad, tuple) else (bad,)
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                fabrication.route_options((("U1", "1"), ("C1", "2"), *extra))
+        parts = [Part("U1", "T:U", "U", "fp", (5, 5), {"VDD": "A", "3": NC})]
+        spec = build.spec_for(self.board(parts, priority_routes=[(("U1", "1"), ("U1", "2"), 0.3)]), self.lib, Path(self.tmp.name), [])
+        self.assertEqual(spec["priority_routes"], [[["U1", "1"], ["U1", "2"], 0.3]])
+        for routes, message in (([(("U1", "1"), ("U1", "2"), 0.05)], "minimum track"), ([(("U1", "1"), ("U1", "2"), "jion")], "join")):
+            with self.subTest(message=message), self.assertRaisesRegex(SystemExit, message):
+                build.spec_for(self.board(parts, priority_routes=routes), self.lib, Path(self.tmp.name), [])
+
+    def test_the_router_cannot_take_the_fanout_and_repairs_rejoin_pour_fragments(self):
+        # pcbnew code, read as source: these steps cannot run without KiCad
+        source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
+        fanout = source[source.index("def fanout("):source.index("REFERENCE_ZONE = ")]
+        self.assertEqual(fanout.count(".SetLocked(True)"), 2)                         # the via and its stub
+        repair = source[source.index("def repair("):source.index("def ease_vias(")]
+        finish = source[source.index("def finish("):source.index('if __name__ == "__main__":')]
+        for body in (repair, finish):
+            self.assertIn("join_all_fragments(board, spec, filler)", body)
+        place = source[source.index("def place("):source.index("def stitch(")]
+        self.assertIn("join, width_mm, via_at = route_options(route)", place)
+        self.assertIn("pinned_via(board, spec, net, *via_at)", place)
+        self.assertIn("MM(width_mm) if width_mm is not None else track_width(spec, net)", place)
+
+
+# What each board README's Fabrication section says now about its narrowest track, smallest drill and
+# vias: (the README's own words, the number in them), None where it states no number. Read by hand on
+# 24 Oct 2026 (P3 stage 1); the test checks each phrase is still in the README.
+README_FAB = {
+    "eos-atmega328p-board": {"narrowest": ("widens it to 0.127 mm, the design's minimum", "0.127"),
+                             "drill": ("**Smallest drill:** 0.3 mm (vias)", "0.3"), "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-cm4-base": {"narrowest": ("narrowing to the 0.09 mm four-layer minimum", "0.09"), "drill": None,
+                     "vias": ("**Vias:** 0.45 mm with a 0.2 mm drill", ["0.45/0.2"])},
+    "eos-cm5-base": {"narrowest": None, "drill": None, "vias": ("**Vias:** 0.45 mm with a 0.2 mm drill", ["0.45/0.2"])},
+    "eos-esp32-devkit": {"narrowest": ("narrowing to the 0.1 mm minimum at fine-pitch pads", "0.1"),
+                         "drill": ("**Smallest drill:** 0.2 mm", "0.2"),
+                         "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill, except one", ["0.5/0.25", "0.6/0.3"])},
+    "eos-f280049c-board": {"narrowest": ("0.15 mm tracks, 0.4 mm on VBUS and 5 V", "0.15"),
+                           "drill": ("vias 0.6 mm with a 0.3 mm drill, which is the smallest drill", "0.3"),
+                           "vias": ("vias 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-feather-rp2040": {"narrowest": ("0.095 mm on the USB-C receptacle's CC contacts", "0.095"),
+                           "drill": ("**Smallest drill:** 0.2 mm, in the vias", "0.2"),
+                           "vias": ("**Vias:** 0.45 mm with a 0.2 mm drill", ["0.45/0.2"])},
+    "eos-ke16z-board": {"narrowest": ("minimum track is set to 0.127 mm (5 mil, `rules`), so the build widens such necks to it", "0.127"),
+                        "drill": ("**Smallest drill:** 0.3 mm (vias)", "0.3"), "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-kl25-board": {"narrowest": ("minimum track is set to 0.127 mm (5 mil, `rules`), so the build widens such necks to it", "0.127"),
+                       "drill": ("**Smallest drill:** 0.3 mm (vias)", "0.3"), "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-learn-rp2350": {"narrowest": ("narrowing to 0.112 mm where the router necks down", "0.112"), "drill": None,
+                         "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill; Raspberry Pi's own copper uses a 0.25 mm drill",
+                                  ["0.6/0.3", "0.6/0.25"])},
+    "eos-lpc55s69-board": {"narrowest": ("(0.09 mm minimum at fine-pitch pins)", "0.09"), "drill": ("smallest drill 0.3 mm", "0.3"),
+                           "vias": ("Vias 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-motion-wing": {"narrowest": ("**Tracks:** 0.15 mm, 0.25 mm on the 3.3 V net", "0.15"),
+                        "drill": ("**Smallest drill:** 0.3 mm (vias)", "0.3"), "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-msp430g2-board": {"narrowest": ("narrowing to 0.112 mm where the router necks into the CP2102N's fine-pitch pads", "0.112"),
+                           "drill": ("**Smallest drill:** 0.3 mm, in the vias", "0.3"), "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-probe-s3": {"narrowest": ("narrowing to 0.112 mm at fine-pitch pins", "0.112"), "drill": ("**Smallest drill:** 0.2 mm", "0.2"),
+                     "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-ra2e1-board": {"narrowest": ("The smallest track is 0.10 mm", "0.10"), "drill": ("**Smallest drill:** 0.3 mm (vias)", "0.3"),
+                        "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-ra4m2-board": {"narrowest": ("Choose a fab process that allows 0.11 mm tracks", "0.11"),
+                        "drill": ("the smallest drill is 0.3 mm", "0.3"), "vias": ("Vias are 0.6 mm with 0.3 mm drills", ["0.6/0.3"])},
+    "eos-rl78g13-board": {"narrowest": None, "drill": None, "vias": ("Standard vias are 0.60 mm with 0.30 mm drill", ["0.6/0.3"])},
+    "eos-sense-cape": {"narrowest": ("Measured from the board file: 0.15 mm signal tracks", "0.15"), "drill": None,
+                       "vias": ("0.6 mm vias with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-stm32-64": {"narrowest": ("**Tracks:** 0.15 mm signals", "0.15"), "drill": ("**Smallest drill:** 0.3 mm (vias)", "0.3"),
+                     "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-tm4c123-board": {"narrowest": ("So the smallest track is 0.10 mm", "0.10"),
+                          "drill": ("the smallest drill is 0.3 mm, in the vias", "0.3"), "vias": ("Vias 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-tm4c1294-board": {"narrowest": ("0.15 mm tracks (every net that enters the TQFP-128), 0.13 mm on the device USB pair", "0.13"),
+                           "drill": ("vias 0.6 mm with a 0.3 mm drill, which is the smallest drill", "0.3"),
+                           "vias": ("vias 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+}
+# Where a README's numbers and the built board disagree today (README first, then the board), from
+# test_readme_fabrication_numbers_agree_with_metrics. P4 fixes each README and removes its entries;
+# this stage does not edit board READMEs.
+README_FAB_MISMATCHES = {
+    ("eos-cm4-base", "narrowest", "0.09", 0.1124), ("eos-cm4-base", "drill", None, 0.2),
+    ("eos-esp32-devkit", "narrowest", "0.1", 0.1124),
+    ("eos-cm5-base", "narrowest", None, 0.1124), ("eos-cm5-base", "drill", None, 0.2),
+    ("eos-f280049c-board", "narrowest", "0.15", 0.1124), ("eos-learn-rp2350", "drill", None, 0.25),
+    ("eos-lpc55s69-board", "narrowest", "0.09", 0.1124), ("eos-probe-s3", "narrowest", "0.112", 0.15),
+    ("eos-ra2e1-board", "narrowest", "0.10", 0.1124), ("eos-rl78g13-board", "narrowest", None, 0.1124),
+    ("eos-rl78g13-board", "drill", None, 0.3), ("eos-sense-cape", "drill", None, 0.3),
+    ("eos-stm32-64", "narrowest", "0.15", 0.1124), ("eos-tm4c1294-board", "narrowest", "0.13", 0.09),
+}
+
+
+def _fab_section(name):
+    text = (EOS_DIR / name / "README.md").read_text(encoding="utf-8")
+    section = text.split("\n## Fabrication", 1)[1].split("\n## ", 1)[0]
+    return " ".join(section.split())
+
+
+FIXED_LINES = {"narrowest": "Narrowest track", "drill": "Smallest drill"}
+
+
+def _fixed_line(section, item):
+    """The number on a README's fixed line, "**Narrowest track:** 0.1124 mm" or "**Smallest drill:** 0.3
+    mm", or None. P4 writes these lines from metrics.json; once a README has one, it is what is checked."""
+    m = re.search(r"\*\*" + FIXED_LINES[item] + r":\*\* ([0-9.]+) mm", section)
+    return m.group(1) if m else None
+
+
+def _agrees(stated, value):
+    """A README's minimum agrees with the board's when it is not above it (a fab process chosen for the
+    README's number must make the board) and the board's number, rounded as the README writes it (at
+    least two decimals), is the same number (review m7: rounding alone let 0.15 pass for 0.146)."""
+    if stated is None or value is None:
+        return stated is None and value is None
+    decimals = max(2, len(stated.split(".", 1)[1]) if "." in stated else 0)
+    return float(stated) <= value + 1e-9 and round(value, decimals) == float(stated)
+
+
+class MetricsTest(unittest.TestCase):
+    """Item 4: the generator's metrics.py reads a built board's fabrication numbers, and each board
+    README's Fabrication numbers agree with them (or are listed as known mismatches for P4)."""
+
+    # A small built board, written here so the numbers below stay fixed when P4 rebuilds the real ones:
+    # a 30 x 20 mm two-layer board, a resistor on top, a header with a plated slot on the bottom, two
+    # track widths, one via, a ground pour, a fiducial rule area, and a BOM with one line lacking an MPN.
+    FIXTURE_PCB = """(kicad_pcb (version 20260206) (generator "pcbnew")
+  (layers (0 "F.Cu" signal) (2 "B.Cu" signal) (25 "Edge.Cuts" user))
+  (setup (pad_to_mask_clearance 0)
+    STACKUP)
+  (footprint "Resistor_SMD:R_0603_1608Metric" (layer "F.Cu") (at 10 10)
+    (property "Reference" "R1" (at 0 0 0)) (attr smd)
+    (pad "1" smd roundrect (at -0.8 0) (size 0.8 0.9) (layers "F.Cu" "F.Mask" "F.Paste") (net "/A"))
+    (pad "2" smd roundrect (at 0.8 0) (size 0.8 0.9) (layers "F.Cu" "F.Mask" "F.Paste") (net "GND")))
+  (footprint "Connector:Slot" (layer "B.Cu") (at 20 10)
+    (property "Reference" "J1" (at 0 0 0)) (attr through_hole)
+    (pad "1" thru_hole oval (at 0 0) (size 1.2 1.8) (drill oval 0.6 1.2) (layers "*.Cu" "*.Mask") (net "/A"))
+    (pad "2" thru_hole circle (at 2.54 0) (size 1.7 1.7) (drill 1.0) (layers "*.Cu" "*.Mask") (net "GND")))
+  (footprint "TestPoint:TestPoint_Pad_D1.0mm" (layer "F.Cu") (at 5 15)
+    (property "Reference" "TP1" (at 0 0 0)) (attr smd)
+    (pad "1" smd circle (at 0 0) (size 1 1) (layers "F.Cu" "F.Mask") (net "GND")))
+  FIDUCIALS
+  (gr_line (start 0 0) (end 30 0) (layer "Edge.Cuts")) (gr_line (start 30 0) (end 30 20) (layer "Edge.Cuts"))
+  (gr_line (start 30 20) (end 0 20) (layer "Edge.Cuts")) (gr_line (start 0 20) (end 0 0) (layer "Edge.Cuts"))
+  (segment (start 10.8 10) (end 20 10) (width 0.2) (layer "F.Cu") (net "/A"))
+  (segment (start 9.2 10) (end 9.2 13) (width 0.1) (layer "B.Cu") (net "GND"))
+  (segment (start 9.2 13) (end 5 15) (width 0.2) (layer "B.Cu") (net "GND"))
+  (via (at 9.2 13) (size 0.6) (drill 0.3) (layers "F.Cu" "B.Cu") (net "GND"))
+  (zone (net "GND") (net_name "GND") (layers "F.Cu" "B.Cu") (name "pour"))
+  (zone (layer "F.Cu") (name "eos-fiducial-keepout") (keepout (tracks not_allowed) (vias not_allowed)))
+)
+"""
+    STACK = '(stackup (layer "F.Cu" (type "copper") (thickness 0.035)) (layer "dielectric 1" (type "core") ' \
+            '(thickness 1.51) (material "FR4") (epsilon_r 4.5)) (layer "B.Cu" (type "copper") (thickness 0.035)) ' \
+            '(copper_finish "ENIG") (dielectric_constraints no))'
+    FIDS = "".join(f'(footprint "Fiducial:Fiducial_1mm_Mask2mm" (layer "F.Cu") (at {x} {y}) (property "Reference" "FID{i}" ' \
+                   f'(at 0 0 0)) (attr smd board_only exclude_from_bom) (pad "" smd circle (at 0 0) (size 1 1) (layers "F.Cu" "F.Mask")))'
+                   for i, (x, y) in enumerate(((4, 4), (26, 4), (4, 16)), 1))
+
+    def _fixture(self, stackup=False, fiducials=False):
+        folder = Path(tempfile.mkdtemp()) / "eos-fixture"
+        (folder / "hardware").mkdir(parents=True)
+        (folder / "fab").mkdir()
+        self.addCleanup(lambda: __import__("shutil").rmtree(folder.parent))
+        text = self.FIXTURE_PCB.replace("STACKUP", self.STACK if stackup else "").replace("FIDUCIALS", self.FIDS if fiducials else "")
+        (folder / "hardware" / "eos-fixture.kicad_pcb").write_text(text, encoding="utf-8")
+        (folder / "fab" / "eos-fixture-bom.csv").write_text(
+            '"Refs","Value","Footprint","Manufacturer","MPN","Description","Qty","DNP"\n'
+            '"R1","10k","R_0603_1608Metric","Yageo","RC0603FR-0710KL","","1",""\n'
+            '"J1","Header","Slot","","","","1",""\n', encoding="utf-8")
+        (folder / "build-report.json").write_text(json.dumps({"erc_violations": 0, "drc_errors": 0, "drc_warnings": 2,
+                                                              "drc": {"violations": 2, "unconnected_items": 0, "schematic_parity": 0}}))
+        return folder
+
+    def test_metrics_of_a_built_board(self):
+        m = metrics.board_metrics(self._fixture(stackup=True, fiducials=True))
+        self.assertEqual((m["board"], m["copper_layers"], m["size_mm"]), ("eos-fixture", 2, [30.0, 20.0]))
+        self.assertEqual((m["stackup"]["copper"], m["stackup"]["finish"], m["stackup"]["thickness_mm"]), (["F.Cu", "B.Cu"], "ENIG", 1.58))
+        self.assertEqual((m["footprints"], m["footprints_by_side"]), (6, {"bottom": 1, "top": 5}))
+        self.assertEqual((m["pads"], m["nets"], m["track_segments"]), ({"smd": 6, "thru_hole": 2}, 2, 3))
+        self.assertEqual(m["track_length_mm"], {"B.Cu": 7.7, "F.Cu": 9.2})            # 3.0 + 4.65 on B.Cu
+        self.assertEqual((m["track_widths_mm"], m["narrowest_track_mm"], m["narrowest_track_segments"]), ({"0.1": 1, "0.2": 2}, 0.1, 1))
+        self.assertEqual(m["narrowest_track_at"], [{"net": "GND", "layer": "B.Cu", "start": [9.2, 10.0], "end": [9.2, 13.0], "length_mm": 3.0}])
+        self.assertEqual((m["vias"], m["vias_by_size_drill_mm"], m["smallest_drill_mm"]), (1, {"0.6/0.3": 1}, 0.3))
+        self.assertEqual(m["plated_slots"], [{"ref": "J1", "pad": "1", "width_mm": 0.6, "length_mm": 1.2}])
+        self.assertEqual((m["pours"], m["rule_areas"]), ([{"net": "GND", "layers": ["F.Cu", "B.Cu"]}], {"eos-fiducial-keepout": 1}))
+        self.assertEqual((m["test_points"], m["fiducials"], m["smd_sides"], m["fiducial_flags"]),
+                         (["TP1"], {"top": [[4.0, 4.0], [4.0, 16.0], [26.0, 4.0]]}, ["top"], []))
+        self.assertEqual((m["bom_lines"], m["bom_parts"], m["bom_lines_with_mpn"], m["bom_mpn_coverage"], m["bom_lines_without_mpn"]),
+                         (2, 2, 1, 0.5, ["Header (J1)"]))
+        self.assertEqual(m["checks"], {"erc": 0, "drc_errors": 0, "drc_warnings": 2, "violations": 2, "unconnected_items": 0,
+                                       "schematic_parity": 0})
+
+    def test_fab_problems_name_a_missing_stackup_and_fiducials(self):
+        self.assertEqual(metrics.fab_problems(metrics.board_metrics(self._fixture()), 30, 20, 1.0),
+                         ["no stack-up in the board file",
+                          "top: 0 fiducial(s); three are needed (two diagonally opposite where three do not fit)"])
+        self.assertEqual(metrics.fab_problems(metrics.board_metrics(self._fixture(stackup=True, fiducials=True)), 30, 20, 1.0), [])
+        m = metrics.board_metrics(self._fixture(stackup=True, fiducials=True))
+        m["copper_layers"] = 4
+        self.assertEqual(metrics.fab_problems(m, 30, 20, 1.0), ["stack-up has 2 copper layers, the board 4"])
+        # review m1/M18: a fiducial left in the BOM, or in the schematic's parity, stops the build
+        folder = self._fixture(stackup=True, fiducials=True)
+        pcb = folder / "hardware" / "eos-fixture.kicad_pcb"
+        pcb.write_text(pcb.read_text(encoding="utf-8").replace("(attr smd board_only exclude_from_bom)", "(attr smd board_only)", 1),
+                       encoding="utf-8")
+        self.assertEqual(metrics.fab_problems(metrics.board_metrics(folder), 30, 20, 1.0), ["fiducial FID1 not exclude_from_bom"])
+
+    def test_metrics_write_and_read_back(self):
+        folder = self._fixture(stackup=True, fiducials=True)
+        written = metrics.write(folder)
+        self.assertEqual(json.loads((folder / "metrics.json").read_text(encoding="utf-8")), json.loads(json.dumps(written)))
+
+    def test_every_board_narrowest_track_and_vias_read_independently(self):
+        for name in EOS_BOARDS:
+            pcb = loads((EOS_DIR / name / "hardware" / f"{name}.kicad_pcb").read_text(encoding="utf-8"))
+            widths = [round(float(find(s, "width")[1]), 4) for kind in ("segment", "arc") for s in find_all(pcb, kind)]
+            m = metrics.board_metrics(EOS_DIR / name)
+            with self.subTest(board=name):
+                self.assertEqual((m["narrowest_track_mm"], m["narrowest_track_segments"]), (min(widths), widths.count(min(widths))))
+                self.assertEqual(m["vias"], len(find_all(pcb, "via")))
+
+    def test_a_build_checks_the_fab_numbers_and_writes_metrics_json(self):
+        source = (REPO_ROOT / "tools" / "eos_boards" / "build.py").read_text(encoding="utf-8")
+        self.assertIn("problems = metrics.fab_problems(metrics.board_metrics(out, board.name, report)", source)
+        self.assertLess(source.index("metrics.write(out, board.name, report)"), source.index('report["outputs"] = sorted('))
+
+    def test_metrics_json_is_what_the_board_files_give(self):
+        for name in EOS_BOARDS:
+            path = EOS_DIR / name / "metrics.json"
+            if path.is_file():               # boards built since P3 stage 1 carry one
+                with self.subTest(board=name):
+                    self.assertEqual(json.loads(path.read_text(encoding="utf-8")),
+                                     json.loads(json.dumps(metrics.board_metrics(EOS_DIR / name))))
+
+    def test_the_readme_rule_for_minima(self):
+        self.assertTrue(_agrees("0.112", 0.1124))
+        self.assertTrue(_agrees("0.10", 0.1))
+        self.assertFalse(_agrees("0.15", 0.146))         # rounds to it, but claims a wider track than the board's
+        self.assertFalse(_agrees("0.1", 0.095))
+        self.assertFalse(_agrees("0.09", 0.1124))
+        self.assertEqual(_fixed_line("x **Narrowest track:** 0.1124 mm (3 segments) y", "narrowest"), "0.1124")
+        self.assertEqual(_fixed_line("**Smallest drill:** 0.3 mm (vias).", "drill"), "0.3")
+        self.assertIsNone(_fixed_line("narrowing to 0.112 mm", "narrowest"))
+
+    def test_readme_phrases_are_still_there(self):
+        self.assertEqual(set(README_FAB), set(EOS_BOARDS))
+        for name, claims in README_FAB.items():
+            section = _fab_section(name)
+            for item, claim in claims.items():
+                if claim is not None:
+                    with self.subTest(board=name, item=item):
+                        self.assertIn(claim[0], section)
+
+    def test_readme_fabrication_numbers_agree_with_metrics(self):
+        found = set()
+        for name, claims in README_FAB.items():
+            path = EOS_DIR / name / "metrics.json"
+            m = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else metrics.board_metrics(EOS_DIR / name)
+            section = _fab_section(name)
+            for item, key in (("narrowest", "narrowest_track_mm"), ("drill", "smallest_drill_mm")):
+                stated = _fixed_line(section, item) or (claims[item][1] if claims[item] else None)
+                if not _agrees(stated, m[key]):
+                    found.add((name, item, stated, m[key]))
+                if name not in BUILT_BEFORE_P3:                  # a rebuilt board's README has the fixed lines
+                    with self.subTest(board=name, item=item):
+                        self.assertIsNotNone(_fixed_line(section, item), f"no **{FIXED_LINES[item]}:** line")
+            with self.subTest(board=name, item="vias"):
+                self.assertEqual(sorted(claims["vias"][1]), sorted(m["vias_by_size_drill_mm"]))
+        self.assertEqual(found, README_FAB_MISMATCHES)
+
+
+class CrashSafetyTest(unittest.TestCase):
+    """Issue #70: KiCad 10's bindings can crash a step when a removed item's proxy is freed, so every
+    board.Remove() keeps its item referenced, and build.py stops when a pcb_build.py step crashes."""
+
+    def test_every_removal_goes_through_the_retaining_helper(self):
+        folder = REPO_ROOT / "tools" / "eos_boards"
+        source = (folder / "pcb_build.py").read_text(encoding="utf-8")
+        self.assertEqual(len(re.findall(r"\.Remove\(", source)), 1, "a board.Remove() outside _remove")
+        helper = source[source.index("def _remove("):]
+        helper = helper[:helper.index("\ndef ")]
+        self.assertIn("board.Remove(item)", helper)
+        self.assertIn("_REMOVED.append(item)", helper)
+        for path in sorted(folder.rglob("*.py")):
+            if path.name != "pcb_build.py":
+                with self.subTest(file=path.name):
+                    self.assertNotIn(".Remove(", path.read_text(encoding="utf-8"))
+
+    def _step(self, returncode):
+        import contextlib
+        import io
+        from unittest import mock
+        done = subprocess.CompletedProcess(["kicad-python"], returncode, "repaired 0 of 3", "TypeError: not iterable")
+        with mock.patch.object(build, "run", return_value=done), \
+                mock.patch.object(build.kicad_env, "python", return_value="kicad-python"), \
+                contextlib.redirect_stdout(io.StringIO()):
+            return build.pcb_step("repair", "spec.json", "board.kicad_pcb", "open.json")
+
+    def test_a_crashed_step_stops_the_build(self):
+        for code in (139, -11, 1):                 # a shell's exit 139, a signal, an exception
+            with self.subTest(exit=code), self.assertRaisesRegex(SystemExit, rf"pcb_build.py repair failed \(exit {code}\)"):
+                self._step(code)
+        self.assertEqual(self._step(0).returncode, 0)
+
+    def _check(self, returncode, writes):
+        from unittest import mock
+        out = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: __import__("shutil").rmtree(out))
+        report = out / "drc.json"
+        report.write_text('{"violations": [], "unconnected_items": [], "schematic_parity": []}')   # the last good build's
+
+        def fake(cmd, **kw):
+            self.assertEqual(cmd[-3:], ["-o", report, "board.kicad_pcb"])
+            self.assertFalse(report.exists(), "the old report must be gone before kicad-cli runs")
+            if writes:
+                report.write_text('{"violations": [1]}')
+            return subprocess.CompletedProcess(cmd, returncode, "", "")
+        with mock.patch.object(build, "run", side_effect=fake), contextlib.redirect_stdout(io.StringIO()):
+            return build.kicad_check(["kicad-cli", "pcb", "drc", "--format", "json", "board.kicad_pcb"], report)
+
+    def test_a_crashed_or_silent_kicad_check_never_reads_an_old_report(self):
+        self.assertEqual(self._check(0, True), {"violations": [1]})
+        for code, writes, message in ((0, False, "no report written"), (134, True, r"exit 134"), (-11, False, r"exit -11")):
+            with self.subTest(exit=code, writes=writes), self.assertRaisesRegex(SystemExit, message):
+                self._check(code, writes)
+
+    def test_every_pcb_build_step_in_a_build_is_checked(self):
+        source = (REPO_ROOT / "tools" / "eos_boards" / "build.py").read_text(encoding="utf-8")
+        self.assertEqual(source.count('HERE / "pcb_build.py"'), 1)           # only inside pcb_step
+        for mode in ("place", "finish", "ripup", "repair"):
+            self.assertIn(f'pcb_step("{mode}"', source)
+        self.assertEqual(source.count('"erc", "--format"') + source.count('"drc", "--format"') + source.count('"drc", "--schematic-parity"'),
+                         source.count("kicad_check([cli, "))          # every ERC and DRC through kicad_check
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -150,13 +150,55 @@ def check_endpoint_layers_by_board_order_unless_via_first():
     assert B._endpoint_layers(board, nets["GND"], B.v(2.0, 2.0)) == [P.F_Cu], "nothing there"
 
 
+def _zone(board, net, layer, corners, name):
+    z = P.ZONE(board)
+    z.SetZoneName(name)
+    z.SetLayer(layer)
+    z.SetNet(net)
+    outline = z.Outline()
+    outline.NewOutline()
+    for x, y in corners:
+        outline.Append(B.MM(x), B.MM(y))
+    board.Add(z)
+
+
+def check_pinned_via_sees_inner_layers_and_reference_zones():
+    """A through via crosses every copper layer. An inner-layer track or a reference zone of
+    another net stops the build; the via's own net, and a board plane that is filled later, do not."""
+    def layers(board):
+        board.GetDesignSettings().SetCopperLayerCount(4)
+
+    board, nets = new_board()
+    layers(board)
+    track(board, nets["SIG"], (6.0, 8.5), (9.0, 8.5), layer=P.In1_Cu)
+    msg = refused(lambda: B.pinned_via(board, SPEC, nets["GND"], 8.0, 8.0, 0.5, 0.25))
+    assert "In1.Cu" in msg, msg
+
+    board, nets = new_board()
+    layers(board)
+    track(board, nets["GND"], (6.0, 8.5), (9.0, 8.5), layer=P.In1_Cu)   # its own net
+    B.pinned_via(board, SPEC, nets["GND"], 8.0, 8.0, 0.5, 0.25)
+
+    board, nets = new_board()
+    layers(board)
+    _zone(board, nets["SIG"], P.In1_Cu, [(7.6, 7.6), (8.4, 7.6), (8.4, 8.4), (7.6, 8.4)], B.REFERENCE_ZONE)
+    msg = refused(lambda: B.pinned_via(board, SPEC, nets["GND"], 8.0, 8.0, 0.5, 0.25))
+    assert "zone" in msg and "In1.Cu" in msg, msg
+
+    board, nets = new_board()
+    layers(board)
+    _zone(board, nets["GND"], P.In1_Cu, [(7.6, 7.6), (8.4, 7.6), (8.4, 8.4), (7.6, 8.4)], B.REFERENCE_ZONE)
+    B.zone(board, nets["SIG"], P.In2_Cu, SPEC["width"], SPEC["height"])   # a plane, filled later
+    B.pinned_via(board, SPEC, nets["GND"], 8.0, 8.0, 0.5, 0.25)
+
+
 def check_prune_dangling_counts_from_the_clean_pass():
     board, nets = new_board()
     track(board, nets["GND"], (11.0, 10.0), (5.0, 5.0), locked=True)   # R1.2 to U1.1: connected
     via(board, nets["GND"], 3.0, 15.0)                                  # leads nowhere
     track(board, nets["GND"], (12.0, 15.0), (14.0, 15.0))               # a stub on its own
     counts = []
-    removed = B.prune_dangling(board, counts)
+    removed = B.prune_dangling(board, counts=counts)
     assert removed == 2, f"removed {removed}, expected the via and the stub"
     assert counts == [1, 0], f"counts {counts}, expected one segment and no via"
     assert [t.GetClass() for t in board.GetTracks()] == ["PCB_TRACK"], "the locked track must stay"

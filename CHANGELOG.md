@@ -15,6 +15,21 @@ has never run.
 
 ### Added
 
+- One more original EmbeddedOS board (batch 4), all rights reserved like the others: the EoS
+  TM4C1294 Board, a TI TM4C1294NCPDT board for the EK-TM4C1294XL form factor (two 40-pin
+  BoosterPack sites, a 98-hole breakout, 10/100 Ethernet on the chip's own PHY, USB device, a
+  CP2102N USB-UART and a 10-pin SWD/JTAG header in place of the on-board ICDI), six layers. Built
+  with `tools/eos_boards` at ERC 0, DRC errors 0, unconnected 0 and schematic parity 0; an
+  independent review, its findings fixed, and a second check of the fixes on the rebuilt board.
+- Generic libraries (MIT, like the generator): the `EoS_MCU:TM4C1294NCPDT` symbol, checked pin for
+  pin against TI SPMS433B; `EoS_Connectors:Conn_02x49_Odd_Even`; and `PinHeader_2x49_P2.54mm_Vertical`
+  from `footprints/generate.py`. The batch-3 symbol test covers the new symbol's supply and debug pins.
+- EoS Feather RP2040, an original board in the Feather form factor (50.8 × 22.86 mm, four layers),
+  all rights reserved like the others: RP2040, 16 MB QSPI flash, USB-C, a LiPo charger with load
+  sharing, STEMMA QT and a 3-pin SWD connector. Built with `tools/eos_boards` at ERC 0, DRC errors
+  0, unconnected 0 and schematic parity 0; an independent review (0 blocker, 0 major, 9 minor), its
+  findings fixed in the README or listed as rev B follow-ups, and a second independent check.
+
 - Three more original EmbeddedOS boards (batch 3), all rights reserved like the others. Each was
   built with `tools/eos_boards` at ERC 0, DRC errors 0, unconnected 0 and schematic parity 0. Each
   had an independent review, its findings were fixed, and then a second reviewer checked the
@@ -231,6 +246,20 @@ has never run.
 
 ### Changed
 
+- The ten original EmbeddedOS boards built before the no-via-in-pad rule (ATmega328P, RA2E1,
+  KE16Z, KL25, STM32 64, ESP32 DevKit, Learn RP2350, LPC55S69, CM4 Base, CM5 Base) are rebuilt
+  under it, each at ERC 0, DRC errors 0, unconnected 0 and schematic parity 0, with the same parts,
+  values, nets and positions and the same DRC warnings as before. Where the autorouter could no
+  longer close a short link without a via in a pad, the design file now lays that link first
+  (a priority route) or gives a boxed-in ground pad its plane via first (`fanout_first`). On the
+  two-layer boards, `ground_vias` gives the grounds the rebuild left on via-less pour pieces their
+  own vias (ATmega328P's power path, KL25's MCU and accelerometer, STM32 64's decoupling and analog
+  capacitors and all but one (C24) of its oscillator capacitors, ESP32's C9); STM32 64's VSS pins,
+  too fine-pitched for a via each, run to their capacitors' ground ends instead. KL25's bottom
+  layer under the 8 MHz crystal and its lines is now a router keep-out, so RESET_b no longer runs
+  under the crystal.
+  `ViaInPadTest` no longer lists any board as built before the rule; it allows only Learn
+  RP2350's two Raspberry Pi reference-copper vias beside C6 and C7.
 - The Icarus Verilog tool adapter runs both of its steps, and its version
   probe, through `run_process`, with the scrubbed environment, the output cap
   and an empty stdin (ARCH-10); it returns the metrics its inputs declare as
@@ -255,6 +284,12 @@ has never run.
 
 ### Fixed
 
+- `tools/eos_boards`: the finishing step no longer crashes in `prune_dangling`. KiCad 10's Python
+  bindings broke when the proxies of removed tracks and vias were freed (`TypeError:
+  'swig_runtime_data5.SwigPyObject' object is not iterable`, exit 139; 3 of the EoS Feather
+  RP2040's first 4 full builds). The removed items are now kept referenced until the process
+  exits. The output is unchanged: on EoS Probe S3, EoS Learn RP2350 and EoS CM5 Base the finished
+  boards with and without the change are identical as sets of items (uuids dropped, order ignored).
 - EmbeddedOS boards: each USB-C receptacle (HRO TYPE-C-31-M-12) now sits where HRO's recommended
   layout puts it, its footprint origin 3.19 mm from the board edge (`design.USB_C_EDGE`; HRO
   draws the PCB edge 5.79 mm from the locating pegs). At the old 3.8 mm the shell's face was
