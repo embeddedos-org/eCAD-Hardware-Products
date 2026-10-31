@@ -120,7 +120,7 @@ def write(board: Board, lib: Library) -> str:
         use(part.lib_id)
         x, y = _snap(part.sch[0]), _snap(part.sch[1])
         items.append(_place_symbol(board, root, lib, part.lib_id, part.ref, part.value, part.footprint,
-                                   x, y, part.sch_rotation, part.fields, part.dnp, True, part.on_board))
+                                   x, y, part.sch_rotation, part.fields, part.dnp, part.in_bom, part.on_board))
         drawn: Dict[Tuple[float, float], str] = {}
         for number, (pin, net) in resolve(part, lib).items():
             px, py = _rotate(pin.x, pin.y, part.sch_rotation)

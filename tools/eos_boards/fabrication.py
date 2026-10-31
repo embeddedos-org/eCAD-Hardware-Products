@@ -365,8 +365,13 @@ def choose_fiducials(width, height, corner_radius, obstacles):
             pairs.append((_diagonal((a[0], b[0])), [a[0], b[0]], f"{n1} and {n2}"))
     if pairs:
         _, pair, which = max(pairs, key=lambda q: q[0])
-        return pair, (f"two diagonally opposite fiducials ({which}): only {len(spots)} corner quarter(s) "
-                      f"have room for one ({', '.join(sorted(spots)) or 'none'})")
+        (ax, ay), (bx, by) = pair
+        # stage-2 review n8: name the dots for what they are, wherever they sit, and send the assembler
+        # to the panel rails, since two dots this close are a short baseline for rotation
+        return pair, (f"two fiducials, the free spots nearest the {which} corners, "
+                      f"{((ax - bx) ** 2 + (ay - by) ** 2) ** 0.5:.1f} mm apart ({abs(ax - bx):g} mm in x, "
+                      f"{abs(ay - by):g} mm in y): only {len(spots)} corner quarter(s) have room for one "
+                      f"({', '.join(sorted(spots)) or 'none'}); use the panel-rail fiducials as well")
     raise ValueError(f"fiducials: room near only {len(spots)} corner(s) ({sorted(spots)}) and no two diagonally "
                      "opposite free spots; give positions with the design's fiducials option")
 
@@ -408,3 +413,84 @@ def lift_with_fallback(clash, lift, fixed=lambda item: False):
     if not n and clash.get("other"):
         n = lift(clash["other"]["net"], clash["other"]["pos"])
     return n
+
+
+# ---- Silkscreen the generator places (BENCH-READY A3/A4, coordinator decision of 29 Oct 2026) -------
+# JLCPCB's capabilities page (https://jlcpcb.com/capabilities/pcb-capabilities, read 24 and 29 Oct 2026):
+# "Minimum text height 40 mil (1.0mm) Characters height less than 40 mil(1.0mm) will be unidentifiable",
+# "Minimum Line Width >= 0.15mm", "Pad To Silkscreen 0.15mm". Every text the generator places (the
+# identity line, the ownership lines, test-point and pin labels) is at least that size; a line that does
+# not fit is moved, shortened (the identity line) or, last, set in narrower characters, never lower.
+SILK_MIN_TEXT = 1.0          # mm, text height
+SILK_MIN_STROKE = 0.15       # mm
+SILK_PAD_GAP = 0.15          # mm, silkscreen to a pad
+SILK_EDGE_GAP = 0.3          # mm, silkscreen to the board edge
+# Character width as a share of the height, tried in turn for a line that fits nowhere at full width (a
+# 26 mm ownership line on a 28 mm board between two pin rows): the height and the stroke, which JLCPCB's
+# minimums are about, stay; the letters get narrower, as 0.8-wide silkscreen text commonly is.
+SILK_WIDTHS = (1.0, 0.9, 0.8)
+SILK_SIDEWAYS = (0.5, 1.0, 1.5, 2.0, 2.5, 3.0)    # mm a line may also move left or right
+
+
+def silk_moves(reach=2.0, step=0.25, sideways=SILK_SIDEWAYS):
+    """The moves (dx, dy) mm tried for a generator line, best first: in place, then up or down in
+    ``step`` steps up to ``reach``, then the same at each sideways offset, left before right.
+
+    >>> silk_moves()[:5]
+    [(0.0, 0.0), (0.0, -0.25), (0.0, 0.25), (0.0, -0.5), (0.0, 0.5)]
+    >>> silk_moves()[17:19], len(silk_moves())
+    ([(-0.5, 0.0), (-0.5, -0.25)], 221)
+    """
+    n = int(round(reach / step))
+    vertical = [0.0] + [round(i * step * d, 4) for i in range(1, n + 1) for d in (-1, 1)]
+    return [(0.0, dy) for dy in vertical] + [(dx * side, dy) for dx in sideways for side in (-1, 1) for dy in vertical]
+
+
+def silk_stroke(size, bold=False):
+    """The stroke for silkscreen text of ``size`` mm: a sixth of the height, JLCPCB's preferred ratio
+    ("The preferred ratio of width to height is 1:6", capabilities page, read 30 Oct 2026; stage-2
+    review n7), 20 % bold, never under SILK_MIN_STROKE. A generator line that fits nowhere with it is
+    fitted again at SILK_MIN_STROKE (pcb_build.fit_text), and says so.
+
+    >>> silk_stroke(1.0), silk_stroke(1.0, bold=True), silk_stroke(2.0), silk_stroke(0.8)
+    (0.1667, 0.2, 0.3333, 0.15)
+    """
+    return round(max(SILK_MIN_STROKE, size * 0.2 if bold else size / 6), 4)
+
+
+def identity_variants(title, revision, year):
+    """The identity line, longest first, for a board where the full line does not fit: the year
+    dropped, then single spaces. Shortened, never shrunk below SILK_MIN_TEXT.
+
+    >>> identity_variants("EoS Motion Wing", "A", "2026")
+    ['EoS Motion Wing  rev A  2026', 'EoS Motion Wing  rev A', 'EoS Motion Wing rev A']
+    """
+    return [f"{title}  rev {revision}  {year}", f"{title}  rev {revision}", f"{title} rev {revision}"]
+
+
+LABEL_GAPS = (0.2, 0.6, 1.0, 1.4)    # mm from a pad's edge to its label, nearest first
+
+
+def label_spots(pad_box, row, text_w, text_h):
+    """Where a pad's silkscreen label may go, best first, as (x, y, angle) of its centre in mm: beside
+    the pad at each of LABEL_GAPS. ``row`` is "horizontal" or "vertical" for a connector pin (the label
+    runs away from the row, turned 90 degrees on a horizontal row so that neighbours' labels do not meet),
+    or "" for a lone test pad (to its right, left, then above and below). ``text_w`` x ``text_h`` is the
+    label's extent unturned.
+
+    >>> label_spots((0, 0, 2, 2), "vertical", 3.0, 1.0)[:2]
+    [(3.7, 1.0, 0.0), (-1.7, 1.0, 0.0)]
+    """
+    x0, y0, x1, y1 = pad_box
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    out = []
+    for g in LABEL_GAPS:
+        right = (round(x1 + g + text_w / 2, 4), cy, 0.0)
+        left = (round(x0 - g - text_w / 2, 4), cy, 0.0)
+        if row == "horizontal":                 # turned: its length runs up or down from the pad
+            out += [(cx, round(y0 - g - text_w / 2, 4), 90.0), (cx, round(y1 + g + text_w / 2, 4), 90.0)]
+        elif row == "vertical":
+            out += [right, left]
+        else:
+            out += [right, left, (cx, round(y0 - g - text_h / 2, 4), 0.0), (cx, round(y1 + g + text_h / 2, 4), 0.0)]
+    return out

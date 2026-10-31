@@ -33,9 +33,89 @@ class Part:
     sch_rotation: int = 0                    # 0, 90, 180 or 270
     model: Optional[Tuple[str, Tuple[float, float, float]]] = None   # 3D model in place of the footprint's: path, offset (mm)
     on_board: bool = True                    # False: a BOM-only item with no footprint (a jumper shunt)
+    in_bom: bool = True                      # False: copper only, nothing to buy (a test pad); the footprint follows
 
 
 ALL_RIGHTS_RESERVED = "All rights reserved"   # a closed board: its owner's terms file, see Board.licence_terms
+
+# Test pads (BENCH-READY C1): KiCad's TestPoint symbol, so the pad is in the schematic and the parity
+# check, on a bare round pad of at least 1.0 mm. Not a BOM line and not in the position file: there is
+# nothing to buy or place (the parts review counted bare test pads as BOM noise).
+TESTPOINT_SYMBOL = "Connector:TestPoint"
+BOTTOM_PAD_FIELD = "Bottom side"            # why a bench test pad sits on the bottom (C1 asks for the top)
+TESTPOINT_FOOTPRINTS = {1.0: "TestPoint:TestPoint_Pad_D1.0mm", 1.5: "TestPoint:TestPoint_Pad_D1.5mm"}
+
+# Rail links (BENCH-READY C2): a solder jumper bridged as delivered, KiCad's
+# SolderJumper-2_P1.3mm_Bridged_RoundedPad1.0x1.5mm (its bridge is copper 0.6 mm wide and 0.5 mm long,
+# a net tie). No part to buy or place, unlike a 0 ohm resistor; to measure, cut the bridge and put an
+# ammeter across the two pads, then bridge them again with solder. IPC-2221's external-layer formula puts
+# a 0.6 mm, 1 oz conductor at about 1.6 A for a 10 C rise: enough for every rail on these boards.
+RAIL_LINK_SYMBOL = "Jumper:SolderJumper_2_Bridged"
+RAIL_LINK_FOOTPRINT = "Jumper:SolderJumper-2_P1.3mm_Bridged_RoundedPad1.0x1.5mm"
+
+
+def bench_pad(ref: str, net: str, label: str, pcb: Tuple[float, float], sch: Tuple[float, float],
+               diameter: float = 1.0, side: str = "F", bottom_reason: str = "") -> "Part":
+    """A test pad on ``net`` at ``pcb`` (x, y mm), labelled ``label`` (its value; the generator prints it
+    on the silkscreen beside the pad). ``diameter`` 1.0 or 1.5 mm. BENCH-READY C1 puts test pads on the
+    top side, where the probe goes; one on the bottom (``side="B"``) needs ``bottom_reason``, which the
+    build checks and the schematic carries.
+
+    >>> bench_pad("TP2", "+3V3", "3V3", (10.0, 5.0), (100, 50)).footprint
+    'TestPoint:TestPoint_Pad_D1.0mm'
+    """
+    if diameter not in TESTPOINT_FOOTPRINTS:
+        raise ValueError(f"{ref}: test pad diameter {diameter}; use one of {sorted(TESTPOINT_FOOTPRINTS)} mm")
+    if side != "F" and not bottom_reason.strip():
+        raise ValueError(f"{ref}: a test pad on the bottom side needs bottom_reason (BENCH-READY C1: top side)")
+    fields = {"Description": f"Test pad {label} ({net}), {diameter} mm bare copper: no part fitted"}
+    if side != "F":
+        fields[BOTTOM_PAD_FIELD] = bottom_reason
+    return Part(ref, TESTPOINT_SYMBOL, label, TESTPOINT_FOOTPRINTS[diameter], sch, {"1": net},
+                pcb=(pcb[0], pcb[1], 0.0), side=side, in_bom=False, fields=fields)
+
+
+def rail_link(ref: str, source_net: str, load_net: str, pcb: Tuple[float, float, float], sch: Tuple[float, float]) -> "Part":
+    """A solder jumper, bridged as delivered, between a regulator's output (``source_net``, e.g.
+    ``+3V3_REG``) and its load (``load_net``, ``+3V3``): cut it to check the rail unloaded or to measure
+    the load's current, then bridge it again."""
+    return Part(ref, RAIL_LINK_SYMBOL, "LINK", RAIL_LINK_FOOTPRINT, sch, {"A": source_net, "B": load_net}, pcb=pcb,
+                fields={"Description": f"Rail link {source_net} to {load_net}, bridged as delivered: cut to measure "
+                                       f"the current into {load_net}, bridge again with solder"})
+
+
+@dataclass
+class Rail:
+    """One supply rail for the bench (BENCH-READY C1, C5)."""
+    net: str                       # the net, as the design names it ("+3V3", "GND")
+    source: str                    # what supplies it: a part and pin ("U5 AP2112K-3.3 VOUT") or a connector pin
+    nominal: str                   # "3.3 V"; "0 V" for ground
+    tolerance: str                 # the range to read, with its source ("3.25-3.35 V: AP2112K +-1.5 %, DS39724")
+    test_points: List[str]         # test pads (TP refs) or connector pins ("J1.4") on this net
+    to_gnd: str                    # resistance to GND unpowered, as a class ("> 100 kohm", "about 10 kohm", "open")
+    link: str = ""                 # the rail link that splits it from its regulator, if any
+    link_note: str = ""            # what the link is for, or why the rail has none
+
+
+@dataclass
+class BringUpTest:
+    """One peripheral test with its pass criterion."""
+    peripheral: str
+    test: str
+    passes: str
+
+
+@dataclass
+class BringUp:
+    """What a bench bring-up needs beyond the rails (BENCH-READY C5); the README section is written from it."""
+    supply: str                    # where first power goes in, and at what voltage
+    current_limit_ma: float        # bench supply current limit for first power
+    idle_current: str              # what it should draw, e.g. "about 0.25 mA"
+    idle_source: str               # where that number comes from, or "estimate"
+    clock: str                     # how to check the clocks, or "N/A: <why>"
+    programming: str               # how to program it, or "N/A: <why>"
+    tests: List[BringUpTest] = field(default_factory=list)
+    before_power: List[str] = field(default_factory=list)   # board-specific checks before first power
 
 # HRO TYPE-C-31-M-12 (KiCad's USB_C_Receptacle_HRO_TYPE-C-31-M-12), placed facing a board edge: HRO's
 # "RECOMMEND P.C.B LAYOUT" puts the PCB edge 5.79 mm from the locating pegs, which sit 2.60 mm behind
@@ -89,6 +169,10 @@ class Board:
     stackup: Dict[str, object] = field(default_factory=dict)            # overrides of the fab stack-up (fabrication.stackup_for)
     fiducials: Dict[str, List[Tuple[float, float]]] = field(default_factory=dict)  # {"F"|"B": [(x, y) x 3]}: where the automatic choice cannot fit
     shunts: Dict[str, int] = field(default_factory=dict)                # jumper header ref -> 2.54 mm shunts supplied for it (BOM lines)
+    rails: List[Rail] = field(default_factory=list)                      # supply rails, GND included, for the bench (C1, C5)
+    bringup: Optional[BringUp] = None                                    # bench bring-up data; the README section is written from it
+    pin_labels: Dict[str, Dict[str, str]] = field(default_factory=dict)  # connector ref -> {pad: label} on the silkscreen (A4)
+    temperature_range: Optional[Tuple[float, float, str, str]] = None    # (min C, max C, limiting part ref, its rating and source) (D8)
 
 
 def resolve(part: Part, lib: Library) -> Dict[str, Tuple[Pin, str]]:

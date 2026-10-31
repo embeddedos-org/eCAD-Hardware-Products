@@ -123,8 +123,7 @@ def text(board, s, x, y, size, layer=P.F_SilkS, angle=0.0, bold=False, mirror=Fa
     t.SetPosition(v(x, y))
     t.SetLayer(layer)
     t.SetTextSize(v(size, size))
-    # 15 % of the height (20 % bold), never under 0.15 mm, the stroke most fabs print reliably
-    t.SetTextThickness(MM(max(0.15, size * (0.2 if bold else 0.15))))
+    t.SetTextThickness(MM(fabrication.silk_stroke(size, bold)))     # 15 % of the height (20 % bold), >= 0.15 mm
     t.SetTextAngleDegrees(angle)
     board.Add(t)
     return t
@@ -600,24 +599,16 @@ def _fiducial_obstacles(board, spec, side):
     return out
 
 
-IDENTITY_PAD_GAP = 0.15      # mm from silkscreen to a pad: JLCPCB's "Pad To Silkscreen" minimum
-IDENTITY_EDGE_GAP = 0.3      # mm from silkscreen to the board edge
-IDENTITY_MIN_SIZE = 0.8      # mm: the smallest text the boards use (their ownership lines)
-
-
-def fit_identity(board, spec, item, t):
-    """Move or shrink the generator's identity line until it clears every pad of its side and every
-    drilled pad by IDENTITY_PAD_GAP, stays IDENTITY_EDGE_GAP inside the outline, and touches no other
-    silkscreen of its layer (board texts and drawings, footprint graphics and visible footprint texts)
-    that the design's own name line (``design_text``, where its designer checked it) did not already
-    touch (PR #74 review: a line moved down could land on the ownership line): first where the design
-    put it, then up or down in 0.25 mm steps (up to 2 mm), then the same at IDENTITY_MIN_SIZE. A line
-    that fits nowhere stops the build: fabs clip silkscreen off pads, and KiCad reports silk over
-    copper only as a warning. Every design text is on the board before this runs. Returns where it went."""
+def _silk_obstacles(board, item, items=None):
+    """What silkscreen ``item`` (a board text) must keep off: every pad of its side and every drilled
+    pad, grown by SILK_PAD_GAP, as boxes; and every other silkscreen item on its layer (board texts and
+    shapes, footprint graphics and visible footprint texts), as {uuid: box}. ``items``, a dict when
+    given, also receives those items themselves by uuid."""
     layer = item.GetLayer()
     cu = P.B_Cu if layer == P.B_SilkS else P.F_Cu
-    gap = MM(IDENTITY_PAD_GAP)
+    gap = MM(fabrication.SILK_PAD_GAP)
     pads, silk = [], {}
+    items = {} if items is None else items
     own = item.m_Uuid.AsString()
     for fp in board.GetFootprints():
         for pad in fp.Pads():
@@ -628,30 +619,143 @@ def fit_identity(board, spec, item, t):
         for g in list(fp.GraphicalItems()) + [fp.Reference(), fp.Value()]:
             if g.GetLayer() == layer and (not hasattr(g, "IsVisible") or g.IsVisible()):
                 silk[g.m_Uuid.AsString()] = g.GetBoundingBox()
+                items[g.m_Uuid.AsString()] = g
     for d in board.GetDrawings():
         if d.GetLayer() == layer and d.m_Uuid.AsString() != own:
             silk[d.m_Uuid.AsString()] = d.GetBoundingBox()
-    allowed = set()
-    if t.get("design_text"):                        # what the design's line touched where it was drawn
-        item.SetText(t["design_text"])
-        item.SetPosition(v(t["x"], t["y"]))
-        allowed = {uid for uid, box in silk.items() if box.Intersects(item.GetBoundingBox())}
-        item.SetText(t["text"])
-    sizes = [t["size"]] + ([IDENTITY_MIN_SIZE] if t["size"] > IDENTITY_MIN_SIZE else [])
-    steps = [0.0] + [s * d for s in (0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0) for d in (-1, 1)]
-    for size in sizes:
-        item.SetTextSize(v(size, size))
-        item.SetTextThickness(MM(max(0.15, size * (0.2 if t.get("bold") else 0.15))))
-        for dy in steps:
-            item.SetPosition(v(t["x"], t["y"] + dy))
-            b = item.GetBoundingBox()
-            corners = [P.VECTOR2I(x, y) for x in (b.GetX(), b.GetRight()) for y in (b.GetY(), b.GetBottom())]
-            if all(_inside(dict(spec, copper_keepouts=[], fiducial_keepouts=[]), c, MM(IDENTITY_EDGE_GAP)) for c in corners) \
-                    and not any(p.Intersects(b) for p in pads) \
-                    and not any(box.Intersects(b) for uid, box in silk.items() if uid not in allowed):
-                return f"{size} mm at ({t['x']}, {round(t['y'] + dy, 2)})"
-    raise SystemExit(f"identity line {t['text']!r} clears no pad, edge or other silkscreen at {t['size']} or "
-                     f"{IDENTITY_MIN_SIZE} mm within 2 mm of ({t['x']}, {t['y']}); move the design's name line")
+            items[d.m_Uuid.AsString()] = d
+    return pads, silk
+
+
+def _strokes_touch(item, others):
+    """True when ``item``'s strokes touch any of ``others`` (silkscreen on its layer), as KiCad's DRC
+    sees silk over silk: their real shapes, not their boxes."""
+    shape = item.GetEffectiveShape(item.GetLayer())
+    return any(shape.Collide(o.GetEffectiveShape(item.GetLayer()), 0) for o in others)
+
+
+def _silk_clear(spec, item, pads, silk, allowed):
+    """True when ``item`` keeps SILK_PAD_GAP off every pad, SILK_EDGE_GAP inside the outline, and off
+    every other silkscreen item but those in ``allowed``."""
+    b = item.GetBoundingBox()
+    corners = [P.VECTOR2I(x, y) for x in (b.GetX(), b.GetRight()) for y in (b.GetY(), b.GetBottom())]
+    plain = dict(spec, copper_keepouts=[], fiducial_keepouts=[])
+    return all(_inside(plain, c, MM(fabrication.SILK_EDGE_GAP)) for c in corners) \
+        and not any(p.Intersects(b) for p in pads) \
+        and not any(box.Intersects(b) for uid, box in silk.items() if uid not in allowed)
+
+
+def fit_text(board, spec, item, t, pending=()):
+    """Fit a silkscreen line the generator sizes (the identity line, the ownership lines): at least
+    SILK_MIN_TEXT high, clear of every pad of its side and every drilled pad by SILK_PAD_GAP, inside
+    the outline by SILK_EDGE_GAP, and off any other silkscreen that its design line (``design_text`` at
+    ``design_size``, where the designer checked it) did not already touch (and whose strokes, not just
+    boxes, it then keeps off: a larger line can reach them); the generator lines still to
+    be fitted (``pending``, uuids) are not in the way yet, they fit round this one. Tried where the
+    design put it, then moved (fabrication.silk_moves: up or down by up to 2 mm, then also up to 3 mm
+    sideways), for each of its ``variants`` (the identity line shortens: fabrication.identity_variants),
+    and last with narrower characters (fabrication.SILK_WIDTHS), all with the preferred 1:6 stroke and
+    then, only if nothing fits, again at the 0.15 mm minimum; the height never goes down. A line that
+    fits nowhere stops the build: fabs clip silkscreen off pads, and KiCad reports silk over
+    copper only as a warning. Returns (the text placed, a description of where it went)."""
+    items = {}
+    pads, silk = _silk_obstacles(board, item, items)
+    item.SetText(t.get("design_text") or t["text"])                   # what the designer checked, as drawn
+    item.SetTextSize(v(t["design_size"], t["design_size"]))
+    item.SetTextThickness(MM(fabrication.silk_stroke(t["design_size"], t.get("bold", False))))
+    touched = {uid for uid, box in silk.items() if box.Intersects(item.GetBoundingBox())} if t.get("design_text") else set()
+    # what the design line's box touched may stay box to box with the larger line, never stroke to stroke
+    near = [items[uid] for uid in touched - set(pending)]
+    allowed = touched | set(pending)
+    preferred = fabrication.silk_stroke(t["size"], t.get("bold", False))
+    # JLCPCB's preferred 1:6 stroke first; only a line that fits nowhere with it keeps the 0.15 mm minimum
+    for stroke in [preferred] + ([fabrication.SILK_MIN_STROKE] if preferred > fabrication.SILK_MIN_STROKE else []):
+        item.SetTextThickness(MM(stroke))
+        for width in fabrication.SILK_WIDTHS:
+            item.SetTextSize(v(t["size"] * width, t["size"]))            # the height stays t["size"]
+            for words in t.get("variants", [t["text"]]):
+                item.SetText(words)
+                for dx, dy in fabrication.silk_moves():
+                    item.SetPosition(v(t["x"] + dx, t["y"] + dy))
+                    if _silk_clear(spec, item, pads, silk, allowed) and not _strokes_touch(item, near):
+                        narrow = "" if width == 1.0 else f" ({width:g} wide)"
+                        thin = "" if stroke == preferred else f" ({stroke:g} stroke: none fits at {preferred:g})"
+                        return words, (f"{words!r} {t['size']} mm{narrow}{thin} at "
+                                       f"({round(t['x'] + dx, 2)}, {round(t['y'] + dy, 2)})")
+    raise SystemExit(f"silkscreen line {t['text']!r} at {t['size']} mm clears no pad, edge or other silkscreen "
+                     f"within 2 mm up or down and 3 mm sideways of ({t['x']}, {t['y']}), even "
+                     f"{min(fabrication.SILK_WIDTHS):g} wide; move the design's line")
+
+
+def place_labels(board, spec):
+    """Silkscreen labels (BENCH-READY A4, C1): each connector pin the design's ``pin_labels`` names, and
+    each test pad (its value, the rail name), at fabrication.SILK_MIN_TEXT on the silkscreen of the pad's
+    side, beside the pad where it clears every pad, the board edge, every other silkscreen, every other
+    part's courtyard and every fiducial square (fabrication.label_spots). A through-hole pin whose top
+    has no room is labelled on the bottom silkscreen instead (mirrored, so it reads from below; the pin
+    is there too), and is listed in ``spec["labels_on_back"]``. A test pad whose rail name has no room
+    gets its shorter reference ("TP5") instead, which the README's bring-up section keys to its rail
+    (stage-2 review n3), listed in ``spec["labels_as_ref"]``. A label that fits nowhere is left out and
+    reported (``spec["labels_skipped"]``); the README names those test pads as unlabelled. Returns
+    (placed, skipped)."""
+    jobs = [(ref, pad, label, None) for ref, labels in spec.get("pin_labels", {}).items() for pad, label in labels.items()]
+    jobs += [(p["ref"], "1", p["value"], p["ref"]) for p in spec["parts"] if p.get("test_pad")]
+    placed, skipped, back, as_ref = 0, [], [], []
+    for ref, number, label, fallback in jobs:
+        fp = board.FindFootprintByReference(ref)
+        pad = next((q for q in fp.Pads() if q.GetNumber() == number), None)
+        if pad is None:
+            skipped.append(f"{ref}.{number} {label}: no such pad")
+            continue
+        bottom = fp.GetLayer() == P.B_Cu and pad.GetAttribute() == P.PAD_ATTRIB_SMD
+        sides = [bottom] + ([not bottom] if pad.HasHole() else [])
+        xs = [q.GetPosition().x for q in fp.Pads()]
+        ys = [q.GetPosition().y for q in fp.Pads()]
+        row = "" if len(xs) < 2 else ("horizontal" if max(xs) - min(xs) >= max(ys) - min(ys) else "vertical")
+        b = pad.GetBoundingBox()
+        box = (P.ToMM(b.GetX()), P.ToMM(b.GetY()), P.ToMM(b.GetRight()), P.ToMM(b.GetBottom()))
+        tries = [(on_bottom, label) for on_bottom in sides]
+        if fallback and fallback != label:
+            tries += [(on_bottom, fallback) for on_bottom in sides]
+        for on_bottom, words in tries:
+            if _place_label(board, spec, ref, words, on_bottom, box, row):
+                placed += 1
+                if on_bottom and not bottom:
+                    back.append(f"{ref}.{number} {words}")
+                if words != label:
+                    as_ref.append(f"{ref}.{number} {label}: {words}")
+                break
+        else:
+            skipped.append(f"{ref}.{number} {label}")
+    spec["labels_placed"], spec["labels_skipped"], spec["labels_on_back"] = placed, skipped, back
+    spec["labels_as_ref"] = as_ref
+    return placed, skipped
+
+
+def _place_label(board, spec, ref, label, bottom, box, row):
+    """One label on the bottom (``bottom``) or top silkscreen at the first of fabrication.label_spots
+    round the pad box ``box`` that is clear (see place_labels); True when it went down, else the text
+    is removed again."""
+    layer, crtyd = (P.B_SilkS, P.B_CrtYd) if bottom else (P.F_SilkS, P.F_CrtYd)
+    item = text(board, label, 0, 0, fabrication.SILK_MIN_TEXT, layer, 0.0, False, bottom)
+    bb = item.GetBoundingBox()
+    w, h = P.ToMM(bb.GetWidth()), P.ToMM(bb.GetHeight())
+    pads, silk = _silk_obstacles(board, item)
+    for other in board.GetFootprints():
+        if other.GetReference() != ref:
+            other.BuildCourtyardCaches()
+            cy = other.GetCourtyard(crtyd)
+            if cy.OutlineCount():
+                silk["crtyd/" + other.GetReference()] = cy.BBox()
+    for i, k in enumerate(spec.get("fiducial_keepouts", [])):
+        silk[f"fiducial/{i}"] = P.BOX2I(v(k[0], k[1]), P.VECTOR2I(MM(k[2] - k[0]), MM(k[3] - k[1])))
+    for x, y, angle in fabrication.label_spots(box, row, w, h):
+        item.SetTextAngleDegrees(angle)
+        item.SetPosition(v(x, y))
+        if _silk_clear(spec, item, pads, silk, set()):
+            return True
+    _remove(board, item)
+    return False
 
 
 def place_fiducials(board, spec):
@@ -774,13 +878,19 @@ def place(spec, pcb_path, dsn_path):
             net = part["pads"].get(pad.GetNumber())
             if net:
                 pad.SetNet(nets[net])
-    placed_texts = [(text(board, t["text"], t["x"], t["y"], t["size"], getattr(P, t.get("layer", "F_SilkS")),
-                          t.get("angle", 0.0), t.get("bold", False), t.get("mirror", False)), t)
+    placed_texts = [(t, text(board, t["text"], t["x"], t["y"], t["size"], getattr(P, t.get("layer", "F_SilkS")),
+                             t.get("angle", 0.0), t.get("bold", False), t.get("mirror", False)))
                     for t in spec.get("texts", [])]
-    for item, t in placed_texts:        # every design text is down before the name line is fitted round them
+    # the generator's own lines, the ownership lines first and the identity line last, each fitted
+    # against everything already on the board but the generator lines after it, which then fit round it
+    # (recorded in build-report.json)
+    fits = sorted([pt for pt in placed_texts if pt[0].get("fit")], key=lambda pt: bool(pt[0].get("identity")))
+    for i, (t, item) in enumerate(fits):
+        words, where = fit_text(board, spec, item, t, {later.m_Uuid.AsString() for _, later in fits[i + 1:]})
+        spec.setdefault("silk_fits", []).append(where)
         if t.get("identity"):
-            spec["identity_fit"] = fit_identity(board, spec, item, t)       # recorded in build-report.json
-            print(f"identity line: {spec['identity_fit']}")
+            spec["identity_fit"], spec["identity_text"] = where, words
+        print(f"silkscreen: {where}")
     tb = board.GetTitleBlock()       # as the schematic's: title, date, revision, owner and licence
     tb.SetTitle(spec["title_block"]["title"])
     tb.SetDate(spec["title_block"]["date"])
@@ -857,6 +967,8 @@ def place(spec, pcb_path, dsn_path):
     placed, left = fanout(board, spec, exclude=early | first)   # two layers: the exposed pads' vias only
     if placed or left:
         print(f"plane fan-out: {placed} vias, {left} pads left to the router")
+    labelled, unlabelled = place_labels(board, spec)          # after the fiducials: labels keep off their squares
+    print(f"labels: {labelled} placed, {len(unlabelled)} with no room: {unlabelled}")
     for x0, y0, x1, y1 in spec.get("copper_keepouts", []):
         copper_keepout(board, [(MM(x0), MM(y0)), (MM(x1), MM(y0)), (MM(x1), MM(y1)), (MM(x0), MM(y1))])
     for x0, y0, x1, y1, layer in spec.get("pour_keepouts", []):
