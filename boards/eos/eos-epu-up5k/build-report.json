@@ -1,0 +1,81 @@
+{
+ "board": "eos-epu-up5k",
+ "kicad": "10.0.6",
+ "erc_violations": 0,
+ "fiducials": [
+  [
+   "FID1",
+   "F",
+   4.0,
+   8.5
+  ],
+  [
+   "FID2",
+   "F",
+   66.5,
+   4.0
+  ],
+  [
+   "FID3",
+   "F",
+   66.5,
+   51.0
+  ]
+ ],
+ "fiducial_notes": {},
+ "identity_line": "1.0 mm at (37.5, 24.0)",
+ "repair_rounds": 3,
+ "routing_runs": 2,
+ "routing_run_kept": 2,
+ "drc": {
+  "violations": 2,
+  "unconnected_items": 0,
+  "schematic_parity": 0
+ },
+ "drc_errors": 0,
+ "drc_warnings": 2,
+ "fab_problems": [],
+ "outputs": [
+  "LICENSE.txt",
+  "README.md",
+  "build-report.json",
+  "drc.json",
+  "eos-epu-up5k-schematic.pdf",
+  "erc.json",
+  "fab/eos-epu-up5k-bom.csv",
+  "fab/eos-epu-up5k-placement.csv",
+  "fab/eos-epu-up5k.step",
+  "fab/gerbers/eos-epu-up5k-B_Cu.gbr",
+  "fab/gerbers/eos-epu-up5k-B_Mask.gbr",
+  "fab/gerbers/eos-epu-up5k-B_Paste.gbr",
+  "fab/gerbers/eos-epu-up5k-B_Silkscreen.gbr",
+  "fab/gerbers/eos-epu-up5k-Edge_Cuts.gbr",
+  "fab/gerbers/eos-epu-up5k-F_Cu.gbr",
+  "fab/gerbers/eos-epu-up5k-F_Mask.gbr",
+  "fab/gerbers/eos-epu-up5k-F_Paste.gbr",
+  "fab/gerbers/eos-epu-up5k-F_Silkscreen.gbr",
+  "fab/gerbers/eos-epu-up5k-In1_Cu.gbr",
+  "fab/gerbers/eos-epu-up5k-In2_Cu.gbr",
+  "fab/gerbers/eos-epu-up5k-NPTH-drl_map.pdf",
+  "fab/gerbers/eos-epu-up5k-NPTH.drl",
+  "fab/gerbers/eos-epu-up5k-PTH-drl_map.pdf",
+  "fab/gerbers/eos-epu-up5k-PTH.drl",
+  "fab/gerbers/eos-epu-up5k-job.gbrjob",
+  "hardware/eos-epu-up5k.kicad_pcb",
+  "hardware/eos-epu-up5k.kicad_prl",
+  "hardware/eos-epu-up5k.kicad_pro",
+  "hardware/eos-epu-up5k.kicad_sch",
+  "hardware/footprints/EoS_Packages.pretty/HLQFP-100-1EP_14x14mm_P0.5mm_EP3.21x3.21mm.kicad_mod",
+  "hardware/footprints/EoS_Packages.pretty/PinHeader_2x49_P2.54mm_Vertical.kicad_mod",
+  "hardware/footprints/EoS_Packages.pretty/Samtec_FTSH-105-xx-x-DV_2x05_P1.27mm_Vertical_SMD.kicad_mod",
+  "hardware/fp-lib-table",
+  "hardware/sym-lib-table",
+  "hardware/symbols/EoS_FPGA.kicad_sym",
+  "images/eos-epu-up5k-bottom.png",
+  "images/eos-epu-up5k-copper.svg",
+  "images/eos-epu-up5k-iso.png",
+  "images/eos-epu-up5k-top.png",
+  "images/eos-epu-up5k.svg",
+  "metrics.json"
+ ]
+}

@@ -27,6 +27,7 @@ board's schematic, layout, routing, checks and fabrication outputs; see
 | [EoS RL78G13 Board](eos-rl78g13-board) | Renesas RL78/G13 (R5F100LEAFB) stick board: two 30-pin headers 25.4 mm apart, USB-C serial port, TOOL0 debug | 2 | 0 | 0 | 0 | 0 |
 | [EoS TM4C1294 Board](eos-tm4c1294-board) | TI TM4C1294NCPDT board with two 40-pin BoosterPack sites, a 98-hole breakout and 10/100 Ethernet, six layers: USB device port, CP2102N USB-UART, SWD/JTAG | 6 | 0 | 0 | 0 | 0 |
 | [EoS Feather RP2040](eos-feather-rp2040) | RP2040 board in the Feather form factor: USB-C, LiPo charger, 16 MB QSPI flash, STEMMA QT, SWD | 4 | 0 | 0 | 0 | 0 |
+| [EoS EPU Board](eos-epu-up5k) | iCE40UP5K FPGA board for EPU, EmbeddedOS's RISC-V SoC: USB-C with FT2232H (iceprog flash programming and UART), 16 MB flash, two Pmod ports, JTAG header | 4 | 0 | 0 | 0 | 0 |
 
 Each board folder contains:
 

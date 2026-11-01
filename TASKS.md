@@ -9,6 +9,31 @@ Status is one of: `todo`, `in-progress`, `blocked`, `review`, `done`.
 
 ## Active
 
+### EoS EPU Board (iCE40UP5K board for EPU)
+
+Owner: Kartikey1306; each review by someone who did not design the board
+Mode: Review
+Status: review
+
+Scope: the EoS EPU Board (`eos_epu_up5k`), its generated artifacts and documentation; the generic
+`EoS_FPGA:ICE40UP5K-SG48` symbol and its check in `tools/eos_boards/symbols/generate.py`.
+
+Acceptance criteria (from the board's design brief, in this repository's terms)
+: - No vendor design file is opened or used, nor anything derived from one.
+  - Every FPGA user I/O goes somewhere useful (an LED, a button, the FT2232H, the flash, the oscillator, a Pmod
+    port or a header), and the README's pin table lists each one with its EPU signal.
+  - ERC 0, DRC errors 0, unconnected 0, schematic parity 0.
+  - No ground-pour fragment holds a pad without a via (checked with KiCad's own Python, by a script kept outside
+    this repository).
+  - `python3 -m unittest tests.unit.test_eos_boards` passes.
+
+State (2026-11-01): full build 10 passes (ERC 0, DRC errors 0, unconnected 0, parity 0; 2 silkscreen-to-edge
+warnings at J1). Independent review of build 4: 0 blocker, 1 major (the 3.3 V buck's layout), 9 minor. Fixed and
+rebuilt; the second check (build 8) verified 13 of 15 findings and found two minor ones (one ESD line past its diode,
+a capacitance sum); fixed in build 10, which the third check verified with notes, all in the README. The README's
+Build results section is now in place and the board tests pass (117 run, 2 skipped). Open: no board made or
+bench-tested; 34- and 40-week lead times on the FT2232HL and iCE40UP5K.
+
 ### EoS Feather RP2040 (campaign #55)
 
 Owner: implementation and independent review assigned separately

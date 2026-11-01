@@ -22,6 +22,10 @@ TI TMS320F280049CPZ (C2000, LQFP-100) follows SPRS945H Table 5-1 and Figure 5-1;
 TI TM4C1294NCPDT (TQFP-128) follows SPMS433B Table 26-5 (the 90 GPIO pins), Table 26-3 (the fixed
 supply, oscillator, hibernation and Ethernet pins) and Figure 25-1. KiCad 10 has no TM4C129x symbol.
 
+EoS_FPGA.kicad_sym: the Lattice iCE40UP5K in the 48-pin QFN (SG48), pins from Lattice's iCE40UP5K pinout file
+(Revision 1.1) and the iCE40 UltraPlus Family Data Sheet FPGA-DS-02008-2.4. KiCad's own ICE40UP5K-SG48ITR symbol
+has four units, and a board here places unit 1 only, so this one has all 49 pins in one unit.
+
 usage: python3 tools/eos_boards/symbols/generate.py
 """
 
@@ -644,7 +648,82 @@ def _check_tm4c1294() -> None:
     assert len(names) == len(set(names)), sorted({n for n in names if names.count(n) > 1})
 
 
+# --- iCE40UP5K-SG48: Lattice "iCE40UP5K Pinout" file, Revision 1.1 (updated Jun 19, 2017; view_document?document_id=
+# 51971), SG48 column, cross-checked with the iCE40 UltraPlus Family Data Sheet FPGA-DS-02008-2.4 (Table 2.1: 39 user
+# I/O in the 48-pin QFN; section 5.1 pin descriptions). KiCad's own ICE40UP5K-SG48ITR symbol has four units, and the
+# generator places unit 1 only, so this one draws all 49 pins in one unit. (number, name, KiCad electrical type).
+ICE40UP_LEFT = [  # configuration, then bank 1 (SPI_VCCIO1) and bank 2 (VCCIO_2)
+    ("8", "CRESET_B", "input"), ("7", "CDONE", "open_collector"), None,
+    ("14", "IOB_32a_SPI_SO", _IO), ("15", "IOB_34a_SPI_SCK", _IO), ("16", "IOB_35b_SPI_SS", _IO), ("17", "IOB_33b_SPI_SI", _IO), None,
+    ("6", "IOB_13b", _IO), ("9", "IOB_16a", _IO), ("10", "IOB_18a", _IO), ("11", "IOB_20a", _IO), ("12", "IOB_22a", _IO),
+    ("21", "IOB_23b", _IO), ("13", "IOB_24a", _IO), ("20", "IOB_25b_G3", _IO), ("19", "IOB_29b", _IO), ("18", "IOB_31b", _IO), None,
+    ("46", "IOB_0a", _IO), ("47", "IOB_2a", _IO), ("44", "IOB_3b_G6", _IO), ("48", "IOB_4a", _IO), ("45", "IOB_5b", _IO),
+    ("2", "IOB_6a", _IO), ("4", "IOB_8a", _IO), ("3", "IOB_9b", _IO),
+]
+ICE40UP_RIGHT = [  # bank 0 (VCCIO_0) and the three 24 mA RGB LED sinks
+    ("25", "IOT_36b", _IO), ("23", "IOT_37a", _IO), ("27", "IOT_38b", _IO), ("26", "IOT_39a", _IO), ("28", "IOT_41a", _IO),
+    ("31", "IOT_42b", _IO), ("32", "IOT_43a", _IO), ("34", "IOT_44b", _IO), ("37", "IOT_45a_G1", _IO), ("35", "IOT_46b_G0", _IO),
+    ("36", "IOT_48b", _IO), ("43", "IOT_49a", _IO), ("38", "IOT_50b", _IO), ("42", "IOT_51a", _IO), None,
+    ("39", "RGB0", "open_collector"), ("40", "RGB1", "open_collector"), ("41", "RGB2", "open_collector"),
+]
+ICE40UP_TOP = [("5", "VCC", "power_in"), ("30", "VCC", "power_in"), ("29", "VCCPLL", "power_in"), ("33", "VCCIO_0", "power_in"),
+               ("22", "SPI_VCCIO1", "power_in"), ("1", "VCCIO_2", "power_in"), ("24", "VPP_2V5", "power_in")]
+ICE40UP_BOTTOM = [("49", "GND", "power_in")]   # the package paddle ("SG48 GND is connected to package paddle")
+ICE40UP_FOOTPRINT = "Package_DFN_QFN:QFN-48-1EP_7x7mm_P0.5mm_EP5.3x5.3mm"
+ICE40UP_DATASHEET = "https://www.latticesemi.com/view_document?document_id=51968"
+
+
+def ice40up5k_sg48() -> list:
+    """Lattice iCE40UP5K in the 48-pin QFN (SG48), one unit: configuration pins and banks 1 and 2 on the left, bank 0
+    and the RGB sinks on the right, supplies along the top and the paddle (GND, pin 49) below. Pin numbers and names
+    from Lattice's iCE40UP5K pinout file (see ICE40UP_LEFT); the footprint's exposed pad is pad 49."""
+    name = "ICE40UP5K-SG48"
+    rows = max(len(ICE40UP_LEFT), len(ICE40UP_RIGHT))
+    top = round(2.54 * (rows // 2 + 1), 2)
+    body = [Sym("symbol"), f"{name}_1_1",
+            [Sym("rectangle"), [Sym("start"), -17.78, top], [Sym("end"), 17.78, -top],
+             [Sym("stroke"), [Sym("width"), 0.254], [Sym("type"), Sym("default")]], [Sym("fill"), [Sym("type"), Sym("background")]]]]
+
+    def pin(number, label, kind, x, y, angle):
+        return [Sym("pin"), Sym(kind), Sym("line"), [Sym("at"), x, y, angle], [Sym("length"), 2.54],
+                [Sym("name"), label, _font()], [Sym("number"), number, _font()]]
+
+    for column, x, angle in ((ICE40UP_LEFT, -20.32, 0), (ICE40UP_RIGHT, 20.32, 180)):
+        for row, entry in enumerate(column):
+            if entry is not None:
+                body.append(pin(*entry, x, round(top - 2.54 * (row + 1), 2), angle))
+    for k, (number, label, kind) in enumerate(ICE40UP_TOP):
+        body.append(pin(number, label, kind, round(-7.62 + 2.54 * k, 2), round(top + 2.54, 2), 270))
+    for k, (number, label, kind) in enumerate(ICE40UP_BOTTOM):
+        body.append(pin(number, label, kind, 0, round(-top - 2.54, 2), 90))
+    return [Sym("symbol"), name, [Sym("exclude_from_sim"), Sym("no")], [Sym("in_bom"), Sym("yes")], [Sym("on_board"), Sym("yes")],
+            _prop("Reference", "U", 0, round(top + 5.08, 2)), _prop("Value", name, 0, round(-top - 5.08, 2)),
+            _prop("Footprint", ICE40UP_FOOTPRINT, 0, 0, True),
+            _prop("Datasheet", ICE40UP_DATASHEET, 0, 0, True),
+            _prop("Description", "Lattice iCE40 UltraPlus FPGA, 5,280 logic cells, 120 kbit EBR, 1 Mbit SPRAM, 48-pin QFN "
+                                 "7 x 7 mm, exposed paddle = GND (FPGA-DS-02008, iCE40UP5K pinout file Rev. 1.1)", 0, 0, True),
+            body]
+
+
+def _check_ice40up5k() -> None:
+    """Every SG48 pin 1-48 and the paddle (49) exactly once; 39 user I/O (36 PIO plus the 3 RGB sinks: FPGA-DS-02008
+    Table 2.1); the four SG48 global inputs G0, G1, G3, G6 on pins 35, 37, 20 and 44, and the configuration SPI on
+    pins 14-17, as the pinout file gives them; no name twice except VCC."""
+    entries = [e for e in ICE40UP_LEFT + ICE40UP_RIGHT if e is not None] + ICE40UP_TOP + ICE40UP_BOTTOM
+    numbers = [e[0] for e in entries]
+    assert sorted(numbers, key=int) == [str(n) for n in range(1, 50)], sorted(set(range(1, 50)) - {int(n) for n in numbers})
+    user = [e for e in entries if e[1].startswith(("IOB_", "IOT_", "RGB"))]
+    assert len(user) == 39, len(user)
+    by_name = {e[1]: e[0] for e in entries}
+    assert {by_name[n] for n in ("IOT_46b_G0", "IOT_45a_G1", "IOB_25b_G3", "IOB_3b_G6")} == {"35", "37", "20", "44"}
+    assert [by_name[n] for n in ("IOB_32a_SPI_SO", "IOB_34a_SPI_SCK", "IOB_35b_SPI_SS", "IOB_33b_SPI_SI")] == ["14", "15", "16", "17"]
+    assert [by_name[n] for n in ("RGB0", "RGB1", "RGB2", "CDONE", "CRESET_B", "VCCPLL", "VPP_2V5")] == ["39", "40", "41", "7", "8", "29", "24"]
+    names = [e[1] for e in entries if e[1] != "VCC"]
+    assert len(names) == len(set(names)), sorted({n for n in names if names.count(n) > 1})
+
+
 def main() -> int:
+    _check_ice40up5k()
     _check_lpc55s69()
     _check_ra2e1()
     _check_ra4m2()
@@ -652,7 +731,7 @@ def main() -> int:
     _check_f280049c()
     _check_tm4c1294()
     for file, symbols in (("EoS_Connectors", [double_row(50), double_row(49)]), ("EoS_Parts", [tpd4eusb30_flow_through()]),
-                          ("EoS_Sensors", [adt7410()]), ("EoS_MCU", [tm4c123gh6pm(), lpc55s69jbd100(), r7fa2e1a92dfm(),
+                          ("EoS_Sensors", [adt7410()]), ("EoS_FPGA", [ice40up5k_sg48()]), ("EoS_MCU", [tm4c123gh6pm(), lpc55s69jbd100(), r7fa2e1a92dfm(),
                                        r7fa4m2ad3cfp(), r5f100leafb(), tms320f280049cpz(),
                                        tm4c1294ncpdt()])):
         lib = [Sym("kicad_symbol_lib"), [Sym("version"), 20231120], [Sym("generator"), "eos_boards"], *symbols]
