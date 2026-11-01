@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/drc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-21T06:29:28",
+    "date": "2026-10-22T00:06:27",
     "ignored_checks": [
         {
             "description": "Footprint has no courtyard defined",
@@ -43,7 +43,7 @@
                         "x": 0.0,
                         "y": 52.34
                     },
-                    "uuid": "7ef0ea5b-5256-43c9-9d72-0e0753447a89"
+                    "uuid": "fee5f70c-5cec-4fb6-818c-5a3c938fdf33"
                 },
                 {
                     "description": "Segment of J2 on F.Silkscreen",
@@ -51,7 +51,7 @@
                         "x": -1.8,
                         "y": 36.6
                     },
-                    "uuid": "e1ca3410-8f9c-4b31-b340-03144557a07c"
+                    "uuid": "68238321-6c4f-47dd-9fba-e13c08ade04b"
                 }
             ],
             "severity": "warning",
@@ -66,7 +66,7 @@
                         "x": 0.0,
                         "y": 52.34
                     },
-                    "uuid": "7ef0ea5b-5256-43c9-9d72-0e0753447a89"
+                    "uuid": "fee5f70c-5cec-4fb6-818c-5a3c938fdf33"
                 },
                 {
                     "description": "Segment of J2 on F.Silkscreen",
@@ -74,7 +74,7 @@
                         "x": 7.2,
                         "y": 45.8
                     },
-                    "uuid": "2c31f781-e62d-4b32-a94b-0295580e5308"
+                    "uuid": "5e74796e-8726-4c62-84b1-3c0a5fd7cc60"
                 }
             ],
             "severity": "warning",
@@ -89,7 +89,7 @@
                         "x": 0.0,
                         "y": 52.34
                     },
-                    "uuid": "7ef0ea5b-5256-43c9-9d72-0e0753447a89"
+                    "uuid": "fee5f70c-5cec-4fb6-818c-5a3c938fdf33"
                 },
                 {
                     "description": "Segment of J1 on F.Silkscreen",
@@ -97,7 +97,7 @@
                         "x": 1.19,
                         "y": 10.54
                     },
-                    "uuid": "57ef06e3-78a9-4a5b-ac75-bffaa1dba1a3"
+                    "uuid": "898311cb-5010-4af5-86e3-b99f8d63ee5f"
                 }
             ],
             "severity": "warning",
@@ -112,7 +112,7 @@
                         "x": 0.0,
                         "y": 52.34
                     },
-                    "uuid": "7ef0ea5b-5256-43c9-9d72-0e0753447a89"
+                    "uuid": "fee5f70c-5cec-4fb6-818c-5a3c938fdf33"
                 },
                 {
                     "description": "Segment of J1 on F.Silkscreen",
@@ -120,7 +120,7 @@
                         "x": 1.19,
                         "y": 19.94
                     },
-                    "uuid": "bdae00a0-25c7-4011-88a8-9cef901e0906"
+                    "uuid": "c7c6f0a0-47c9-4ca4-8644-75df58a2c429"
                 }
             ],
             "severity": "warning",
