@@ -1,0 +1,269 @@
+{
+ "board": "eos-epu-up5k",
+ "bom_lines": 59,
+ "bom_lines_with_mpn": 52,
+ "bom_lines_without_mpn": [
+  "+1V2_LDO (TP3)",
+  "+1V2_PLL (TP6)",
+  "+1V8 (TP5)",
+  "+3V3 (TP4)",
+  "+3V3_BUCK (TP2)",
+  "GND (TP7,TP8)",
+  "VBUS_F (TP1)"
+ ],
+ "bom_mpn_coverage": 0.881,
+ "bom_parts": 139,
+ "checks": {
+  "drc_errors": 0,
+  "drc_warnings": 2,
+  "erc": 0,
+  "schematic_parity": 0,
+  "unconnected_items": 0,
+  "violations": 2
+ },
+ "copper_layers": 4,
+ "fiducial_flags": [],
+ "fiducials": {
+  "top": [
+   [
+    4.0,
+    8.5
+   ],
+   [
+    66.5,
+    4.0
+   ],
+   [
+    66.5,
+    51.0
+   ]
+  ]
+ },
+ "footprints": 145,
+ "footprints_by_side": {
+  "top": 145
+ },
+ "narrowest_track_at": [
+  {
+   "end": [
+    51.711,
+    31.407
+   ],
+   "layer": "F.Cu",
+   "length_mm": 0.723,
+   "net": "+3V3",
+   "start": [
+    51.2,
+    30.896
+   ]
+  },
+  {
+   "end": [
+    51.711,
+    31.435
+   ],
+   "layer": "F.Cu",
+   "length_mm": 0.028,
+   "net": "+3V3",
+   "start": [
+    51.711,
+    31.407
+   ]
+  },
+  {
+   "end": [
+    10.691,
+    26.624
+   ],
+   "layer": "F.Cu",
+   "length_mm": 0.147,
+   "net": "/CC2",
+   "start": [
+    10.838,
+    26.624
+   ]
+  }
+ ],
+ "narrowest_track_mm": 0.09,
+ "narrowest_track_segments": 3,
+ "nets": 107,
+ "pads": {
+  "np_thru_hole": 6,
+  "smd": 524,
+  "thru_hole": 36
+ },
+ "plated_slots": [
+  {
+   "length_mm": 1.7,
+   "pad": "SH",
+   "ref": "J1",
+   "width_mm": 0.6
+  },
+  {
+   "length_mm": 1.2,
+   "pad": "SH",
+   "ref": "J1",
+   "width_mm": 0.6
+  },
+  {
+   "length_mm": 1.7,
+   "pad": "SH",
+   "ref": "J1",
+   "width_mm": 0.6
+  },
+  {
+   "length_mm": 1.2,
+   "pad": "SH",
+   "ref": "J1",
+   "width_mm": 0.6
+  }
+ ],
+ "pours": [
+  {
+   "layers": [
+    "In2.Cu"
+   ],
+   "net": "+3V3"
+  },
+  {
+   "layers": [
+    "B.Cu"
+   ],
+   "net": "GND"
+  },
+  {
+   "layers": [
+    "F.Cu"
+   ],
+   "net": "GND"
+  },
+  {
+   "layers": [
+    "In1.Cu"
+   ],
+   "net": "GND"
+  }
+ ],
+ "rule_areas": {
+  "eos-fiducial-keepout": 3
+ },
+ "size_mm": [
+  75.0,
+  55.0
+ ],
+ "smallest_drill_mm": 0.2,
+ "smd_sides": [
+  "top"
+ ],
+ "stackup": {
+  "copper": [
+   "F.Cu",
+   "In1.Cu",
+   "In2.Cu",
+   "B.Cu"
+  ],
+  "finish": "ENIG",
+  "rows": [
+   {
+    "name": "F.SilkS",
+    "type": "Top Silk Screen"
+   },
+   {
+    "name": "F.Paste",
+    "type": "Top Solder Paste"
+   },
+   {
+    "name": "F.Mask",
+    "thickness": 0.01,
+    "type": "Top Solder Mask"
+   },
+   {
+    "name": "F.Cu",
+    "thickness": 0.035,
+    "type": "copper"
+   },
+   {
+    "epsilon_r": 4.4,
+    "material": "FR4 7628",
+    "name": "dielectric 1",
+    "thickness": 0.2104,
+    "type": "prepreg"
+   },
+   {
+    "name": "In1.Cu",
+    "thickness": 0.0152,
+    "type": "copper"
+   },
+   {
+    "epsilon_r": 4.6,
+    "material": "FR4",
+    "name": "dielectric 2",
+    "thickness": 1.065,
+    "type": "core"
+   },
+   {
+    "name": "In2.Cu",
+    "thickness": 0.0152,
+    "type": "copper"
+   },
+   {
+    "epsilon_r": 4.4,
+    "material": "FR4 7628",
+    "name": "dielectric 3",
+    "thickness": 0.2104,
+    "type": "prepreg"
+   },
+   {
+    "name": "B.Cu",
+    "thickness": 0.035,
+    "type": "copper"
+   },
+   {
+    "name": "B.Mask",
+    "thickness": 0.01,
+    "type": "Bottom Solder Mask"
+   },
+   {
+    "name": "B.Paste",
+    "type": "Bottom Solder Paste"
+   },
+   {
+    "name": "B.SilkS",
+    "type": "Bottom Silk Screen"
+   }
+  ],
+  "thickness_mm": 1.6062
+ },
+ "test_points": [
+  "TP1",
+  "TP2",
+  "TP3",
+  "TP4",
+  "TP5",
+  "TP6",
+  "TP7",
+  "TP8"
+ ],
+ "track_length_mm": {
+  "B.Cu": 459.8,
+  "F.Cu": 1311.2
+ },
+ "track_length_total_mm": 1771.1,
+ "track_segments": 1325,
+ "track_widths_mm": {
+  "0.09": 3,
+  "0.0952": 59,
+  "0.127": 875,
+  "0.1874": 4,
+  "0.2": 4,
+  "0.25": 84,
+  "0.3": 203,
+  "0.4": 81,
+  "0.5": 3,
+  "0.6": 9
+ },
+ "vias": 365,
+ "vias_by_size_drill_mm": {
+  "0.45/0.2": 365
+ }
+}

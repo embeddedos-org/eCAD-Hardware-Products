@@ -1641,7 +1641,8 @@ class ShuntTest(_Lib):
                 if "PinHeader" in p.footprint and "P2.54mm" in p.footprint and (p.ref.startswith("JP") or p.value == "BOOT") \
                         and p.ref not in counted:
                     undeclared.add((path.stem, p.ref))
-        self.assertEqual(auto, {"eos_ra2e1_board": 1, "eos_ra4m2_board": 1})         # their boot-mode jumper (Jumper_2_Open)
+        self.assertEqual(auto, {"eos_epu_up5k": 1, "eos_ra2e1_board": 1,          # their boot-mode jumper (Jumper_2_Open)
+                                "eos_ra4m2_board": 1})
         self.assertEqual(undeclared, SHUNTS_TO_DECLARE)
 
 
@@ -1747,6 +1748,9 @@ README_FAB = {
     "eos-cm4-base": {"narrowest": ("narrowing to the 0.09 mm four-layer minimum", "0.09"), "drill": None,
                      "vias": ("**Vias:** 0.45 mm with a 0.2 mm drill", ["0.45/0.2"])},
     "eos-cm5-base": {"narrowest": None, "drill": None, "vias": ("**Vias:** 0.45 mm with a 0.2 mm drill", ["0.45/0.2"])},
+    "eos-epu-up5k": {"narrowest": ("**Narrowest track:** 0.09 mm", "0.09"),
+                     "drill": ("**Smallest drill:** 0.2 mm, in the vias", "0.2"),
+                     "vias": ("**Vias:** 0.45 mm with a 0.2 mm drill", ["0.45/0.2"])},
     "eos-esp32-devkit": {"narrowest": ("**Tracks:** 0.15 mm (the rules allow 0.1 mm at fine-pitch pads; this build narrows none)", "0.15"),
                          "drill": ("**Smallest drill:** 0.2 mm", "0.2"), "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
     "eos-f280049c-board": {"narrowest": ("0.15 mm tracks, 0.4 mm on VBUS and 5 V", "0.15"),

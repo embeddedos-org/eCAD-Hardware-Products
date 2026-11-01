@@ -15,6 +15,16 @@ has never run.
 
 ### Added
 
+- The EoS EPU Board, an original iCE40UP5K FPGA board for EPU, EmbeddedOS's RISC-V SoC, all
+  rights reserved like the other EoS boards (75 × 55 mm, four layers): USB-C with an FT2232H
+  (channel A programs the configuration flash the way iceprog drives it, channel B is EPU's
+  UART), 16 MB SPI flash, two Pmod host ports, a 10-pin JTAG header for EPU's planned debug
+  port, and two TPS3808 supervisors holding CRESET_B until both rails are valid. Built with
+  `tools/eos_boards` at ERC 0, DRC errors 0, unconnected 0 and schematic parity 0; an
+  independent review (0 blocker, 1 major, 9 minor), its findings fixed, and two independent
+  checks of the fixes on the rebuilt board (the last: verified with notes, all in the README).
+- Generic library (MIT, like the generator): the `EoS_FPGA:ICE40UP5K-SG48` symbol, all 49 pins in
+  one unit, checked by `_check_ice40up5k()` against Lattice's iCE40UP5K pinout file (Revision 1.1).
 - One more original EmbeddedOS board (batch 4), all rights reserved like the others: the EoS
   TM4C1294 Board, a TI TM4C1294NCPDT board for the EK-TM4C1294XL form factor (two 40-pin
   BoosterPack sites, a 98-hole breakout, 10/100 Ethernet on the chip's own PHY, USB device, a
