@@ -41,12 +41,14 @@ paths that `kicad_env.py` and `build.py` use.
 3. **Routing**. Freerouting, headless. The router is given 0.01 mm more clearance than the board's
    rules, so its grid rounding never reaches DRC. Freerouting 2.4.1 routes a given DSN the same way
    every time and takes no seed, so a retry changes its own costs instead: when the repair rounds
-   (step 5) still leave connections that a route could close, the build starts again from the placed
+   (step 5) still leave anything unconnected, the build starts again from the placed
    board with the cost of a via doubled (`--router.scoring.via_costs=100`, default 50), then with the
    cost of ripping up routed copper tripled (`--router.scoring.start_ripup_costs=300`, default 100),
    up to three runs, and keeps the run that left the fewest connections open. On EoS Learn RP2350's
    placement these settings each gave a different route, and the via-cost run closed /GPIO5, which
-   the default run had left open. A zone island left unconnected is no reason to route again. Logs go
+   the default run had left open. A pour island counts: a route can cut a pad's patch of pour off from
+   the rest (on EoS Feather RP2040, J6.2's 1 x 2 mm of top ground, too small for a via), and another
+   route may not. Logs go
    to `.build/freerouting.log`, `freerouting-2.log`, `freerouting-3.log`; `build-report.json`
    records `routing_runs` and `routing_run_kept`.
 4. **Finish** (`pcb_build.py finish`). Imports the routes, widens any track the router necked
@@ -122,8 +124,9 @@ make it two-sided. For each corner the generator takes the 25 free spots nearest
 quarter of the board, then the trio from three corners whose closest two are furthest apart, each at
 least 5 mm off the line through the other two. Where fewer than three corners have room, it places
 two diagonally opposite ones (the free spots nearest two opposite corners, at least 5 mm apart in x
-and in y), records why in `build-report.json` (`fiducial_notes`), and the board's README must say so
-(BENCH-READY A2). Each mask opening is at least 3 mm from the board edge, and a 3 mm square round each
+and in y), records why in `build-report.json` (`fiducial_notes`: the two spots, their spacing, and
+"use the panel-rail fiducials as well"; the two can sit in the same half of the board), and the
+board's README must say so (BENCH-READY A2). Each mask opening is at least 3 mm from the board edge, and a 3 mm square round each
 dot is clear of every courtyard, pad, drilled hole, silkscreen text, keep-out and earlier copper on
 that side: other copper stays 1.0 mm beyond the dot's edge, outside the mask opening, which meets
 IPC-7351B's clear area of at least twice the mark's radius. That square is a rule area on the saved
@@ -149,14 +152,26 @@ marked `on_board=False`.
 "EoS Motion Wing  rev A  2026", beside its ownership line ("(c) 2026 <owner>"), on the same layer
 and mirrored as it is. A design's own name line there, one ending in "rev <letter or number>", is
 replaced where it stands; otherwise the line goes 2 mm above the ownership line. A design with no
-ownership line is refused. The line must never sit on a pad or other silkscreen: the placement step
-puts every design text down first, then checks the line against every pad of its side and every
-drilled pad (0.15 mm, JLCPCB's pad-to-silkscreen minimum), the board edge (0.3 mm) and the other
-silkscreen of its layer that the design's own name line did not already touch (the ownership line
-below it, say), moves it up or down by up to 2 mm, then tries 0.8 mm text (the boards'
-ownership-line size), and stops the build when it fits nowhere. A DRC `silk_over_copper`,
-`silk_edge_clearance` or `silk_overlap` finding on the line, which KiCad grades a warning, fails the
-build too. The revision is the board's `revision` (default "A"). The board file's title block
+ownership line is refused.
+
+**Legible silkscreen.** Every line the generator places or sizes (the identity line, the two
+ownership lines, test-point and pin labels) is at least 1.0 mm high, with a stroke of a sixth of the
+height (0.167 mm at 1.0 mm; 20 % for the bold identity line) and never under 0.15 mm: JLCPCB's
+capabilities page gives "Minimum text height 40 mil (1.0mm)" ("less than 1.0 mm will be
+unidentifiable"), a 0.15 mm minimum line width and "The preferred ratio of width to height is 1:6".
+A generator line that fits nowhere with the 1:6 stroke is fitted again at 0.15 mm, and
+`build-report.json` says so on that line. The ownership lines go up from the
+designs' 0.8 mm. The placement step fits each of these lines: it must clear every pad of its side
+and every drilled pad by 0.15 mm (JLCPCB's pad-to-silkscreen minimum), stay 0.3 mm inside the
+outline, and touch no other silkscreen that the design's own line did not already touch (where the
+designer checked it); the generator lines not yet fitted are not in its way, they fit round it after.
+It is tried where the design put it, then up or down by up to 2 mm, then also up to 3 mm sideways; the
+identity line is then shortened (the year dropped, then single spaces); last, its characters are set
+narrower (0.9, then 0.8 of the height wide), the height and stroke unchanged: the 26.4 mm ownership
+line fits nowhere at full width on a 28 mm board between two pin rows. A line that fits nowhere stops
+the build. A DRC `silk_over_copper`, `silk_edge_clearance` or `silk_overlap` finding on
+the identity line or an ownership line, which KiCad grades a warning, fails the build too; `build-report.json` records where each line
+went (`silk_fits`). The revision is the board's `revision` (default "A"). The board file's title block
 says what the schematic's does: title, date, revision, owner, copyright and licence, and for an
 all-rights-reserved board whom to ask for permission.
 
@@ -168,6 +183,47 @@ parts and MPN coverage (with the lines that have no MPN), test points and fiduci
 build's check counts. `python3 tools/eos_boards/metrics.py boards/eos/<name>` prints them for any
 built board. A test checks each board README's Fabrication numbers (narrowest track, smallest
 drill, via size and drill) against them.
+
+## Bench data in the design file
+
+A board can describe how to bring it up on the bench (BENCH-READY section C). The build checks the
+data against the design (`build.check_bench`) and writes the README's **Bench bring-up** section from
+it (`build.bringup_markdown`, between `<!-- bring-up ... -->` markers; a README without the section
+gets it before its "## Rebuild" heading).
+
+- `design.bench_pad(ref, net, label, (x, y), sch, diameter=1.0)`: a test pad (C1), KiCad's
+  `Connector:TestPoint` on `TestPoint:TestPoint_Pad_D1.0mm` (or `D1.5mm`). It is in the schematic, so
+  the parity check covers it, but it is not a BOM line and not in the position file: a bare pad is
+  nothing to buy or place, and the parts review counted test pads in the BOM as noise. Its value is
+  its label, which the placement step prints on the silkscreen beside it. It goes on the top side,
+  where the probe goes; `side="B"` needs `bottom_reason=...`, which the build checks. The build also
+  refuses `in_bom=False` on anything but a test pad or a `Mechanical:` symbol.
+- `design.rail_link(ref, source_net, load_net, (x, y, rot), sch)`: a rail link (C2), KiCad's
+  `SolderJumper-2_P1.3mm_Bridged_RoundedPad1.0x1.5mm`, bridged as delivered (a 0.6 mm copper bridge,
+  about 1.6 A for a 10 °C rise by IPC-2221's external formula). Chosen over a 0 Ω resistor: no part
+  to buy or place. To check a rail unloaded or measure its load's current, cut the bridge, put an
+  ammeter across the pads, and bridge them again with solder.
+- `rails`: a `design.Rail` per supply net, GND included: the net, its source, nominal voltage,
+  tolerance with its data-sheet source, test points (test pads, or pins of a `Connector*:` symbol as
+  `"J1.4"`; another part's pin is no probe point), the
+  expected resistance to GND unpowered, and its link or a note saying why it has none. Every supply net
+  (`power_nets`) must be listed; every rail needs a test point on its own net, and GND two.
+- `bringup`: a `design.BringUp`: where first power goes in and its current limit, the expected idle
+  current and its source (or "estimate"), the clock check, programming, board-specific checks before
+  power, and the peripheral tests with their pass criteria (`design.BringUpTest`).
+- `temperature_range`: `(min, max, limiting part, its rating and source)`, the narrowest rated range
+  of the board's parts (BENCH-READY D8), printed in the bring-up section.
+- `pin_labels`: `{"J1": {"1": "RST", "2": "3V", ...}}` (pins by number or name): connector pin labels on
+  the top silkscreen (A4). Each test pad gets its value as a label too. The placement step puts each
+  label, 1.0 mm high, beside its pad (`fabrication.label_spots`: away from a header's row, turned on a
+  horizontal row so that neighbours do not meet; to any side of a test pad), at the first spot that
+  clears every pad, the edge, all other silkscreen, other parts' courtyards and the fiducial squares.
+  A through-hole pin with no room on top is labelled on the bottom silkscreen (mirrored, read from
+  below; listed as `labels_on_back`). A test pad whose rail name has no room carries its reference
+  instead ("TP5", `labels_as_ref`); the bring-up section keys every reference to its rail. A label with
+  no room on either side is left out and listed in `build-report.json` (`labels_skipped`); a test pad
+  left bare that way is named in the bring-up section as unlabelled, with the reason (BENCH-READY C1's
+  label, as a named exception).
 
 ## Reusing a reference design's layout exactly
 
@@ -237,6 +293,7 @@ Most boards need only parts, nets and positions. These options cover the rest:
 - `fiducials`: `{"F": [(x, y), (x, y), (x, y)]}` (or `"B"`; or two diagonally opposite positions):
   fiducial positions for a side where the automatic choice finds no room. They are checked against
   the same rules.
+- `rails`, `bringup`, `temperature_range`: bench data (see Bench data in the design file).
 - `shunts`: `{"JP1": 2}`: how many 2.54 mm shunts come with a jumper header drawn with a connector
   symbol (a 2 × 2 header taking two, say); `0` for none.
 - `stackup`: changes to the fab stack-up: `{"finish": "HAL lead-free"}`, `mask_color`,

@@ -27,13 +27,14 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Sequence
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 
 from eos_boards import fabrication, kicad_env, metrics, schematic  # noqa: E402
-from eos_boards.design import ALL_RIGHTS_RESERVED, NC, Board, Part, resolve  # noqa: E402
+from eos_boards.design import (ALL_RIGHTS_RESERVED, BOTTOM_PAD_FIELD, NC, RAIL_LINK_SYMBOL, TESTPOINT_SYMBOL, Board, Part,  # noqa: E402
+                               resolve)
 from eos_boards.kicad_lib import Library  # noqa: E402
 from eos_boards.sexpr import find, find_all  # noqa: E402
 
@@ -162,9 +163,11 @@ def identity_texts(board: Board, texts: List[Dict[str, Any]]) -> List[Dict[str, 
     beside its ownership line ("(c) <year> <owner>"), on the same layer and mirrored as it is. A design
     line on that layer ending in "rev <letter or number>" (the name line every design drew by hand, of
     any revision) is replaced in place; otherwise the line goes 2 mm above the ownership line. The line
-    is marked ``identity``: the placement step moves or shrinks it until it clears every pad and the
-    board edge, or stops the build. A design without an ownership line is refused: there is nowhere to
-    put the identity beside it."""
+    is marked ``identity``; it and the two ownership lines ("(c) ...", "All rights reserved") are at
+    least fabrication.SILK_MIN_TEXT high and marked ``fit``: the placement step moves them (and shortens
+    the identity line, fabrication.identity_variants) until they clear every pad, the board edge and any
+    silkscreen their design lines did not already touch, or stops the build. A design without an
+    ownership line is refused: there is nowhere to put the identity beside it."""
     year = board.date[:4]
     owner = f"(c) {year} {board.company}"
     found = [t for t in texts if t["text"] == owner]
@@ -173,18 +176,27 @@ def identity_texts(board: Board, texts: List[Dict[str, Any]]) -> List[Dict[str, 
                          "the board's identity beside")
     own = found[0]
     layer = own.get("layer", "F_SilkS")
-    identity = f"{board.title}  rev {board.revision}  {year}"
+    variants = fabrication.identity_variants(board.title, board.revision, year)
     old = [t for t in texts if t.get("layer", "F_SilkS") == layer and re.search(r"\brev [A-Z0-9]+$", t["text"])]
     if len(old) > 1:
         raise SystemExit(f"{board.name}: {len(old)} name lines ending in 'rev <revision>' on {layer}; keep one")
     line = dict(old[0]) if old else {"x": own["x"], "y": round(own["y"] - 2.0, 4), "size": 1.0, "bold": True,
                                      "layer": layer, "mirror": own.get("mirror", False)}
-    line["text"] = identity
-    line["identity"] = True
-    line["design_text"] = old[0]["text"] if old else ""     # the design's line, which fit_identity starts from
-    if old:
-        return [line if t is old[0] else t for t in texts]
-    return list(texts) + [line]
+    # the design's own line (text, size) is what its designer checked against the silkscreen round it
+    line.update(text=variants[0], identity=True, fit=True, variants=variants,
+                design_text=old[0]["text"] if old else "", design_size=line["size"],
+                size=max(line["size"], fabrication.SILK_MIN_TEXT))
+    out = []
+    for t in texts:
+        if old and t is old[0]:
+            out.append(line)
+        elif t.get("layer", "F_SilkS") == layer and t["text"] in (owner, "All rights reserved"):
+            # the ownership lines go up to the legible minimum, fitted like the identity line (no shortening)
+            out.append(dict(t, fit=True, design_text=t["text"], design_size=t["size"],
+                            size=max(t["size"], fabrication.SILK_MIN_TEXT)))
+        else:
+            out.append(t)
+    return out if old else out + [line]
 
 
 # The shunt a 2.54 mm jumper header ships with (BENCH-READY B3): Samtec SNT-100-BK-G, a 2-position
@@ -256,11 +268,12 @@ def shunt_parts(board: Board) -> List[Part]:
 
 
 def generated_silk_problems(drc: Dict[str, Any], texts: List[Dict[str, Any]]) -> List[str]:
-    """DRC findings that name silkscreen the generator placed (the identity line) over copper, at the
-    board edge or over other silkscreen (PR #74 review: a moved name line could land on the ownership
-    line). KiCad grades them as warnings; the build treats them as errors, so a clipped or overprinted
-    board name never reaches a fab."""
-    ours = [t["text"] for t in texts if t.get("identity")]
+    """DRC findings that name silkscreen the generator placed or sized (the identity line and, since
+    stage 2, the ownership lines it fits at 1.0 mm) over copper, at the board edge or over other
+    silkscreen (PR #74 review: a moved name line could land on the ownership line). KiCad grades them as
+    warnings; the build treats them as errors, so a clipped or overprinted board name or ownership
+    line never reaches a fab."""
+    ours = [t["text"] for t in texts if t.get("identity") or t.get("fit")]
     out = []
     for v in drc.get("violations", []):
         if v.get("type") not in ("silk_over_copper", "silk_edge_clearance", "silk_overlap"):
@@ -268,6 +281,196 @@ def generated_silk_problems(drc: Dict[str, Any], texts: List[Dict[str, Any]]) ->
         for i in v.get("items", []):
             if any(f"'{text}'" in i.get("description", "") for text in ours):
                 out.append(f"{v['type']}: {i['description']}")
+    return out
+
+
+def check_bench(board: Board) -> None:
+    """Refuse bench data that does not match the design (BENCH-READY C1, C2, C5, A4, D8): a rail on a
+    net no part has; a rail without a test point, or a test point that is not a test pad or connector pin
+    on that rail's net (a pin counts only on a connector); a bench test pad on the bottom side with no
+    reason given; fewer than two test points on GND; a supply net (``power_nets``) missing from the
+    rail list; a rail link that is not a link from that rail to another net; bring-up data without
+    rails; pin labels for pins the board does not have; a temperature range that is empty or names a part
+    the board does not have. Pins are read from each part's ``nets`` (by number or name), so this runs
+    without KiCad's libraries."""
+    by_ref = {p.ref: p for p in board.parts}
+    nets = {n for p in board.parts for n in p.nets.values() if n != NC}
+
+    def fail(message):
+        raise SystemExit(f"{board.name}: {message}")
+
+    def net_at(point):
+        ref, _, pad = point.partition(".")
+        part = by_ref.get(ref)
+        if part is None:
+            return None
+        if not pad:                                     # a test pad, by its reference
+            return part.nets.get("1") if part.lib_id == TESTPOINT_SYMBOL else None
+        # a pin a probe or clip can take: a connector's (stage-2 review n4: U1.5 is not a test point)
+        return part.nets.get(pad) if part.lib_id.startswith("Connector") else None
+
+    if board.bringup is not None and not board.rails:
+        fail("bring-up data needs the rail list (rails)")
+    for part in board.parts:            # BENCH-READY C1: test pads on the top side, where the probe goes
+        if part.lib_id == TESTPOINT_SYMBOL and not part.in_bom and part.side != "F" \
+                and not part.fields.get(BOTTOM_PAD_FIELD, "").strip():
+            fail(f"test pad {part.ref} is on the bottom side with no reason; give bench_pad(..., bottom_reason=...)")
+    seen = set()
+    for rail in board.rails:
+        if rail.net not in nets:
+            fail(f"rail {rail.net}: no part has that net")
+        if rail.net in seen:
+            fail(f"rail {rail.net} listed twice")
+        seen.add(rail.net)
+        if not rail.test_points:
+            fail(f"rail {rail.net}: no test point (BENCH-READY C1)")
+        for point in rail.test_points:
+            if net_at(point) != rail.net:
+                fail(f"rail {rail.net}: test point {point} is not a test pad or connector pin on {rail.net}")
+        if rail.link:
+            link = by_ref.get(rail.link)
+            link_nets = set(link.nets.values()) if link else set()
+            if link is None or link.lib_id != RAIL_LINK_SYMBOL or rail.net not in link_nets or len(link_nets - {rail.net, NC}) != 1:
+                fail(f"rail {rail.net}: link {rail.link} is not a rail link from {rail.net} to one other net")
+        elif not rail.link_note and rail.net != "GND":
+            fail(f"rail {rail.net}: no link, and no note saying why or how to measure its current (BENCH-READY C2)")
+    if board.rails:
+        ground = [r for r in board.rails if r.net == "GND"]
+        if not ground or len(ground[0].test_points) < 2:
+            fail("GND needs at least two test points (BENCH-READY C1: one near the input, one near the main IC)")
+        missing = sorted(set(board.power_nets) - seen)
+        if missing:
+            fail(f"supply nets not in the rail list: {missing}")
+    for ref, labels in board.pin_labels.items():
+        part = by_ref.get(ref)
+        if part is None:
+            fail(f"pin labels for {ref}, which the board does not have")
+        unknown = sorted(set(labels) - set(part.nets))
+        if unknown:
+            fail(f"pin labels for {ref} pins {unknown}, which it does not have")
+    if board.temperature_range is not None:
+        lo, hi, ref, why = board.temperature_range
+        if not lo < hi or ref not in by_ref or not why.strip():
+            fail(f"temperature_range {board.temperature_range!r}: (min, max, the limiting part, its rating and source)")
+
+
+BRINGUP_BEGIN = ("<!-- bring-up: written by tools/eos_boards from the design file's rails and bring-up data; "
+                 "change those, not this section -->")
+BRINGUP_END = "<!-- /bring-up -->"
+
+
+def _degrees(t: float) -> str:
+    return f"{t:g}".replace("-", "\u2212")
+
+
+def unlabelled_pads(board: Board, labels_skipped: List[str]) -> List[str]:
+    """The test pads a build left with no silkscreen label at all (neither the rail name nor the
+    reference had room), from its ``labels_skipped`` ("TP5.1 3V3"), in the design's order."""
+    skipped = {s.split(".", 1)[0] for s in labels_skipped}
+    return [p.ref for p in board.parts if p.lib_id == TESTPOINT_SYMBOL and p.ref in skipped]
+
+
+def bringup_markdown(board: Board, unlabelled: Sequence[str] = ()) -> str:
+    """The README's "Bench bring-up" section (BENCH-READY C5), written from the design's ``rails``,
+    ``bringup`` and ``temperature_range``: checks before power, each rail's resistance to GND, first
+    power with its current limit and expected idle current, each rail's voltage, rail links, clocks,
+    programming, the peripheral tests, and a results table to fill in."""
+    b = board.bringup
+    out = [BRINGUP_BEGIN, "## Bench bring-up", "",
+           "These steps check a built board on the bench, in order; stop at the first that fails. They are written "
+           "from the design file. A board is shown to work only by doing them and filling in the results table.", ""]
+    if board.temperature_range is not None:
+        lo, hi, ref, why = board.temperature_range
+        out += [f"Rated operating range: {_degrees(lo)} to {_degrees(hi)} \u00b0C, the narrowest of its parts: "
+                f"{ref}, {why}.", ""]
+    pads = [p for p in board.parts if p.lib_id == TESTPOINT_SYMBOL and p.pcb]
+    if pads:      # where to find them, and each reference keyed to its rail (stage-2 review n3)
+        out += ["Test pads (reference, rail, centre in mm from the board's top-left corner, on its "
+                + ("top" if all(p.side == "F" for p in pads) else "marked") + " side): "
+                + ", ".join(f"{p.ref} {p.value} ({p.nets.get('1', '')}) at ({p.pcb[0]:g}, {p.pcb[1]:g}"
+                            + ("" if p.side == "F" else ", bottom") + ")" for p in pads)
+                + "."]
+        bare = [r for r in unlabelled if any(p.ref == r for p in pads)]
+        if len(bare) < len(pads):
+            out[-1] += (" On the silkscreen " + ("each" if not bare else "each of the others")
+                        + " carries its rail name, or its reference where the name has no room.")
+        if bare:     # BENCH-READY C1's label, as a named exception: no room for even the reference
+            names = " and ".join([", ".join(bare[:-1]), bare[-1]] if len(bare) > 1 else bare)
+            if len(bare) == len(pads):
+                out[-1] += (" None of them is labelled on the silkscreen: on this board neither the rail name nor "
+                            "the reference fits beside any of them, so this list is how to find them.")
+            else:
+                out += [f"{names} {'have' if len(bare) > 1 else 'has'} no label: on this board neither the rail name "
+                        "nor the reference fits beside the pad, so this list is how to find "
+                        f"{'them' if len(bare) > 1 else 'it'}."]
+        out += [""]
+    polar = [p.ref for p in board.parts if p.on_board and (p.ref[:1] in "UDQ" or "Polarized" in p.lib_id)]
+    out += ["### 1. Before power", "",
+            "1. Look at the board: the orientation (pin 1 or polarity) of " + (", ".join(polar) if polar else "every polarised part")
+            + "; no solder bridges between fine-pitch pins; nothing missing or loose."]
+    out += [f"{i}. {step}" for i, step in enumerate(b.before_power, 2)]
+    out += ["", "### 2. Resistance to GND, unpowered", "",
+            "Meter on resistance, black lead on GND, red lead on each rail's test point. Under 10 \u03a9 is a short: stop.", "",
+            "| Rail | Measure at | Expected |", "|---|---|---|"]
+    out += [f"| {r.net} | {' or '.join(r.test_points)} | {r.to_gnd} |" for r in board.rails if r.net != "GND"]
+    ground = next((r for r in board.rails if r.net == "GND"), None)
+    out += ["", f"GND test points: {', '.join(ground.test_points)}." if ground else "", "",
+            "### 3. First power", "",
+            f"{b.supply}, from a bench supply limited to {b.current_limit_ma:g} mA. Expected current: {b.idle_current} "
+            f"({b.idle_source}). Much more than that: switch off and look for the cause.", "",
+            "### 4. Rail voltages", "",
+            "| Rail | From | Measure at | Nominal | Accept |", "|---|---|---|---|---|"]
+    out += [f"| {r.net} | {r.source} | {' or '.join(r.test_points)} | {r.nominal} | {r.tolerance} |"
+            for r in board.rails if r.net != "GND"]
+    links = [r for r in board.rails if r.net != "GND" and (r.link or r.link_note)]
+    if links:
+        out += ["", "### 5. Rail links and current", ""]
+        for r in links:
+            if r.link:
+                out.append(f"- {r.net}: {r.link} joins it to its source. To check the rail unloaded or to measure the "
+                           f"current into {r.net}, cut {r.link}'s bridge, put an ammeter across its two pads, and bridge it "
+                           "again with solder afterwards." + (f" {r.link_note}" if r.link_note else ""))
+            else:
+                out.append(f"- {r.net}: {r.link_note}")
+    out += ["", "### 6. Clocks", "", b.clock, "", "### 7. Programming", "", b.programming, "",
+            "### 8. Peripheral tests", "", "| Peripheral | Test | Pass |", "|---|---|---|"]
+    out += [f"| {t.peripheral} | {t.test} | {t.passes} |" for t in b.tests]
+    out += ["", "### Results", "", "| Step | Measured | Expected | PASS/FAIL |", "|---|---|---|---|",
+            "| Before power: orientation, bridges | | as in step 1 | |"]
+    out += [f"| {r.net} to GND, unpowered | | {r.to_gnd} | |" for r in board.rails if r.net != "GND"]
+    out += [f"| First power, current at {b.current_limit_ma:g} mA limit | | {b.idle_current} | |"]
+    out += [f"| {r.net} voltage | | {r.tolerance} | |" for r in board.rails if r.net != "GND"]
+    out += ["| Clocks | | as in step 6 | |", "| Programming | | as in step 7 | |"]
+    out += [f"| {t.peripheral}: {t.test} | | {t.passes} | |" for t in b.tests]
+    out += ["", BRINGUP_END]
+    return "\n".join(line for line in out) + "\n"
+
+
+def update_readme(text: str, section: str) -> str:
+    """The README ``text`` with its bring-up section replaced by ``section``; a README without one
+    gets it before its "## Rebuild" heading, or at the end."""
+    if BRINGUP_BEGIN in text:
+        head, rest = text.split(BRINGUP_BEGIN, 1)
+        if BRINGUP_END not in rest:
+            raise SystemExit("README: bring-up section has no end marker")
+        return head + section.rstrip("\n") + rest.split(BRINGUP_END, 1)[1]
+    if "\n## Rebuild" in text:
+        head, rest = text.split("\n## Rebuild", 1)
+        return head.rstrip("\n") + "\n\n" + section + "\n## Rebuild" + rest
+    return text.rstrip("\n") + "\n\n" + section
+
+
+def pin_label_pads(board: Board, lib: Library) -> Dict[str, Dict[str, str]]:
+    """``pin_labels`` with every pin (named by number or name) turned into its pad number: a pin with
+    stacked pads is labelled at its first."""
+    out = {}
+    for ref, labels in board.pin_labels.items():
+        part = next(p for p in board.parts if p.ref == ref)
+        pins = resolve(part, lib)
+        out[ref] = {}
+        for key, label in labels.items():
+            number = key if key in pins else next(n for n, (pin, _) in pins.items() if pin.name == key)
+            out[ref][pad_numbers(number)[0]] = label
     return out
 
 
@@ -328,8 +531,14 @@ def pad_numbers(number: str) -> List[str]:
 
 def spec_for(board: Board, lib: Library, footprint_dir: Path, texts: List[Dict[str, Any]]) -> Dict[str, Any]:
     check_shunts(board)
+    check_bench(board)
     parts, nets = [], set()
     for part in board.parts:
+        if not part.in_bom and not part.lib_id.startswith((TESTPOINT_SYMBOL, "Mechanical:")):
+            # stage-2 review n4: only a bare test pad or a mechanical item may stay out of the BOM; any
+            # other part left out would never be bought
+            raise SystemExit(f"{board.name}: {part.ref} ({part.lib_id}) is left out of the BOM (in_bom=False); "
+                             f"only a test pad ({TESTPOINT_SYMBOL}) or a Mechanical: symbol may be")
         if not part.on_board:
             if resolve(part, lib):         # a part with pins left off the board would vanish from it silently
                 raise SystemExit(f"{board.name}: {part.ref} has pins, so it cannot be a BOM-only part (on_board=False)")
@@ -346,8 +555,9 @@ def spec_for(board: Board, lib: Library, footprint_dir: Path, texts: List[Dict[s
                   and not str(p[1]).startswith("ki_")}
         fields.update(part.fields)
         flag = find(symbol, "in_bom")
-        in_bom = not (flag is not None and str(flag[1]) == "no")      # as the schematic writes it
+        in_bom = part.in_bom and not (flag is not None and str(flag[1]) == "no")      # as the schematic writes it
         parts.append({"ref": part.ref, "value": part.value, "footprint": part.footprint, "in_bom": in_bom,
+                      "test_pad": part.lib_id == TESTPOINT_SYMBOL,
                       "x": part.pcb[0], "y": part.pcb[1], "rot": part.pcb[2], "side": part.side,
                       "pads": pads, "uuid": schematic._u(f"{board.name}/sym/{part.ref}"), "dnp": part.dnp,
                       "fields": fields, "model": list(part.model) if part.model else None})
@@ -408,7 +618,8 @@ def spec_for(board: Board, lib: Library, footprint_dir: Path, texts: List[Dict[s
             "maze_via_cost_mm": board.maze_via_cost_mm,
             "zones": [{"net": board_net(board, n), "layers": layers} for n, layers in board.pours], "texts": texts,
             "stackup": stackup, "title_block": title_block(board),
-            "fiducials": {side: [list(p) for p in points] for side, points in board.fiducials.items()}}
+            "fiducials": {side: [list(p) for p in points] for side, points in board.fiducials.items()},
+            "pin_labels": pin_label_pads(board, lib)}
 
 
 ROUTE_ATTEMPTS = 3      # Freerouting runs at most, when the repair rounds leave repairable connections open
@@ -498,10 +709,11 @@ def check_and_repair(cli: str, spec: Path, pcb: Path, work: Path, out: Path):
 def route(cli: str, spec: Path, pcb: Path, dsn: Path, ses: Path, work: Path, out: Path, passes: int,
           attempts: int = ROUTE_ATTEMPTS):
     """Route with Freerouting, finish, then DRC and repair. When the repair rounds still leave
-    repairable connections open, start again from the placed board with Freerouting's costs changed
+    anything unconnected, start again from the placed board with Freerouting's costs changed
     (RETRY_SETTINGS), up to ``attempts`` runs, and keep the run that left the fewest connections open
-    (the earliest on a tie). Returns (its DRC report, its repair rounds, the runs made, the run kept,
-    1 first)."""
+    (the earliest on a tie). A pour island counts: a route can cut a pad's patch of pour off from the
+    rest (EoS Feather RP2040, stage 2: J6.2's 1 x 2 mm of top ground, too small for a via), and another
+    route may not. Returns (its DRC report, its repair rounds, the runs made, the run kept, 1 first)."""
     placed, kept = work / "placed.kicad_pcb", work / "best-routed.kicad_pcb"
     shutil.copyfile(pcb, placed)
     best = None
@@ -509,7 +721,8 @@ def route(cli: str, spec: Path, pcb: Path, dsn: Path, ses: Path, work: Path, out
         if attempt:
             shutil.copyfile(placed, pcb)
             print(f"routing again, run {attempt + 1} of {attempts} ({' '.join(freerouting_args(attempt))}): "
-                  f"{len(repairable_opens(drc))} repairable connection(s) were still open", flush=True)
+                  f"{len(drc.get('unconnected_items', []))} connection(s) were still open, "
+                  f"{len(repairable_opens(drc))} of them repairable", flush=True)
         freeroute(dsn, ses, passes, attempt, work)
         pcb_step("finish", spec, pcb, ses)
         drc, rounds = check_and_repair(cli, spec, pcb, work, out)
@@ -518,8 +731,8 @@ def route(cli: str, spec: Path, pcb: Path, dsn: Path, ses: Path, work: Path, out
             best = (opens, attempt, drc, rounds)
             shutil.copyfile(pcb, kept)
             shutil.copyfile(ses, work / "best-routed.ses")
-        if not opens or not repairable_opens(drc):
-            break                          # done, or only what a new route would not change (a zone island)
+        if not opens:
+            break
     runs = attempt + 1
     if best[1] != attempt:                 # an earlier run did better: its board and session, checked again
         shutil.copyfile(kept, pcb)
@@ -609,6 +822,14 @@ def main() -> int:
     report["fiducials"] = placed_spec.get("fiducials_placed", [])
     report["fiducial_notes"] = placed_spec.get("fiducial_notes", {})
     report["identity_line"] = placed_spec.get("identity_fit", "")
+    report["silk_fits"] = placed_spec.get("silk_fits", [])
+    report["labels_placed"] = placed_spec.get("labels_placed", 0)
+    report["labels_skipped"] = placed_spec.get("labels_skipped", [])
+    report["labels_on_back"] = placed_spec.get("labels_on_back", [])
+    report["labels_as_ref"] = placed_spec.get("labels_as_ref", [])
+    for t in texts:                        # the identity line as placed (it may have been shortened)
+        if t.get("identity") and placed_spec.get("identity_text"):
+            t["text"] = placed_spec["identity_text"]
     if board.reference_copper:
         # nets the reference copper completes on its own, which the router must leave alone
         ref = json.loads((HERE / board.reference_copper["file"]).read_text())
@@ -676,6 +897,11 @@ def main() -> int:
     run([cli, "pcb", "export", "svg", "--layers", "F.Cu,B.Cu,F.SilkS,Edge.Cuts", "--mode-single",
          "--exclude-drawing-sheet", "-o", img / f"{board.name}-copper.svg", pcb])
     metrics.write(out, board.name, report)        # metrics.json: the board's fabrication numbers
+    readme = out / "README.md"
+    if board.bringup is not None and readme.is_file():      # the bench bring-up section, from the design file
+        section = bringup_markdown(board, unlabelled_pads(board, report.get("labels_skipped", [])))
+        readme.write_text(update_readme(readme.read_text(encoding="utf-8"), section), encoding="utf-8")
+        report["readme_bringup"] = True
     report["outputs"] = sorted(str(p.relative_to(out)) for p in out.rglob("*")
                                if p.is_file() and ".build" not in p.parts)
     (out / "build-report.json").write_text(json.dumps(report, indent=1) + "\n")
