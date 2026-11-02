@@ -103,7 +103,7 @@ are JLCPCB's published standard stack-ups for 1.6 mm boards, read on 24 October 
 |---|---|---|
 | 2 | copper 0.035 / FR-4 core 1.51, εr 4.5 / copper 0.035 mm | [capabilities](https://jlcpcb.com/capabilities/pcb-capabilities): FR-4 εr "4.5 (2-Layer PCB)", 1 oz outer copper. No two-layer core thickness is published there: 1.51 mm makes copper, core and masks add up to 1.6 mm |
 | 4 | JLC04161H-7628: copper 0.035 / prepreg 7628 0.2104, εr 4.4 / copper 0.0152 / core 1.065, εr 4.6 / copper 0.0152 / prepreg 7628 0.2104 / copper 0.035 mm | [impedance page](https://jlcpcb.com/impedance) |
-| 6 | JLC06161H-2116B: copper 0.035 / 2116 0.1164, εr 4.16 / 0.0152 / core 0.5 / 0.0152 / 1080 × 2 0.1528, εr 3.91 / 0.0152 / core 0.5 / 0.0152 / 2116 0.1164 / copper 0.035 mm | [impedance page](https://jlcpcb.com/impedance), read again 29 Oct 2026. Chosen for EoS TM4C1294, the only six-layer board: its 0.15 mm Ethernet lines 0.25 mm apart come out about 100 Ω under solder mask and 107 Ω bare (2D field solve with JLCPCB's mask model), and its 0.13 mm device USB pair about 103 Ω under mask. On that Ethernet pair, JLC06161H-3313 comes out about 94 Ω and JLC06161H-7628 well above 110 Ω |
+| 6 | JLC06161H-2116B: copper 0.035 / 2116 0.1164, εr 4.16 / 0.0152 / core 0.5 / 0.0152 / 1080 × 2 0.1528, εr 3.91 / 0.0152 / core 0.5 / 0.0152 / 2116 0.1164 / copper 0.035 mm | [impedance page](https://jlcpcb.com/impedance), read again 29 Oct 2026. Chosen for EoS TM4C1294, the only six-layer board: its 0.15 mm Ethernet lines 0.25 mm apart come out about 100 Ω under solder mask and 107 Ω bare (2D field solve with JLCPCB's mask model), its 0.13 mm device USB pair about 103 Ω under mask; about 94 Ω on JLC06161H-3313, well above 110 Ω on JLC06161H-7628 |
 
 Solder mask 0.01 mm each side, green; silkscreen white; surface finish ENIG (BENCH-READY A5: ENIG
 wherever a pitch is 0.5 mm or finer or a part is a QFN). The loss tangent is not published there;
@@ -243,17 +243,13 @@ enforces three things:
 - **Same footprints and pad nets.** Each reused part must use the reference footprint, and
   every pad the copper touches must be on the same net in our schematic. Otherwise the build
   stops before placing anything.
-- **Fixed copper.** The copper is laid down locked, so the autorouter treats it as fixed. A board
-  may list `"moved_vias": [((x, y), (new_x, new_y)), ...]` in reference coordinates to move a
-  reference via off a pad. The build refuses a via the reference does not have, or a move of more
-  than 0.25 mm.
+- **Fixed copper.** The copper is laid down locked, so the autorouter treats it as fixed.
 - **No router interference.** The area inside the chip's pins, and each reused zone, is closed
   to the autorouter. Nets the reused copper completes on its own are taken away from it, so it
   cannot add a second path. Plane nets are not included: their fan-out vias are not locked.
 
 `tests/unit/test_eos_boards.py` reads the built board and checks every reused footprint, track
-end, via and zone corner against the reference file, in integer nanometres; a moved via is
-checked at the position the board gives it. The reference file
+end, via and zone corner against the reference file, in integer nanometres. The reference file
 records the SHA-256 of the design it was taken from. With `RPI_MINIMAL_PCB` pointing at
 Raspberry Pi's file, a test re-extracts it and compares the two.
 
@@ -276,14 +272,9 @@ Most boards need only parts, nets and positions. These options cover the rest:
   via spots (EoS F280049C's C11, after VIA_PAD_GAP moved the /VDD4 route). A pad that finds no
   spot then is not tried again after the priority routes: the autorouter joins it.
 - `priority_routes`: lines routed before the autorouter, in the order given. Add `"join"` to end
-  a route at any copper the net already has; that suits a branch such as an ESD part's pad.
-  An optional width in mm overrides the net class for that one line (a 0.15 mm neck off a
-  fine-pitch Power pad, or a supply branch wider than its class: `(("U1", "1"), ("C1", "1"), 0.4)`).
-  `{"via": [x, y, diameter, drill]}` (mm) pins a via the line passes through, for a gap the maze
-  grid cannot land in, such as the centre of four 0402 pads. The build stops unless the via meets
-  the board's via rules, the board-edge and hole-to-hole limits, every net class's clearance from
-  other nets' copper on every copper layer and from their reference zones, and `VIA_PAD_GAP` from
-  its own net's pads. A board's own planes are filled afterwards and are not treated as obstacles.
+  a route at any copper the net already has; that suits a branch such as an ESD part's pad. Add a
+  number to give that route its own track width in mm (at least the board's minimum track), say a
+  supply branch wider than its net class: `(("U1", "1"), ("C1", "1"), 0.4)`.
   Lines that start at a reference design's pin follow its escape first.
 - `escape_footprints`: fine-pitch connectors whose pads keep a clear way out. The channel
   between the pad rows is closed, and each pad keeps a 1 mm corridor for its own net.
