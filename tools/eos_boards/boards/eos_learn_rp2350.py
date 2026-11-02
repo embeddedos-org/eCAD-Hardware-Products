@@ -259,7 +259,11 @@ BOARD = Board(
     # the USB termination and the QSPI lines. The regulator corner is joined by that copper
     # alone; the decoupling capacitors also get a via each into the planes.
     no_fanout=["U1", "L1", "C6", "C7", "C9", "R6", "R3", "R4"],
-    reference_copper={"file": REFERENCE, "origin": MCU},
+    # Two of Raspberry Pi's ground vias beside the regulator capacitors come 0.05 mm from C6.2 and
+    # C7.2, and solder wicks down an open barrel that close. Each moves to the nearest spot clear of
+    # both pads by VIA_PAD_GAP, inside Raspberry Pi's ground pour and 0.15 mm off the VREG_AVDD track.
+    reference_copper={"file": REFERENCE, "origin": MCU,
+                      "moved_vias": [((3.1, -5.5), (3.16, -5.59)), ((3.1, -4.9), (3.11, -5.08))]},
     # Inside the pin ring belongs to that copper: the autorouter may not escape signals inward.
     router_keepouts=[(MCU[0] - 3.0, MCU[1] - 3.0, MCU[0] + 3.0, MCU[1] + 3.0)],
     # Every GPIO line is routed before the autorouter, which, left to pick its own order, boxes

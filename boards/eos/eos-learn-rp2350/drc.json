@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/drc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-20T10:33:15",
+    "date": "2026-10-24T14:29:31",
     "ignored_checks": [
         {
             "description": "Footprint has no courtyard defined",
@@ -43,7 +43,7 @@
                         "x": 24.5,
                         "y": 35.9
                     },
-                    "uuid": "d96984fd-e907-457e-9e5a-d5f5e0f0c2b7"
+                    "uuid": "3e0a8465-651f-4b05-9cb4-4ff8607c87fb"
                 }
             ],
             "severity": "warning",
@@ -58,7 +58,7 @@
                         "x": 32.305,
                         "y": 26.905
                     },
-                    "uuid": "f026551e-ec21-43df-a6e8-71c13194290c"
+                    "uuid": "8e3d9a53-8cfe-46d5-9a30-811df161e22a"
                 }
             ],
             "severity": "warning",
@@ -73,7 +73,7 @@
                         "x": 1.0,
                         "y": 0.0
                     },
-                    "uuid": "5e28f10d-223a-4ff1-9ae6-5e6115be981b"
+                    "uuid": "c4f101e2-5c14-4361-b7a4-dc685654a34a"
                 },
                 {
                     "description": "Segment of J1 on F.Silkscreen",
@@ -81,7 +81,7 @@
                         "x": 21.6,
                         "y": 1.19
                     },
-                    "uuid": "9068ec7d-3c37-4014-b78f-5cb57a328880"
+                    "uuid": "961bdd2f-f6e4-4456-9edf-020413b4dcb4"
                 }
             ],
             "severity": "warning",
@@ -96,7 +96,7 @@
                         "x": 1.0,
                         "y": 0.0
                     },
-                    "uuid": "5e28f10d-223a-4ff1-9ae6-5e6115be981b"
+                    "uuid": "c4f101e2-5c14-4361-b7a4-dc685654a34a"
                 },
                 {
                     "description": "Segment of J1 on F.Silkscreen",
@@ -104,7 +104,7 @@
                         "x": 31.0,
                         "y": 1.19
                     },
-                    "uuid": "5711b9a6-f160-4d21-8446-a2e64622e42d"
+                    "uuid": "f4f4759d-f794-4193-b0c3-b5b2eaf8109f"
                 }
             ],
             "severity": "warning",
