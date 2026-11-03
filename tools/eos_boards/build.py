@@ -532,42 +532,21 @@ def check_priority_routes(board: Board, rules: Dict[str, Any]) -> None:
         check_route_options(board.name, route, rules)
 
 
-def _number(x: Any) -> bool:
-    """A finite int or float; bool is an int to Python, but True is not a width."""
-    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
-
-
 def check_route_options(name: str, route: tuple, rules: Dict[str, Any]) -> None:
-    """Refuse a priority route's options before KiCad starts. After the two pads a route may carry,
-    once each: "join"; a track width in mm, at least the board's min_track; and
-    {"via": [x, y, diameter, drill]}, within the board's via rules. "join" and a pinned via
-    exclude each other."""
+    """Refuse a priority route's options before KiCad starts. The option grammar is
+    ``fabrication.route_options`` (join, one width, one pinned via). This then applies the board's
+    minimum track and via sizes. ``pcb_build.route_options`` uses that same grammar."""
     where = f"{name}: priority route {route[:2]}"
-    seen = set()
-    for extra in route[2:]:
-        if isinstance(extra, str) and extra == "join":
-            kind = "join"
-        elif _number(extra):
-            if extra < rules["min_track"]:
-                raise SystemExit(f"{where}: width {extra} mm is below the board's minimum track "
-                                 f"({rules['min_track']} mm)")
-            kind = "width"
-        elif isinstance(extra, dict):
-            via = extra.get("via")
-            if set(extra) != {"via"} or not isinstance(via, (list, tuple)) or len(via) != 4 \
-                    or not all(_number(n) for n in via):
-                raise SystemExit(f"{where}: {extra!r} is not " '{"via": [x, y, diameter, drill]}')
-            if via[2] < rules["min_via"] or via[3] < rules["min_drill"] or via[3] >= via[2]:
-                raise SystemExit(f"{where}: pinned via {via[2]}/{via[3]} mm is outside the board's via rules "
-                                 f"(min via {rules['min_via']} mm, min drill {rules['min_drill']} mm)")
-            kind = "via"
-        else:
-            raise SystemExit(f"{where}: unknown option {extra!r}; after the pads give \"join\", a width, or a pinned via")
-        if kind in seen:
-            raise SystemExit(f"{where}: {kind} given twice")
-        seen.add(kind)
-    if {"join", "via"} <= seen:
-        raise SystemExit(f'{where}: "join" and a pinned via together')
+    try:
+        _join, width, via = fabrication.route_options(route)
+    except ValueError as e:
+        raise SystemExit(f"{where}: {e}") from e
+    if width is not None and width < rules["min_track"]:
+        raise SystemExit(f"{where}: width {width} mm is below the board's minimum track "
+                         f"({rules['min_track']} mm)")
+    if via is not None and (via[2] < rules["min_via"] or via[3] < rules["min_drill"] or via[3] >= via[2]):
+        raise SystemExit(f"{where}: pinned via {via[2]}/{via[3]} mm is outside the board's via rules "
+                         f"(min via {rules['min_via']} mm, min drill {rules['min_drill']} mm)")
 
 
 def kicad_net_text(text: str) -> str:

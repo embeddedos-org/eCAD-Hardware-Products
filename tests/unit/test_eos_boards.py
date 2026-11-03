@@ -505,23 +505,47 @@ class ReferenceExactnessTest(unittest.TestCase):
     MOVED_VIAS = {(3.1, -5.5): (3.16, -5.59), (3.1, -4.9): (3.11, -5.08)}
 
     def test_the_board_moves_exactly_the_two_reviewed_vias(self):
+        """The design declares exactly the two reviewed moves, each a reference via and within
+        MAX_VIA_MOVE. A third move is not declared."""
         board = importlib.import_module("eos_boards.boards.eos_learn_rp2350").BOARD
         declared = {tuple(a): tuple(b) for a, b in board.reference_copper.get("moved_vias", [])}
         self.assertEqual(declared, self.MOVED_VIAS)
+        ref_at = {(d["x"], d["y"]) for d in self.ref["vias"]}
+        self.assertLessEqual(set(declared), ref_at)
+        for old, new in declared.items():
+            self.assertLessEqual(math.dist(old, new), build.MAX_VIA_MOVE, (old, new))
+        self.assertNotIn((0.0, 0.0), declared)
 
     def test_every_via_exact(self):
-        """Every reference via where the reference puts it, except the two in MOVED_VIAS, which must
-        be at their new positions and nowhere else."""
+        """Every reference via is where the reference puts it. The two vias in MOVED_VIAS are
+        accepted only at their declared positions. Any other move is missing from the board."""
+        source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
+        body = source[source.index("def reference_copper("):source.index("def preroute(")]
+        self.assertIn('moved.pop((round(d["x"], 6), round(d["y"], 6)), (d["x"], d["y"]))', body)
+        self.assertIn("via.SetPosition(v(ox + x, oy + y))", body)
         vias = {(str(find(v, "net")[-1]), nm(find(v, "at")[1]), nm(find(v, "at")[2]), nm(find(v, "size")[1]),
                  nm(find(v, "drill")[1])) for v in find_all(self.pcb, "via")}
         ref_at = {(d["x"], d["y"]) for d in self.ref["vias"]}
         self.assertLessEqual(set(self.MOVED_VIAS), ref_at, "MOVED_VIAS names vias the reference does not have")
+
+        def expect(moves):
+            out = set()
+            for d in self.ref["vias"]:
+                x, y = moves.get((d["x"], d["y"]), (d["x"], d["y"]))
+                out.add((d["net"], *self._at(x, y), nm(d["d"]), nm(d["drill"])))
+            return out
+
+        accepted = expect(self.MOVED_VIAS)
+        self.assertLessEqual(accepted, vias)
         for d in self.ref["vias"]:
-            x, y = self.MOVED_VIAS.get((d["x"], d["y"]), (d["x"], d["y"]))
-            self.assertIn((d["net"], *self._at(x, y), nm(d["d"]), nm(d["drill"])), vias, d)
             if (d["x"], d["y"]) in self.MOVED_VIAS:
                 self.assertNotIn((d["net"], *self._at(d["x"], d["y"]), nm(d["d"]), nm(d["drill"])), vias,
                                  f"{d}: still at the reference position")
+        undeclared = dict(self.MOVED_VIAS)
+        other = next(d for d in self.ref["vias"] if (d["x"], d["y"]) not in self.MOVED_VIAS)
+        undeclared[(other["x"], other["y"])] = (other["x"] + 0.1, other["y"])
+        self.assertNotEqual(expect(undeclared), accepted)
+        self.assertFalse(expect(undeclared) <= vias)
 
     def test_every_zone_outline_exact(self):
         zones = []
@@ -1000,9 +1024,20 @@ def _vias_in_pads(pcb, skip=()):
     return hits
 
 
-needs_kicad = unittest.skipUnless(any((c / "Contents/MacOS/kicad-cli").is_file() for c in [
-    Path(os.environ.get("KICAD_APP") or "/nonexistent"), Path.home() / "Applications/KiCad/KiCad.app",
-    Path("/Applications/KiCad/KiCad.app")]), "KiCad is not installed; set KICAD_APP")
+def _kicad_10():
+    """True when KiCad 10's app bundle is installed. The helper scripts run only from the two
+    tests below, and only then."""
+    apps = [Path(os.environ.get("KICAD_APP") or "/nonexistent"),
+            Path.home() / "Applications/KiCad/KiCad.app", Path("/Applications/KiCad/KiCad.app")]
+    cli = next((c / "Contents/MacOS/kicad-cli" for c in apps if (c / "Contents/MacOS/kicad-cli").is_file()), None)
+    if cli is None:
+        return False
+    version = subprocess.run([str(cli), "version"], capture_output=True, text=True, timeout=30)
+    return version.returncode == 0 and version.stdout.strip().startswith("10.")
+
+
+needs_kicad = unittest.skipUnless(_kicad_10(),
+    "KiCad 10 is not installed; set KICAD_APP to KiCad.app. The pcb_build and ESD-flow checks are skipped.")
 
 
 @needs_kicad
@@ -1011,7 +1046,8 @@ class PcbBuildKiCadTest(unittest.TestCase):
     KiCad's own Python against a board made in memory: see eos_pcb_build_kicad.py."""
 
     def test_pcb_build_checks_pass_in_kicads_python(self):
-        """Every check in eos_pcb_build_kicad.py prints ``ok`` and the process exits 0."""
+        """The only call of eos_pcb_build_kicad.py. A failing check exits nonzero and fails this test.
+        Skipped, with the class, when KiCad 10 is not installed."""
         from eos_boards import kicad_env
         r = subprocess.run([kicad_env.python(), str(Path(__file__).with_name("eos_pcb_build_kicad.py"))],
                            capture_output=True, text=True, timeout=300)
@@ -1041,7 +1077,8 @@ class EsdFlowKiCadTest(unittest.TestCase):
                ("eos-learn-rp2350", "U2.1/6")}
 
     def test_esd_parts_lie_on_their_lines(self):
-        """Every EoS board is checked, and the stubs printed are exactly STUBBED."""
+        """The only call of eos_esd_flow_kicad.py. A failing check exits nonzero and fails this test.
+        Skipped, with the class, when KiCad 10 is not installed. The stubs printed are exactly STUBBED."""
         from eos_boards import kicad_env
         r = subprocess.run([kicad_env.python(), str(Path(__file__).with_name("eos_esd_flow_kicad.py"))],
                            capture_output=True, text=True, timeout=300)
@@ -1995,17 +2032,33 @@ class RobustRoutingTest(_Lib):
                          [{"net": "/A", "a": [1.0, 1.0], "b": [2.0, 1.0]}])
 
     def test_priority_route_options(self):
-        self.assertEqual(fabrication.route_options((("U1", "1"), ("C1", "2"))), (False, None))
-        self.assertEqual(fabrication.route_options((("U1", "1"), ("C1", "2"), "join")), (True, None))
-        self.assertEqual(fabrication.route_options((("U1", "1"), ("C1", "2"), 0.4, "join")), (True, 0.4))
-        for bad in ("joins", 0, -0.2, True, ("join", "join"), (0.3, 0.4)):
+        """pcb_build.route_options is fabrication.route_options: join, a width, and a pinned via.
+        An unknown option, a repeated option, and join together with a via are refused. The board
+        rules (minimum track, via size) are the same check build.spec_for runs."""
+        pads = (("U1", "1"), ("C1", "2"))
+        self.assertEqual(fabrication.route_options(pads), (False, None, None))
+        self.assertEqual(fabrication.route_options(pads + ("join",)), (True, None, None))
+        self.assertEqual(fabrication.route_options(pads + (0.4, "join")), (True, 0.4, None))
+        self.assertEqual(fabrication.route_options(pads + ({"via": [19.75, 35.2, 0.5, 0.25]},)),
+                         (False, None, [19.75, 35.2, 0.5, 0.25]))
+        for bad in ("joins", 0, -0.2, True, float("nan"), ("join", "join"), (0.3, 0.4),
+                    ({"via": [1, 2, 3]},), ("join", {"via": [1.0, 2.0, 0.5, 0.25]})):
             extra = bad if isinstance(bad, tuple) else (bad,)
             with self.subTest(bad=bad), self.assertRaises(ValueError):
-                fabrication.route_options((("U1", "1"), ("C1", "2"), *extra))
+                fabrication.route_options(pads + extra)
+        source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
+        parser = source[source.index("def route_options("):source.index("def _exposed_pad(")]
+        self.assertIn("return fabrication.route_options(route)", parser)
         parts = [Part("U1", "T:U", "U", "fp", (5, 5), {"VDD": "A", "3": NC})]
         spec = build.spec_for(self.board(parts, priority_routes=[(("U1", "1"), ("U1", "2"), 0.3)]), self.lib, Path(self.tmp.name), [])
         self.assertEqual(spec["priority_routes"], [[["U1", "1"], ["U1", "2"], 0.3]])
-        for routes, message in (([(("U1", "1"), ("U1", "2"), 0.05)], "minimum track"), ([(("U1", "1"), ("U1", "2"), "jion")], "join")):
+        via = (("U1", "1"), ("U1", "2"), {"via": [6.0, 6.0, 0.5, 0.25]})
+        spec = build.spec_for(self.board(parts, priority_routes=[via]), self.lib, Path(self.tmp.name), [])
+        self.assertEqual(spec["priority_routes"], [[["U1", "1"], ["U1", "2"], {"via": [6.0, 6.0, 0.5, 0.25]}]])
+        for routes, message in (([(("U1", "1"), ("U1", "2"), 0.05)], "minimum track"),
+                                ([(("U1", "1"), ("U1", "2"), "jion")], "join"),
+                                ([(("U1", "1"), ("U1", "2"), 0.2, 0.3)], "twice"),
+                                ([(("U1", "1"), ("U1", "2"), "join", {"via": [6.0, 6.0, 0.5, 0.25]})], "together")):
             with self.subTest(message=message), self.assertRaisesRegex(SystemExit, message):
                 build.spec_for(self.board(parts, priority_routes=routes), self.lib, Path(self.tmp.name), [])
 

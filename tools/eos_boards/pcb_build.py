@@ -263,25 +263,14 @@ def pinned_via(board, spec, net, x, y, diameter, drill):
 
 
 def route_options(route):
-    """A priority route's extras after its two pads, as (join, width in mm or None, pinned via
-    [x, y, diameter, drill] or None): "join"; a track width that overrides the net class (a
-    0.4 mm Power track cannot leave a 0.5 mm-pitch pad; 0.15 mm can); and
-    {"via": [x, y, diameter, drill]}, a via the line must pass through (see pinned_via).
-    build.py checks them against the board's rules before KiCad starts; this refuses the rest."""
-    (ra, pa), (rb, pb) = route[0], route[1]
-    join, width_mm, via_at = False, None, None
-    for extra in route[2:]:
-        if isinstance(extra, str) and extra == "join":
-            join = True
-        elif isinstance(extra, (int, float)) and not isinstance(extra, bool) and extra > 0:
-            width_mm = float(extra)
-        elif isinstance(extra, dict) and set(extra) == {"via"} and len(extra["via"]) == 4:
-            via_at = [float(n) for n in extra["via"]]
-        else:
-            raise SystemExit(f"priority route {ra}.{pa} -> {rb}.{pb}: unknown option {extra!r}")
-    if join and via_at:
-        raise SystemExit(f"priority route {ra}.{pa} -> {rb}.{pb}: \"join\" and a pinned via together")
-    return join, width_mm, via_at
+    """The same parse as ``fabrication.route_options``: (join, width in mm or None, pinned via or
+    None). A width overrides the net class (a 0.4 mm Power track cannot leave a 0.5 mm-pitch pad;
+    0.15 mm can). A ValueError from that parse stops this step. build.py checks the numbers
+    against the board's rules before KiCad starts."""
+    try:
+        return fabrication.route_options(route)
+    except ValueError as e:
+        raise SystemExit(str(e)) from e
 
 
 def _exposed_pad(fp, pad):

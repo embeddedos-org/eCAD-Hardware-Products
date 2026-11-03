@@ -67,7 +67,11 @@ The numbers below are from `build-report.json` and `drc.json` in this folder.
 
 - **Vias:** 0.45 mm with a 0.2 mm drill, the size Raspberry Pi's CM5 IO Board uses around this
   connector.
-- **Tracks:** 0.15 mm, narrowing at fine-pitch pins; 0.5 mm on 5 V.
+- **Tracks:** Default signal tracks are 0.15 mm. The USB data pairs (USB_P, USB_N, USBH_DP,
+  USBH_DM) and the Ethernet pairs are 0.2 mm, except two USB_P segments at 0.15 mm. Fine-pitch
+  routes narrow: five ground segments are 0.1124 mm. The 5 V power class is 0.5 mm. USBH_VBUS,
+  the host port's 5 V, uses that width except two segments at 0.375 mm. The module's +5V net
+  on this board is 0.2 mm and 0.3 mm.
 - **Coin-cell holder:** on the bottom side, under the module. Everything else is on top.
 - **Under the module:** nothing on the top side, because 1.5 mm stacking leaves no room. There is
   no copper at all under the antenna.

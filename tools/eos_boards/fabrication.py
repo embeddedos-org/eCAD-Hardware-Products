@@ -44,6 +44,7 @@ colours, or a whole ``"layers"`` list of copper and dielectric rows for another 
 from __future__ import annotations
 
 import copy
+import math
 
 STACKUP_CHECKED = "2026-10-24"
 JLCPCB_IMPEDANCE = "https://jlcpcb.com/impedance"
@@ -379,20 +380,46 @@ def choose_fiducials(width, height, corner_radius, obstacles):
 # ---- Priority routes ------------------------------------------------------------------------------
 
 
+def _finite(x):
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
+
+
 def route_options(route):
-    """A priority route's options after its two pads: ``"join"`` (end at any copper the net already
-    has) and a number, the route's own track width in mm (wider than its net class for a supply
-    branch, say). Returns (join, width or None); raises ValueError on anything else.
+    """A priority route's options after its two pads, once each: ``"join"`` (end at any copper the
+    net already has), one positive finite track width in mm, and ``{"via": [x, y, diameter, drill]}``
+    (a via the line must pass through). ``"join"`` and a pinned via exclude each other. Returns
+    ``(join, width or None, via or None)``. Raises ValueError on an unknown option, a repeated
+    option, a width that is not a positive finite number, or a via that is not four finite numbers.
+    The board's minimum track and via sizes are checked separately, before KiCad starts.
 
     >>> route_options((("U1", "1"), ("C1", "2"), "join", 0.4))
-    (True, 0.4)
+    (True, 0.4, None)
+    >>> route_options((("U1", "1"), ("C1", "2"), {"via": [1.0, 2.0, 0.5, 0.25]}))
+    (False, None, [1.0, 2.0, 0.5, 0.25])
     """
-    extra = list(route[2:])
-    widths = [x for x in extra if isinstance(x, (int, float)) and not isinstance(x, bool)]
-    bad = [x for x in extra if x != "join" and not (isinstance(x, (int, float)) and not isinstance(x, bool))]
-    if bad or extra.count("join") > 1 or len(widths) > 1 or any(w <= 0 for w in widths):
-        raise ValueError(f"priority route {route!r}: after the two pads give \"join\" and/or one width in mm")
-    return "join" in extra, (float(widths[0]) if widths else None)
+    join, width, via_at = False, None, None
+    seen = set()
+    for extra in route[2:]:
+        if extra == "join":
+            kind, join = "join", True
+        elif isinstance(extra, (int, float)) and not isinstance(extra, bool):
+            if not _finite(extra) or extra <= 0:
+                raise ValueError(f"priority route {route!r}: width {extra!r} is not a positive finite number")
+            kind, width = "width", float(extra)
+        elif isinstance(extra, dict):
+            via = extra.get("via")
+            if set(extra) != {"via"} or not isinstance(via, (list, tuple)) or len(via) != 4 or not all(_finite(n) for n in via):
+                raise ValueError(f"priority route {route!r}: {extra!r} is not " '{"via": [x, y, diameter, drill]}')
+            kind, via_at = "via", [float(n) for n in via]
+        else:
+            raise ValueError(f"priority route {route!r}: unknown option {extra!r}; after the pads give "
+                             '"join", a width, or a pinned via')
+        if kind in seen:
+            raise ValueError(f"priority route {route!r}: {kind} given twice")
+        seen.add(kind)
+    if join and via_at is not None:
+        raise ValueError(f'priority route {route!r}: "join" and a pinned via together')
+    return join, width, via_at
 
 
 def lift_with_fallback(clash, lift, fixed=lambda item: False):
