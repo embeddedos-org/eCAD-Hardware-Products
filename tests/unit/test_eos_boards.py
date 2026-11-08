@@ -1026,13 +1026,17 @@ def _vias_in_pads(pcb, skip=()):
 
 def _kicad_10():
     """True when KiCad 10's app bundle is installed. The helper scripts run only from the two
-    tests below, and only then."""
+    tests below, and only then. This runs at import, so a kicad-cli that cannot start or does
+    not answer returns False: only the KiCad tests skip, never the rest of the module."""
     apps = [Path(os.environ.get("KICAD_APP") or "/nonexistent"),
             Path.home() / "Applications/KiCad/KiCad.app", Path("/Applications/KiCad/KiCad.app")]
     cli = next((c / "Contents/MacOS/kicad-cli" for c in apps if (c / "Contents/MacOS/kicad-cli").is_file()), None)
     if cli is None:
         return False
-    version = subprocess.run([str(cli), "version"], capture_output=True, text=True, timeout=30)
+    try:
+        version = subprocess.run([str(cli), "version"], capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
     return version.returncode == 0 and version.stdout.strip().startswith("10.")
 
 
