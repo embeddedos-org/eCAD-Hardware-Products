@@ -230,6 +230,68 @@ class SpecTest(_Lib):
             with self.subTest(**{k: str(v) for k, v in kw.items()}), self.assertRaises(SystemExit):
                 build.spec_for(self.board(parts, **kw), self.lib, Path(self.tmp.name), [])
 
+    def test_a_pinned_via_reaches_the_board_spec_within_the_via_rules(self):
+        """A legal pinned via is copied into the spec. One outside the via rules is refused."""
+        parts = [Part("U1", "T:M", "M", "fp", (5, 5), {"GND": "GND", "A/B": NC})]
+        route = (("U1", "1"), ("U1", "3"), {"via": [6.0, 6.0, 0.5, 0.25]})
+        spec = build.spec_for(self.board(parts, priority_routes=[route]), self.lib, Path(self.tmp.name), [])
+        self.assertEqual(spec["priority_routes"], [[["U1", "1"], ["U1", "3"], {"via": [6.0, 6.0, 0.5, 0.25]}]])
+        # below the 0.5 mm minimum via, below the 0.25 mm minimum drill, no annular ring, mistyped
+        for extra in ({"via": [6.0, 6.0, 0.45, 0.25]}, {"via": [6.0, 6.0, 0.5, 0.2]},
+                      {"via": [6.0, 6.0, 0.5, 0.5]}, {"via": [6.0, 6.0, 0.5]}, {"vias": [6.0, 6.0, 0.5, 0.25]}):
+            with self.subTest(extra=str(extra)), self.assertRaises(SystemExit):
+                build.spec_for(self.board(parts, priority_routes=[(route[0], route[1], extra)]),
+                               self.lib, Path(self.tmp.name), [])
+
+    def test_route_options_are_checked_against_the_board_rules(self):
+        """Legal route options pass. A repeated, non-finite, or undersized option is refused."""
+        rules = build.board_rules(self.board([]))
+        pads = (("U1", "1"), ("U1", "3"))
+        for ok in ((), ("join",), (0.15,), (1,), ("join", 0.15), (0.15, {"via": [6.0, 6.0, 0.5, 0.25]})):
+            with self.subTest(ok=repr(ok)):
+                build.check_route_options("t", pads + ok, rules)
+        bad = {"unknown text": ("joins",), "a list": ([0.15],), "None": (None,),
+               "True as a width": (True,), "False as a width": (False,),
+               "zero width": (0,), "negative width": (-0.2,), "NaN width": (float("nan"),),
+               "infinite width": (float("inf"),), "below min_track": (0.05,),
+               "a via coordinate as text": ({"via": ["6", 6.0, 0.5, 0.25]},),
+               "join twice": ("join", "join"), "two widths": (0.15, 0.2),
+               "join and a pinned via": ("join", {"via": [6.0, 6.0, 0.5, 0.25]})}
+        for name, extras in bad.items():
+            with self.subTest(name), self.assertRaises(SystemExit):
+                build.check_route_options("t", pads + extras, rules)
+
+    def test_a_bad_route_option_stops_the_build_before_kicad_runs(self):
+        """``True`` as a route option raises SystemExit, and KiCad is not started."""
+        import types
+        from unittest import mock
+        parts = [Part("U1", "T:M", "M", "fp", (5, 5), {"GND": "GND", "A/B": NC})]
+        board = self.board(parts, priority_routes=[(("U1", "1"), ("U1", "3"), True)])
+        name = "eos_boards.boards._route_option_probe"
+        kicad = mock.Mock(side_effect=AssertionError("KiCad was started"))
+        with mock.patch.dict(sys.modules, {name: types.SimpleNamespace(BOARD=board)}), \
+                mock.patch.object(sys, "argv", ["build.py", name.rsplit(".", 1)[1]]), \
+                mock.patch.object(build, "run", kicad), mock.patch.object(build.kicad_env, "cli", kicad), \
+                mock.patch.object(build.kicad_env, "symbols", kicad), self.assertRaises(SystemExit):
+            build.main()
+        kicad.assert_not_called()
+
+    def test_a_moved_reference_via_must_be_a_reference_via_and_stay_close(self):
+        """A short move of a reference via reaches the spec. A via that is not in the reference, or a
+        move past the limit, is refused."""
+        parts = [Part("U1", "T:M", "M", "fp", (5, 5), {"GND": "GND", "A/B": NC})]
+        ref = Path(self.tmp.name, "ref.json")
+        ref.write_text(json.dumps({"footprints": {}, "vias": [{"net": "GND", "x": 3.1, "y": -5.5, "d": 0.6, "drill": 0.25}]}))
+        moved = [((3.1, -5.5), (3.16, -5.59))]
+        board = self.board(parts, reference_copper={"file": str(ref), "origin": (5, 5), "moved_vias": moved})
+        spec = build.spec_for(board, self.lib, Path(self.tmp.name), [])
+        self.assertEqual(spec["reference_copper"]["moved_vias"], [[[3.1, -5.5], [3.16, -5.59]]])
+        # not a reference via, and a move past MAX_VIA_MOVE
+        for bad in ([((3.0, -5.5), (3.06, -5.5))], [((3.1, -5.5), (3.4, -5.5))]):
+            with self.subTest(moved=str(bad)), self.assertRaises(SystemExit):
+                build.spec_for(self.board(parts, reference_copper={"file": str(ref), "origin": (5, 5), "moved_vias": bad}),
+                               self.lib, Path(self.tmp.name), [])
+
 
 class ClashTest(unittest.TestCase):
     def test_clearance_clashes_pick_the_via_then_the_shorter_track_and_leave_pads(self):
@@ -438,11 +500,52 @@ class ReferenceExactnessTest(unittest.TestCase):
             key = (t["net"], t["layer"], nm(t["w"]), frozenset((self._at(*t["a"]), self._at(*t["b"]))), True)
             self.assertIn(key, segs, t)
 
+    # The two GND vias beside C6/C7 that sat 0.05 mm from those pads, and where they went (mm from
+    # the chip centre). Written out here, not read from the board script, so a further move fails.
+    MOVED_VIAS = {(3.1, -5.5): (3.16, -5.59), (3.1, -4.9): (3.11, -5.08)}
+
+    def test_the_board_moves_exactly_the_two_reviewed_vias(self):
+        """The design declares exactly the two reviewed moves, each a reference via and within
+        MAX_VIA_MOVE. A third move is not declared."""
+        board = importlib.import_module("eos_boards.boards.eos_learn_rp2350").BOARD
+        declared = {tuple(a): tuple(b) for a, b in board.reference_copper.get("moved_vias", [])}
+        self.assertEqual(declared, self.MOVED_VIAS)
+        ref_at = {(d["x"], d["y"]) for d in self.ref["vias"]}
+        self.assertLessEqual(set(declared), ref_at)
+        for old, new in declared.items():
+            self.assertLessEqual(math.dist(old, new), build.MAX_VIA_MOVE, (old, new))
+        self.assertNotIn((0.0, 0.0), declared)
+
     def test_every_via_exact(self):
+        """Every reference via is where the reference puts it. The two vias in MOVED_VIAS are
+        accepted only at their declared positions. Any other move is missing from the board."""
+        source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
+        body = source[source.index("def reference_copper("):source.index("def preroute(")]
+        self.assertIn('moved.pop((round(d["x"], 6), round(d["y"], 6)), (d["x"], d["y"]))', body)
+        self.assertIn("via.SetPosition(v(ox + x, oy + y))", body)
         vias = {(str(find(v, "net")[-1]), nm(find(v, "at")[1]), nm(find(v, "at")[2]), nm(find(v, "size")[1]),
                  nm(find(v, "drill")[1])) for v in find_all(self.pcb, "via")}
+        ref_at = {(d["x"], d["y"]) for d in self.ref["vias"]}
+        self.assertLessEqual(set(self.MOVED_VIAS), ref_at, "MOVED_VIAS names vias the reference does not have")
+
+        def expect(moves):
+            out = set()
+            for d in self.ref["vias"]:
+                x, y = moves.get((d["x"], d["y"]), (d["x"], d["y"]))
+                out.add((d["net"], *self._at(x, y), nm(d["d"]), nm(d["drill"])))
+            return out
+
+        accepted = expect(self.MOVED_VIAS)
+        self.assertLessEqual(accepted, vias)
         for d in self.ref["vias"]:
-            self.assertIn((d["net"], *self._at(d["x"], d["y"]), nm(d["d"]), nm(d["drill"])), vias, d)
+            if (d["x"], d["y"]) in self.MOVED_VIAS:
+                self.assertNotIn((d["net"], *self._at(d["x"], d["y"]), nm(d["d"]), nm(d["drill"])), vias,
+                                 f"{d}: still at the reference position")
+        undeclared = dict(self.MOVED_VIAS)
+        other = next(d for d in self.ref["vias"] if (d["x"], d["y"]) not in self.MOVED_VIAS)
+        undeclared[(other["x"], other["y"])] = (other["x"] + 0.1, other["y"])
+        self.assertNotEqual(expect(undeclared), accepted)
+        self.assertFalse(expect(undeclared) <= vias)
 
     def test_every_zone_outline_exact(self):
         zones = []
@@ -921,16 +1024,83 @@ def _vias_in_pads(pcb, skip=()):
     return hits
 
 
+def _kicad_10():
+    """True when KiCad 10's app bundle is installed. The helper scripts run only from the two
+    tests below, and only then. This runs at import, so a kicad-cli that cannot start or does
+    not answer returns False: only the KiCad tests skip, never the rest of the module."""
+    apps = [Path(os.environ.get("KICAD_APP") or "/nonexistent"),
+            Path.home() / "Applications/KiCad/KiCad.app", Path("/Applications/KiCad/KiCad.app")]
+    cli = next((c / "Contents/MacOS/kicad-cli" for c in apps if (c / "Contents/MacOS/kicad-cli").is_file()), None)
+    if cli is None:
+        return False
+    try:
+        version = subprocess.run([str(cli), "version"], capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return version.returncode == 0 and version.stdout.strip().startswith("10.")
+
+
+needs_kicad = unittest.skipUnless(_kicad_10(),
+    "KiCad 10 is not installed; set KICAD_APP to KiCad.app. The pcb_build and ESD-flow checks are skipped.")
+
+
+@needs_kicad
+class PcbBuildKiCadTest(unittest.TestCase):
+    """pcb_build.py's pinned via, route options, endpoint layers and dangling-copper pass, run in
+    KiCad's own Python against a board made in memory: see eos_pcb_build_kicad.py."""
+
+    def test_pcb_build_checks_pass_in_kicads_python(self):
+        """The only call of eos_pcb_build_kicad.py. A failing check exits nonzero and fails this test.
+        Skipped, with the class, when KiCad 10 is not installed."""
+        from eos_boards import kicad_env
+        r = subprocess.run([kicad_env.python(), str(Path(__file__).with_name("eos_pcb_build_kicad.py"))],
+                           capture_output=True, text=True, timeout=300)
+        lines = [ln for ln in r.stdout.splitlines() if ln.startswith(("ok ", "FAIL "))]
+        self.assertGreaterEqual(len(lines), 6, r.stdout + r.stderr)
+        for line in lines:
+            with self.subTest(line.split(":")[0]):
+                self.assertTrue(line.startswith("ok "), r.stdout)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+
+@needs_kicad
+class EsdFlowKiCadTest(unittest.TestCase):
+    """Each line through a two-pad ESD part passes over the part's pads, rather than meeting its
+    other end beside the part and leaving the pads on a stub: see eos_esd_flow_kicad.py.
+    STUBBED lists the known stubs. A line on it must still be a stub, so one fixed cannot stay
+    listed."""
+
+    STUBBED = {
+               # USBH_DM. Dropping any track that touched a pad hid this stub; with only the copper
+               # inside the pad removed, the line's ends still meet beside U3. The rebuilt routing stays.
+               ("eos-cm4-base", "U3.3/4"),
+               ("eos-cm5-base", "U1.1/6"), ("eos-cm5-base", "U1.3/4"),   # USB_P, USB_N: before issue #67
+               ("eos-probe-s3", "U1.3/4"),                                 # USB_D-: before issue #67
+               # USB_D+, since issue #67's rebuild: the line's ends meet 0.7 mm from U2.1, leaving
+               # a 1.37 mm stub on the Full Speed (12 Mbit/s) line
+               ("eos-learn-rp2350", "U2.1/6")}
+
+    def test_esd_parts_lie_on_their_lines(self):
+        """The only call of eos_esd_flow_kicad.py. A failing check exits nonzero and fails this test.
+        Skipped, with the class, when KiCad 10 is not installed. The stubs printed are exactly STUBBED."""
+        from eos_boards import kicad_env
+        r = subprocess.run([kicad_env.python(), str(Path(__file__).with_name("eos_esd_flow_kicad.py"))],
+                           capture_output=True, text=True, timeout=300)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        lines = [ln.split() for ln in r.stdout.splitlines()]
+        boards = sorted((Path(__file__).resolve().parents[2] / "boards" / "eos").glob("*/hardware/*.kicad_pcb"))
+        self.assertEqual([ln[1] for ln in lines if ln[0] == "checked"], [p.stem for p in boards])
+        self.assertEqual({(ln[1], ln[2]) for ln in lines if ln[0] == "stub"}, self.STUBBED)
+
+
 class ViaInPadTest(unittest.TestCase):
     """No via sits in a surface pad, or within VIA_PAD_GAP of one, except the vias a chip's exposed
     pad takes on purpose: solder wicks down an open barrel and starves the joint. Every board is
-    built under the rule, the ten built before it included."""
+    held to it. Issue #67 rebuilt the boards that predated the rule and moved the two Learn RP2350
+    ground vias that sat in pads, so nothing is exempt. A position in REFERENCE_COPPER is skipped;
+    a via that has moved clear of its pad must not stay listed."""
 
-    # Raspberry Pi's RP2350A reference copper, kept exactly as drawn (the board README's "The core
-    # layout is Raspberry Pi's, exactly"): two of its locked ground vias sit 0.05 mm from the
-    # regulator capacitors' ground pads (C6.2, C7.2). Only these two vias, by position, are left
-    # out; any other via in or beside any pad, those two pads included, still fails.
-    REFERENCE_COPPER = {"eos-learn-rp2350": {(29.4, 24.8), (29.4, 25.4)}}
+    REFERENCE_COPPER = {}
 
     def test_the_gap_matches_the_generators(self):
         source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
@@ -1866,21 +2036,39 @@ class RobustRoutingTest(_Lib):
                          [{"net": "/A", "a": [1.0, 1.0], "b": [2.0, 1.0]}])
 
     def test_priority_route_options(self):
-        self.assertEqual(fabrication.route_options((("U1", "1"), ("C1", "2"))), (False, None))
-        self.assertEqual(fabrication.route_options((("U1", "1"), ("C1", "2"), "join")), (True, None))
-        self.assertEqual(fabrication.route_options((("U1", "1"), ("C1", "2"), 0.4, "join")), (True, 0.4))
-        for bad in ("joins", 0, -0.2, True, ("join", "join"), (0.3, 0.4)):
+        """pcb_build.route_options is fabrication.route_options: join, a width, and a pinned via.
+        An unknown option, a repeated option, and join together with a via are refused. The board
+        rules (minimum track, via size) are the same check build.spec_for runs."""
+        pads = (("U1", "1"), ("C1", "2"))
+        self.assertEqual(fabrication.route_options(pads), (False, None, None))
+        self.assertEqual(fabrication.route_options(pads + ("join",)), (True, None, None))
+        self.assertEqual(fabrication.route_options(pads + (0.4, "join")), (True, 0.4, None))
+        self.assertEqual(fabrication.route_options(pads + ({"via": [19.75, 35.2, 0.5, 0.25]},)),
+                         (False, None, [19.75, 35.2, 0.5, 0.25]))
+        for bad in ("joins", 0, -0.2, True, float("nan"), ("join", "join"), (0.3, 0.4),
+                    ({"via": [1, 2, 3]},), ("join", {"via": [1.0, 2.0, 0.5, 0.25]})):
             extra = bad if isinstance(bad, tuple) else (bad,)
             with self.subTest(bad=bad), self.assertRaises(ValueError):
-                fabrication.route_options((("U1", "1"), ("C1", "2"), *extra))
+                fabrication.route_options(pads + extra)
+        source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
+        parser = source[source.index("def route_options("):source.index("def _exposed_pad(")]
+        self.assertIn("return fabrication.route_options(route)", parser)
         parts = [Part("U1", "T:U", "U", "fp", (5, 5), {"VDD": "A", "3": NC})]
         spec = build.spec_for(self.board(parts, priority_routes=[(("U1", "1"), ("U1", "2"), 0.3)]), self.lib, Path(self.tmp.name), [])
         self.assertEqual(spec["priority_routes"], [[["U1", "1"], ["U1", "2"], 0.3]])
-        for routes, message in (([(("U1", "1"), ("U1", "2"), 0.05)], "minimum track"), ([(("U1", "1"), ("U1", "2"), "jion")], "join")):
+        via = (("U1", "1"), ("U1", "2"), {"via": [6.0, 6.0, 0.5, 0.25]})
+        spec = build.spec_for(self.board(parts, priority_routes=[via]), self.lib, Path(self.tmp.name), [])
+        self.assertEqual(spec["priority_routes"], [[["U1", "1"], ["U1", "2"], {"via": [6.0, 6.0, 0.5, 0.25]}]])
+        for routes, message in (([(("U1", "1"), ("U1", "2"), 0.05)], "minimum track"),
+                                ([(("U1", "1"), ("U1", "2"), "jion")], "join"),
+                                ([(("U1", "1"), ("U1", "2"), 0.2, 0.3)], "twice"),
+                                ([(("U1", "1"), ("U1", "2"), "join", {"via": [6.0, 6.0, 0.5, 0.25]})], "together")):
             with self.subTest(message=message), self.assertRaisesRegex(SystemExit, message):
                 build.spec_for(self.board(parts, priority_routes=routes), self.lib, Path(self.tmp.name), [])
 
     def test_the_router_cannot_take_the_fanout_and_repairs_rejoin_pour_fragments(self):
+        """Fan-out vias stay locked, repairs rejoin pour fragments, and a pinned via is placed from
+        its route option."""
         # pcbnew code, read as source: these steps cannot run without KiCad
         source = (REPO_ROOT / "tools" / "eos_boards" / "pcb_build.py").read_text(encoding="utf-8")
         fanout = source[source.index("def fanout("):source.index("REFERENCE_ZONE = ")]
@@ -1890,8 +2078,9 @@ class RobustRoutingTest(_Lib):
         for body in (repair, finish):
             self.assertIn("join_all_fragments(board, spec, filler)", body)
         place = source[source.index("def place("):source.index("def stitch(")]
-        self.assertIn("fabrication.route_options(route)", place)
-        self.assertIn("MM(width) if width else track_width(spec, net)", place)
+        self.assertIn("join, width_mm, via_at = route_options(route)", place)
+        self.assertIn("pinned_via(board, spec, net, *via_at)", place)
+        self.assertIn("MM(width_mm) if width_mm is not None else track_width(spec, net)", place)
 
 
 # What each board README's Fabrication section says now about its narrowest track, smallest drill and
@@ -1906,8 +2095,9 @@ README_FAB = {
     "eos-epu-up5k": {"narrowest": ("**Narrowest track:** 0.09 mm", "0.09"),
                      "drill": ("**Smallest drill:** 0.2 mm, in the vias", "0.2"),
                      "vias": ("**Vias:** 0.45 mm with a 0.2 mm drill", ["0.45/0.2"])},
-    "eos-esp32-devkit": {"narrowest": ("**Tracks:** 0.15 mm (the rules allow 0.1 mm at fine-pitch pads; this build narrows none)", "0.15"),
-                         "drill": ("**Smallest drill:** 0.2 mm", "0.2"), "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
+    "eos-esp32-devkit": {"narrowest": ("narrowing to the 0.1 mm minimum at fine-pitch pads", "0.1"),
+                         "drill": ("**Smallest drill:** 0.2 mm", "0.2"),
+                         "vias": ("**Vias:** 0.6 mm with a 0.3 mm drill, except one", ["0.5/0.25", "0.6/0.3"])},
     "eos-f280049c-board": {"narrowest": ("0.15 mm tracks, 0.4 mm on VBUS and 5 V", "0.15"),
                            "drill": ("vias 0.6 mm with a 0.3 mm drill, which is the smallest drill", "0.3"),
                            "vias": ("vias 0.6 mm with a 0.3 mm drill", ["0.6/0.3"])},
@@ -1949,6 +2139,7 @@ README_FAB = {
 # this stage does not edit board READMEs.
 README_FAB_MISMATCHES = {
     ("eos-cm4-base", "narrowest", "0.09", 0.1124), ("eos-cm4-base", "drill", None, 0.2),
+    ("eos-esp32-devkit", "narrowest", "0.1", 0.1124),
     ("eos-cm5-base", "narrowest", None, 0.1124), ("eos-cm5-base", "drill", None, 0.2),
     ("eos-f280049c-board", "narrowest", "0.15", 0.1124), ("eos-learn-rp2350", "drill", None, 0.25),
     ("eos-lpc55s69-board", "narrowest", "0.09", 0.1124), ("eos-probe-s3", "narrowest", "0.112", 0.15),

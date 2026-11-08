@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
+import math
 import os
 import re
 import shutil
@@ -41,6 +42,8 @@ from eos_boards.sexpr import find, find_all  # noqa: E402
 RULES = {"track": 0.15, "clearance": 0.15, "via": 0.6, "drill": 0.3, "min_track": 0.1,
          "min_clearance": 0.15, "min_via": 0.5, "min_drill": 0.25, "edge_clearance": 0.3,
          "hole_clearance": 0.25}
+# How far a board may move a reference via to keep it off a pad: a nudge, not a different layout.
+MAX_VIA_MOVE = 0.25
 
 
 def run(cmd: List[str], **kw: Any) -> subprocess.CompletedProcess:
@@ -500,6 +503,50 @@ def check_reference(board, lib, parts):
         bad = {pad: (ours.get(pad), net) for pad, net in fp["pads"].items() if ours.get(pad) != net}
         if bad:
             raise SystemExit(f"{name}: pads on other nets than the reference copper expects (ours, reference): {bad}")
+    vias = {(round(d["x"], 6), round(d["y"], 6)) for d in ref["vias"]}
+    for old, new in board.reference_copper.get("moved_vias", []):
+        if (round(old[0], 6), round(old[1], 6)) not in vias:
+            raise SystemExit(f"{board.name}: moved via {list(old)} is not a via in the reference copper")
+        if math.dist(old, new) > MAX_VIA_MOVE:
+            raise SystemExit(f"{board.name}: moved via {list(old)} -> {list(new)} goes more than "
+                             f"{MAX_VIA_MOVE} mm from the reference")
+
+
+def board_rules(board: Board) -> Dict[str, Any]:
+    """The design rules the board is built with: the defaults, the board's own, and the floor a
+    reference design's pad clearances need."""
+    rules = dict(RULES)
+    if board.layers >= 4:
+        rules["min_track"] = 0.09      # standard 4-layer capability; the router necks down at fine-pitch pins
+    rules.update(board.rules)
+    if board.reference_copper:
+        # Reference footprints can carry their own pad clearance (Raspberry Pi's VREG capacitors
+        # use 0.125 mm); the floor drops so it applies. Net classes keep 0.15 mm everywhere else.
+        rules["min_clearance"] = 0.1
+    return rules
+
+
+def check_priority_routes(board: Board, rules: Dict[str, Any]) -> None:
+    """Refuse a priority route whose options break ``rules``, before KiCad starts."""
+    for route in board.priority_routes:
+        check_route_options(board.name, route, rules)
+
+
+def check_route_options(name: str, route: tuple, rules: Dict[str, Any]) -> None:
+    """Refuse a priority route's options before KiCad starts. The option grammar is
+    ``fabrication.route_options`` (join, one width, one pinned via). This then applies the board's
+    minimum track and via sizes. ``pcb_build.route_options`` uses that same grammar."""
+    where = f"{name}: priority route {route[:2]}"
+    try:
+        _join, width, via = fabrication.route_options(route)
+    except ValueError as e:
+        raise SystemExit(f"{where}: {e}") from e
+    if width is not None and width < rules["min_track"]:
+        raise SystemExit(f"{where}: width {width} mm is below the board's minimum track "
+                         f"({rules['min_track']} mm)")
+    if via is not None and (via[2] < rules["min_via"] or via[3] < rules["min_drill"] or via[3] >= via[2]):
+        raise SystemExit(f"{where}: pinned via {via[2]}/{via[3]} mm is outside the board's via rules "
+                         f"(min via {rules['min_via']} mm, min drill {rules['min_drill']} mm)")
 
 
 def kicad_net_text(text: str) -> str:
@@ -530,6 +577,7 @@ def pad_numbers(number: str) -> List[str]:
 
 
 def spec_for(board: Board, lib: Library, footprint_dir: Path, texts: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """The placement spec: parts, nets, rules, routes, and the fabrication settings the board declares."""
     check_shunts(board)
     check_bench(board)
     parts, nets = [], set()
@@ -573,10 +621,7 @@ def spec_for(board: Board, lib: Library, footprint_dir: Path, texts: List[Dict[s
             raise SystemExit(f"{board.name}: {option} names parts the board does not have: {unknown}")
     if board.reference_copper:
         check_reference(board, lib, parts)
-    rules = dict(RULES)
-    if board.layers >= 4:
-        rules["min_track"] = 0.09      # standard 4-layer capability; the router necks down at fine-pitch pins
-    rules.update(board.rules)
+    rules = board_rules(board)
     try:
         stackup = fabrication.stackup_for(board.layers, board.thickness, board.stackup)
     except ValueError as e:
@@ -585,18 +630,7 @@ def spec_for(board: Board, lib: Library, footprint_dir: Path, texts: List[Dict[s
         if side not in ("F", "B") or len(points) not in (2, 3) or not all(len(p) == 2 for p in points):
             raise SystemExit(f'{board.name}: fiducials {side!r}: {points!r}; give "F" or "B" and three (x, y) '
                              "positions, or two diagonally opposite ones")
-    for r in board.priority_routes:
-        try:
-            _, width = fabrication.route_options(r)
-        except ValueError as e:
-            raise SystemExit(f"{board.name}: {e}")
-        if width is not None and width < rules["min_track"]:
-            raise SystemExit(f"{board.name}: priority route {r!r}: {width} mm is under the board's "
-                             f"{rules['min_track']} mm minimum track")
-    if board.reference_copper:
-        # Reference footprints can carry their own pad clearance (Raspberry Pi's VREG capacitors
-        # use 0.125 mm); the floor drops so it applies. Net classes keep 0.15 mm everywhere else.
-        rules["min_clearance"] = 0.1
+    check_priority_routes(board, rules)
     return {"name": board.name, "width": board.width, "height": board.height, "thickness": board.thickness,
             "corner_radius": board.corner_radius, "layers": board.layers, "rules": rules,
             "netclasses": board.netclasses,
@@ -607,7 +641,8 @@ def spec_for(board: Board, lib: Library, footprint_dir: Path, texts: List[Dict[s
             "ground_vias": board.ground_vias,
             "fanout_first": board.fanout_first,
             "preroutes": [{"a": list(a), "b": list(b), "width": w} for a, b, w in board.preroutes],
-            "reference_copper": ({"file": str(HERE / board.reference_copper["file"]), "origin": list(board.reference_copper["origin"])}
+            "reference_copper": ({"file": str(HERE / board.reference_copper["file"]), "origin": list(board.reference_copper["origin"]),
+                                  "moved_vias": [[list(a), list(b)] for a, b in board.reference_copper.get("moved_vias", [])]}
                                  if board.reference_copper else None),
             "local_footprints": {lib: str(HERE / "footprints" / f"{lib}.pretty") for lib in board.local_footprints},
             "router_keepouts": [list(k) for k in board.router_keepouts],
@@ -755,6 +790,8 @@ def violations(report: Path) -> List[Dict[str, Any]]:
 
 
 def main() -> int:
+    """Build the board named on the command line. Return 0 when DRC reports no errors, unconnected
+    items, or schematic-parity mismatches."""
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("board")
     ap.add_argument("--out", type=Path, default=None)
@@ -766,6 +803,7 @@ def main() -> int:
     module = importlib.import_module(f"eos_boards.boards.{args.board}")
     board: Board = module.BOARD
     texts = one_revision(board, identity_texts(board, getattr(module, "TEXTS", [])))
+    check_priority_routes(board, board_rules(board))      # a mistyped route option stops here, before KiCad runs
     lib = Library(kicad_env.symbols(), (HERE / "symbols",))
     out = args.out or HERE.parents[1] / "boards" / "eos" / board.name
     hw, fab, img = out / "hardware", out / "fab", out / "images"
