@@ -82,7 +82,7 @@ eRadar360_CAD_Design/
 |-----------|--------------|--------|
 | FCC Part 15B (unintentional radiator) | All configurations | Documentation complete |
 | FCC Part 15.253 (77 GHz radar) | Radar subsystem | Documentation complete |
-| FCC Part 90 / Part 95 (V2X 5.9 GHz) | V2X configuration | Documentation complete |
+| FCC Part 90 / Part 95 (V2X 5.9 GHz) | V2X configuration | Under revision — C-V2X only; limits not yet re-derived (see `regulatory/fcc/FCC_AUTHORIZATION_CHECKLIST.md`, Part 3) |
 | NHTSA FMVSS 111 (rearview systems) | All configurations | Documentation complete |
 | SAE J3016 (ADAS taxonomy) | All configurations | Documentation complete |
 | ISO 26262 (functional safety, ASIL-B) | All configurations | Documentation complete |

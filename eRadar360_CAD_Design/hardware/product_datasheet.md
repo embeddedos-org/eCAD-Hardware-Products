@@ -85,7 +85,7 @@
 | Parameter | Value |
 |-----------|-------|
 | Chipset | Autotalks TEKTON3 |
-| US mode | C-V2X, 3GPP PC5 Sidelink, 5.895–5.925 GHz |
+| US mode | C-V2X, 3GPP PC5 Sidelink. US band is 5.895–5.925 GHz; the design range (5.855–5.925 GHz) is to be restricted to it |
 | IEEE 802.11p | Supported by the chipset; not a US operating mode. US DSRC operations end on 2026-12-14 (FCC DA 25-125 (ET Docket No. 19-138, released 2025-02-11)). For regions that use ITS-G5 only |
 | Modes | C-V2X in the United States; the chipset is dual-mode |
 | Range | Up to 1 km (line of sight) |

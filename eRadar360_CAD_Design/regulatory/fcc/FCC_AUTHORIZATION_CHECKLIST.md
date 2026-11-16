@@ -95,7 +95,7 @@ The limits in the table below were written for the earlier rules and have **not*
 | Frequency range | 5.895–5.925 GHz | 5.855–5.925 GHz | ❌ Design value extends below the band — restrict to 5.895–5.925 GHz |
 | Channel bandwidth | To be taken from the current rules | 10 MHz | Open — limit not re-derived |
 | Modulation (C-V2X) | SC-FDM per 3GPP | SC-FDM | Open — to be confirmed against the grant |
-| DSRC (IEEE 802.11p) | Not a US mode after 2026-12-14 | Supported by the chipset | Not applicable — keep disabled in US configurations |
+| DSRC (IEEE 802.11p) | Not planned for the US; US DSRC operations end 2026-12-14 | Supported by the chipset | Not applicable — keep disabled in US configurations |
 
 ### Checklist — Part 90 Subpart M
 
@@ -185,7 +185,7 @@ The eRadar360 will also require Industry Canada (ISED) certification for Canadia
 |-----------|------------------|-----------------|
 | 77 GHz radar | RSS-Gen + RSS-210 | RSS-210 Issue 10 |
 | Wi-Fi 6 / BT | RSS-247 | IC ID required |
-| V2X DSRC | RSS-252 | IC ID required |
+| V2X (written for DSRC; Canada not reviewed in the 2026-11 US revision of this checklist) | RSS-252 | IC ID required |
 | Part 15B equivalent | ICES-003 Class B | SDoC |
 
 Canadian certification can typically be obtained simultaneously with FCC testing at minimal additional cost ($5,000–$12,000).
