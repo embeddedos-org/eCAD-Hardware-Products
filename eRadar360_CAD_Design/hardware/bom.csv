@@ -2,7 +2,7 @@ Reference,Component,Manufacturer,MPN,Package,Qty,Unit_Cost_USD,Description
 U1,77GHz Radar SoC (Front),Texas Instruments,AWR2944BFCAAEQ1,BGA-232,1,45.00,FMCW radar transceiver 4TX/4RX 77GHz automotive
 U2,77GHz Radar SoC (Rear),Texas Instruments,AWR2944BFCAAEQ1,BGA-232,1,45.00,FMCW radar transceiver 4TX/4RX 77GHz automotive
 U3,Main Processor + NPU,Rockchip,RK3588S,FCBGA-775,1,28.00,8-core ARM A76/A55 6 TOPS NPU Mali G610
-U4,V2X Transceiver,Autotalks,TEKTON3-B,BGA-196,1,18.50,DSRC 802.11p + C-V2X PC5 dual-mode chipset
+U4,V2X Transceiver,Autotalks,TEKTON3-B,BGA-196,1,18.50,C-V2X PC5 transceiver (dual-mode chipset; 802.11p not used in US configurations)
 U5A,InGaAs APD Laser Sensor,Hamamatsu,G12183-010K,TO-46,1,12.00,InGaAs avalanche photodiode 900-1700nm
 U5B,InGaAs APD Laser Sensor,Hamamatsu,G12183-010K,TO-46,1,12.00,InGaAs avalanche photodiode 900-1700nm
 U5C,InGaAs APD Laser Sensor,Hamamatsu,G12183-010K,TO-46,1,12.00,InGaAs avalanche photodiode 900-1700nm

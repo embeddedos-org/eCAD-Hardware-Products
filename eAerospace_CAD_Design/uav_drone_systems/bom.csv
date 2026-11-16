@@ -7,7 +7,7 @@ U5,1,Mid-360,Custom,Livox,Mid-360,Solid-state 360 LiDAR,599.00,599.00,Livox
 U6,3,IMX678,CSP,Sony,IMX678,4K CMOS image sensor,45.00,135.00,Mouser
 U7,1,SX1276,QFN28,Semtech,SX1276IMLTRT,900MHz LoRa transceiver,3.50,3.50,Mouser
 U8,1,EC25-AF,LGA,Quectel,EC25AFFA-512-STD,4G LTE Cat 4 module,18.00,18.00,Mouser
-U9,1,TEKTON3,QFN,Autotalks,TEKTON3,V2X DSRC + C-V2X transceiver,120.00,120.00,Digi-Key
+U9,1,TEKTON3,QFN,Autotalks,TEKTON3,V2X C-V2X transceiver (dual-mode chipset; DSRC not used in the US),120.00,120.00,Digi-Key
 U10,8,TLE9879QXA40,QFN,Infineon,TLE9879QXA40,Motor driver IC,12.50,100.00,Mouser
 U11,1,ATECC608B,UDFN8,Microchip,ATECC608B-MAHDA-T,Crypto co-processor,0.95,0.95,Mouser
 U12,4,INA3221,WSON10,Texas Instruments,INA3221AIRGVR,Triple-ch power monitor,3.20,12.80,Mouser
