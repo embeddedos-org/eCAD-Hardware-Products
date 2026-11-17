@@ -6,14 +6,13 @@
 
 ## Overview
 
-The eRadar360 contains three radio subsystems, each requiring separate FCC authorization:
+The eRadar360 contains three radio subsystems, each requiring separate FCC authorization. DSRC (IEEE 802.11p) is not one of the US modes: see Part 3.
 
 | Subsystem | Chipset | Frequency | FCC Rule | Authorization Type |
 |-----------|---------|-----------|----------|-------------------|
 | 77 GHz FMCW Radar (×2) | TI AWR2944 | 76–81 GHz | 47 CFR §15.253 | Verification (self-declaration) |
 | Wi-Fi 6 + Bluetooth 5.3 | Qualcomm QCA6174A-5 | 2.4/5 GHz + 2.4 GHz | 47 CFR §15.247 | Certification (TCB) |
-| V2X DSRC | Autotalks TEKTON3 | 5.855–5.925 GHz | 47 CFR Part 90 Subpart M | Certification (FCC) |
-| V2X C-V2X | Autotalks TEKTON3 | Band 47 (5.9 GHz) | 47 CFR Part 90 Subpart M | Certification (FCC) |
+| V2X C-V2X | Autotalks TEKTON3 | 5.895–5.925 GHz | 47 CFR Part 90 Subpart M | Certification (FCC) |
 | Unintentional radiator | Full device | Broadband | 47 CFR Part 15B | Verification (self-declaration) |
 
 ---
@@ -79,25 +78,30 @@ The Qualcomm QCA6174A-5 module operates under §15.247 (spread spectrum and digi
 
 ---
 
-## Part 3: V2X DSRC + C-V2X — 47 CFR Part 90 Subpart M
+## Part 3: V2X C-V2X — 47 CFR Part 90 Subpart M
 
 ### Regulatory Basis
 
-The Dedicated Short-Range Communications (DSRC) service at 5.850–5.925 GHz is governed by 47 CFR Part 90 Subpart M. C-V2X (PC5 sidelink) in Band 47 (5.855–5.925 GHz) is also authorized under Part 90 following the FCC's November 2020 Report and Order.
+The US mode of this product is C-V2X (PC5 sidelink). DSRC (IEEE 802.11p) is not planned for the United States:
+
+- DSRC operations in the 5.9 GHz band sunset on **2026-12-14**; no new DSRC roadside units could be registered after 2025-02-11, and licences issued under the current rules authorise C-V2X only. Source: FCC DA 25-125 (ET Docket No. 19-138, released 2025-02-11); Second Report and Order, 89 Fed. Reg. 100838 (2024-12-13).
+- Intelligent-transportation operations have the upper 30 MHz of the band, **5.895–5.925 GHz**. The 5.850–5.925 GHz and 5.855–5.925 GHz figures this checklist used before predate that.
+
+The limits in the table below were written for the earlier rules and have **not** been re-derived from the current text of 47 CFR Part 90 Subpart M and Part 95 Subpart L. Treat every row as open until that is done.
 
 | Parameter | Limit | TEKTON3 Spec | Status |
 |-----------|-------|-------------|--------|
-| Max EIRP (DSRC) | 33 dBm | 23 dBm | ✅ Compliant |
-| Frequency range | 5.850–5.925 GHz | 5.855–5.925 GHz | ✅ Compliant |
-| Channel bandwidth | 10 MHz (DSRC) | 10 MHz | ✅ Compliant |
-| Modulation (DSRC) | OFDM per IEEE 802.11p | OFDM | ✅ Compliant |
-| Modulation (C-V2X) | SC-FDM per 3GPP | SC-FDM | ✅ Compliant |
+| Max EIRP (C-V2X) | To be taken from the current rules | 23 dBm | Open — limit not re-derived |
+| Frequency range | 5.895–5.925 GHz | 5.855–5.925 GHz | ❌ Design value extends below the band — restrict to 5.895–5.925 GHz |
+| Channel bandwidth | To be taken from the current rules | 10 MHz | Open — limit not re-derived |
+| Modulation (C-V2X) | SC-FDM per 3GPP | SC-FDM | Open — to be confirmed against the grant |
+| DSRC (IEEE 802.11p) | Not planned for the US; US DSRC operations end 2026-12-14 | Supported by the chipset | Not applicable — keep disabled in US configurations |
 
 ### Checklist — Part 90 Subpart M
 
 - [ ] Obtain TEKTON3 FCC grant from Autotalks (confirm existing FCC ID)
 - [ ] Verify integration: antenna gain, cable loss, enclosure shielding
-- [ ] Confirm dual-mode (DSRC + C-V2X) simultaneous operation is within grant
+- [ ] Confirm the TEKTON3 grant covers C-V2X in 5.895–5.925 GHz, and that the US configuration keeps IEEE 802.11p disabled
 - [ ] Conduct antenna VSWR and gain measurement for 5.9 GHz SMA port (J5)
 - [ ] Verify out-of-band emissions: −43 dBc at ±15 MHz from channel edge
 - [ ] Prepare FCC Form 601 (Part 90 license application) if required for V2X RSU operation
@@ -165,7 +169,7 @@ For devices where physical labeling space is constrained, FCC permits electronic
 | Pre-compliance emissions scan | Month 1–2 | $3,000–$8,000 |
 | 77 GHz radar verification testing | Month 3–5 | $18,000–$35,000 |
 | Wi-Fi 6 / BT integration testing | Month 3–5 | $12,000–$22,000 |
-| V2X DSRC/C-V2X certification | Month 4–6 | $15,000–$28,000 |
+| V2X C-V2X certification | Month 4–6 | $15,000–$28,000 |
 | Part 15B full compliance testing | Month 5–7 | $8,000–$15,000 |
 | FCC filing fees (per application) | — | $1,085 (FCC fee) |
 | TCB fees (Wi-Fi, V2X) | — | $3,000–$6,000 |
@@ -181,7 +185,7 @@ The eRadar360 will also require Industry Canada (ISED) certification for Canadia
 |-----------|------------------|-----------------|
 | 77 GHz radar | RSS-Gen + RSS-210 | RSS-210 Issue 10 |
 | Wi-Fi 6 / BT | RSS-247 | IC ID required |
-| V2X DSRC | RSS-252 | IC ID required |
+| V2X (written for DSRC; Canada not reviewed in the 2026-11 US revision of this checklist) | RSS-252 | IC ID required |
 | Part 15B equivalent | ICES-003 Class B | SDoC |
 
 Canadian certification can typically be obtained simultaneously with FCC testing at minimal additional cost ($5,000–$12,000).

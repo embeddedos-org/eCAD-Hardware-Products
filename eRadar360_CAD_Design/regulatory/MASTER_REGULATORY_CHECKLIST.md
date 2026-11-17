@@ -45,7 +45,7 @@ The eRadar360 requires clearance across **7 regulatory frameworks** before comme
 - [ ] Pre-compliance emissions scan (30 MHz–1 GHz) — $3K–$8K
 - [ ] 77 GHz radar verification (§15.253/§15.255) — $18K–$35K
 - [ ] Wi-Fi 6 / BT integration testing (§15.247) — $12K–$22K
-- [ ] V2X DSRC/C-V2X certification (Part 90) — $15K–$28K
+- [ ] V2X C-V2X certification (Part 90) — $15K–$28K. DSRC is not a US mode: US DSRC operations end 2026-12-14 (see `fcc/FCC_AUTHORIZATION_CHECKLIST.md`, Part 3)
 - [ ] Part 15B full compliance test — $8K–$15K
 - [ ] FCC filing and fees — $4K–$7K
 - [ ] ISED/IC simultaneous testing — $5K–$12K

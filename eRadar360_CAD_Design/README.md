@@ -15,7 +15,7 @@ The **eRadar360** (marketed as **Aegis One** for OEM channels) is a windshield-m
 | Front Radar | TI AWR2944 77 GHz FMCW | 120° FOV, 0–250 m | 0.75 m range resolution |
 | Rear Radar | TI AWR2944 77 GHz FMCW | 120° FOV, 0–150 m | 0.75 m range resolution |
 | Laser Detection | 5× Hamamatsu G12183-010K InGaAs APD | 360° (72° spacing) | <50 ms alert latency |
-| V2X | Autotalks TEKTON3 DSRC + C-V2X | 1 km LOS | BSM, TIM, SPaT, MAP |
+| V2X | Autotalks TEKTON3, C-V2X (PC5) in the US; chipset also supports 802.11p | 1 km LOS | BSM, TIM, SPaT, MAP |
 
 **AI Processing:** Rockchip RK3588S (6 TOPS NPU) — radar signature fingerprinting, 97% false-alert suppression  
 **Co-processor:** STM32H7B3 — laser ADC, OBD-II parsing, GPS fusion  
@@ -52,7 +52,7 @@ eRadar360_CAD_Design/
 │   ├── fcc/                    ← FCC Part 15B, Part 90, Part 95 (V2X)
 │   ├── nhtsa/                  ← NHTSA FMVSS, SAE J3016, ADAS guidelines
 │   ├── iso26262/               ← ISO 26262 functional safety (ASIL-B)
-│   ├── v2x/                    ← DSRC/C-V2X certification, IEEE 802.11p
+│   ├── v2x/                    ← C-V2X certification (US); IEEE 802.11p / ITS-G5 for other regions
 │   ├── cybersecurity/          ← IEC 62443, NIST CSF, UNECE WP.29
 │   └── legal/                  ← Terms of Service, Privacy Policy, EULA
 ├── simulation/                 ← All simulation and test code
@@ -71,7 +71,7 @@ eRadar360_CAD_Design/
 | Configuration | COGS | MSRP | Margin |
 |--------------|------|------|--------|
 | eRadar360 Standard (radar + laser + GPS) | $285 | $699 | 59% |
-| eRadar360 Pro (+ V2X DSRC/C-V2X) | $310 | $899 | 65% |
+| eRadar360 Pro (+ V2X, C-V2X) | $310 | $899 | 65% |
 | Aegis One OEM (no display, V2X optional) | $240 | OEM pricing | — |
 
 ---
@@ -82,7 +82,7 @@ eRadar360_CAD_Design/
 |-----------|--------------|--------|
 | FCC Part 15B (unintentional radiator) | All configurations | Documentation complete |
 | FCC Part 15.253 (77 GHz radar) | Radar subsystem | Documentation complete |
-| FCC Part 90 / Part 95 (V2X 5.9 GHz) | V2X configuration | Documentation complete |
+| FCC Part 90 / Part 95 (V2X 5.9 GHz) | V2X configuration | Under revision — C-V2X only; limits not yet re-derived (see `regulatory/fcc/FCC_AUTHORIZATION_CHECKLIST.md`, Part 3) |
 | NHTSA FMVSS 111 (rearview systems) | All configurations | Documentation complete |
 | SAE J3016 (ADAS taxonomy) | All configurations | Documentation complete |
 | ISO 26262 (functional safety, ASIL-B) | All configurations | Documentation complete |
