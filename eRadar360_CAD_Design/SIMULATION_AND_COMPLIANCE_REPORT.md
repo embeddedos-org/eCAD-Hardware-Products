@@ -84,7 +84,7 @@ The following tests require physical hardware and cannot be simulated. They repr
 |------|-----------|----------|------|
 | FCC Part 15B radiated emissions | NTS or Element Materials | 8–10 weeks | $8K–$15K |
 | FCC §15.253/§15.255 77GHz radar verification | NTS (millimeter-wave lab) | 10–14 weeks | $18K–$35K |
-| FCC Part 90 V2X DSRC/C-V2X certification | NTS or Intertek | 10–14 weeks | $15K–$28K |
+| FCC Part 90 C-V2X certification | NTS or Intertek | 10–14 weeks | $15K–$28K |
 | FCC §15.247 Wi-Fi 6 / BT integration | Any A2LA lab | 6–8 weeks | $12K–$22K |
 | FMVSS 302 flammability | Intertek or SGS | 4–6 weeks | $3K–$6K |
 | SAE J2364 driver distraction assessment | Human factors lab | 6–8 weeks | $8K–$15K |

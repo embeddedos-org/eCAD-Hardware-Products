@@ -122,7 +122,7 @@ If any rail is missing or shows wrong voltage, STOP. Check PMIC (U10) enable pin
 
 1. UART communication test at 115200 baud
 2. Send AT command — expect `OK` response
-3. Scan for DSRC (5.9 GHz) beacon signals
+3. Scan for C-V2X PC5 (5.9 GHz) sidelink signals
 4. Verify C-V2X PC5 sidelink mode enters search state
 5. **Antenna test:** connect V2X antenna to J5, verify RSSI reading
 
