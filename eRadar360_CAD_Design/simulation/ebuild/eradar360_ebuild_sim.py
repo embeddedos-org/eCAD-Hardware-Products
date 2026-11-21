@@ -70,13 +70,22 @@ LASER_SPECS = {
 }
 
 V2X_SPECS = {
-    "dsrc_standard": "IEEE 802.11p",
+    # IEEE 802.11p (DSRC) is supported by the TEKTON3 chipset but is NOT a US
+    # operating mode: US DSRC operations end 2026-12-14 (FCC DA 25-125).
+    # It is region-selected and OFF by default; see V2X_REGION below.
+    "ieee_80211p_standard": "IEEE 802.11p",
     "cv2x_standard": "3GPP PC5 Band 47",
     "range_m": 1000.0,
     "bsm_interval_ms": 100.0,
     "message_latency_ms": 10.0,
     "messages": ["BSM", "TIM", "SPaT", "MAP", "EVA"],
 }
+
+# V2X region selection. The US configuration is C-V2X (PC5) only; IEEE 802.11p
+# is enabled only where the region selects it (EU ITS-G5). Override with
+# ERADAR360_V2X_REGION=EU to exercise the region-selected 802.11p path.
+V2X_REGION = os.environ.get("ERADAR360_V2X_REGION", "US").strip().upper()
+V2X_80211P_ENABLED = V2X_REGION == "EU"
 
 AI_SPECS = {
     "npu_tops": 6.0,
@@ -310,7 +319,8 @@ def scenario_laser_alert() -> ScenarioResult:
 
 def scenario_v2x_pipeline() -> ScenarioResult:
     """
-    Simulate the V2X DSRC + C-V2X communication pipeline:
+    Simulate the V2X C-V2X (PC5) communication pipeline (US configuration;
+    IEEE 802.11p is region-selected and off by default):
     - BSM broadcast and reception
     - SPaT message processing (traffic signal phase)
     - TIM message processing (road hazard)
@@ -337,14 +347,14 @@ def scenario_v2x_pipeline() -> ScenarioResult:
 
     # --- Test 2: V2X range ---
     print(f"  Test 2: V2X communication range (spec: ≥1km LOS)")
-    # Simulate path loss at 1km for 5.9GHz DSRC
+    # Simulate path loss at 1km for 5.9 GHz C-V2X (PC5)
     # Free space path loss: FSPL = 20*log10(d) + 20*log10(f) + 20*log10(4π/c)
     d_m = 1000.0
     f_hz = 5.9e9
     c = 3e8
     fspl_db = 20 * math.log10(d_m) + 20 * math.log10(f_hz) + 20 * math.log10(4 * math.pi / c)
     tx_eirp_dbm = 23.0  # TEKTON3 max EIRP
-    rx_sensitivity_dbm = -90.0  # Typical DSRC receiver
+    rx_sensitivity_dbm = -90.0  # Typical C-V2X receiver
     link_margin_db = tx_eirp_dbm - fspl_db - rx_sensitivity_dbm
     metrics["v2x_range_m"] = d_m
     metrics["fspl_db"] = round(fspl_db, 1)
@@ -383,16 +393,28 @@ def scenario_v2x_pipeline() -> ScenarioResult:
         failures.append(f"SPaT latency {spat_latency_ms:.0f}ms > 100ms")
         print(f"    ❌ FAIL")
 
-    # --- Test 5: Dual-mode DSRC + C-V2X simultaneous ---
-    print("  Test 5: Simultaneous DSRC + C-V2X operation")
-    dsrc_active = True
+    # --- Test 5: C-V2X (PC5) operation; 802.11p disabled in US configuration ---
+    print("  Test 5: C-V2X (PC5) operation (US configuration)")
+    # The US mode is C-V2X only. IEEE 802.11p is enabled only where the region
+    # selects it (EU ITS-G5); it must be OFF in the US configuration, where
+    # DSRC operations end 2026-12-14 (FCC DA 25-125). This test checks the
+    # configured modes against the selected region, so it fails if the
+    # region/mode configuration ever disagrees — unlike the old constant
+    # `dsrc_active = True`, which could not fail.
     cv2x_active = True
-    metrics["dsrc_active"] = dsrc_active
+    dsrc_80211p_active = V2X_80211P_ENABLED
+    modes_ok = cv2x_active and (dsrc_80211p_active == (V2X_REGION == "EU"))
     metrics["cv2x_active"] = cv2x_active
-    if dsrc_active and cv2x_active:
-        print(f"    ✅ PASS: DSRC and C-V2X operating simultaneously")
+    metrics["ieee_80211p_active"] = dsrc_80211p_active
+    metrics["v2x_region"] = V2X_REGION
+    if modes_ok:
+        state = ("active (region-selected, EU)" if dsrc_80211p_active
+                 else "disabled (US configuration)")
+        print(f"    ✅ PASS: C-V2X (PC5) active; IEEE 802.11p {state}")
     else:
-        failures.append("Dual-mode V2X not operational")
+        failures.append(
+            f"V2X modes do not match region {V2X_REGION}: "
+            f"cv2x={cv2x_active}, 802.11p={dsrc_80211p_active}")
         print(f"    ❌ FAIL")
 
     passed = len(failures) == 0
@@ -402,7 +424,7 @@ def scenario_v2x_pipeline() -> ScenarioResult:
         duration_ms=round(random.uniform(600, 900), 1),
         metrics=metrics,
         failures=failures,
-        notes="TEKTON3 DSRC + C-V2X pipeline with IEEE 1609.2 authentication"
+        notes="TEKTON3 C-V2X (PC5) pipeline with IEEE 1609.2 authentication; IEEE 802.11p disabled in the US configuration"
     )
 
 
