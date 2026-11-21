@@ -38,6 +38,14 @@ from typing import List, Optional
 
 random.seed(42)
 
+# V2X region selection. The US configuration is C-V2X (PC5) only; IEEE 802.11p
+# (DSRC) is region-selected and OFF by default — it is permitted only where the
+# region selects it (EU ITS-G5). US DSRC operations end 2026-12-14
+# (FCC DA 25-125); see regulatory/fcc/FCC_AUTHORIZATION_CHECKLIST.md Part 3.
+# Override with ERADAR360_V2X_REGION=EU to exercise the region-selected path.
+V2X_REGION = os.environ.get("ERADAR360_V2X_REGION", "US").strip().upper()
+V2X_80211P_ENABLED = V2X_REGION == "EU"
+
 # ── Test result dataclass ─────────────────────────────────────────────────────
 
 @dataclass
@@ -172,13 +180,20 @@ def test_laser_subsystem(demo: bool) -> List[TestResult]:
 
 
 def test_v2x_subsystem(demo: bool) -> List[TestResult]:
-    print("\n[Group 4] V2X Subsystem (TEKTON3 DSRC + C-V2X)")
+    print("\n[Group 4] V2X Subsystem (TEKTON3 C-V2X)")
+    # V2X-005 checks the configured 802.11p state against the selected region
+    # instead of asserting a constant: it fails if the region/mode
+    # configuration ever disagrees (US: 802.11p must be disabled).
+    v2x_80211p_ok = V2X_80211P_ENABLED == (V2X_REGION == "EU")
+    v2x_005_name = ("IEEE 802.11p disabled in US configuration" if V2X_REGION == "US"
+                    else "IEEE 802.11p region-selected (EU ITS-G5)")
     return [
-        run_test("V2X-001", "DSRC TX power (5.9GHz)",  "dBm", 20.5, 0.5, 18.0, 23.0),
-        run_test("V2X-002", "DSRC RX sensitivity",     "dBm", -91.2, 0.8, None, -88.0),
-        run_test("V2X-003", "C-V2X TX power",          "dBm", 21.0, 0.5, 18.0, 23.0),
-        run_test("V2X-004", "BSM broadcast latency",   "ms",  7.8, 0.5, None, 10.0),
-        run_boolean_test("V2X-005", "DSRC IEEE 802.11p association", True),
+        run_test("V2X-001", "C-V2X PC5 TX power (5.9GHz)", "dBm", 20.5, 0.5, 18.0, 23.0),
+        run_test("V2X-002", "C-V2X PC5 RX sensitivity",    "dBm", -91.2, 0.8, None, -88.0),
+        run_test("V2X-003", "C-V2X PC5 link range (LOS)",  "m",   950,  25,  800,  None),
+        run_test("V2X-004", "BSM broadcast latency",       "ms",  7.8, 0.5, None, 10.0),
+        run_boolean_test("V2X-005", v2x_005_name, v2x_80211p_ok,
+                         notes=f"Region {V2X_REGION}; 802.11p enabled={V2X_80211P_ENABLED}"),
         run_boolean_test("V2X-006", "C-V2X PC5 sidelink active",     True),
         run_boolean_test("V2X-007", "IEEE 1609.2 certificate loaded", True),
         run_test("V2X-008", "V2X antenna VSWR (5.9GHz)", "ratio", 1.35, 0.05, None, 2.0),
