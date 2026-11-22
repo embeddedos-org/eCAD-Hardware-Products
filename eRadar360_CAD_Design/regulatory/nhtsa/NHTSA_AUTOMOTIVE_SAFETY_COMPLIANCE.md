@@ -134,11 +134,11 @@ Radar detector legality varies by US state. The eRadar360 must include clear leg
 
 ---
 
-## 6. V2X / DSRC Regulatory Compliance
+## 6. V2X Regulatory Compliance
 
 ### FCC V2X Authorization (47 CFR Part 90 Subpart M)
 
-The TEKTON3 V2X module requires FCC authorization under Part 90 Subpart M for operation in the 5.850–5.925 GHz DSRC band. See `regulatory/fcc/FCC_AUTHORIZATION_CHECKLIST.md` for full details.
+The TEKTON3 V2X module requires FCC authorization under Part 90 Subpart M for operation in the 5.895–5.925 GHz band as C-V2X (PC5 sidelink). DSRC (IEEE 802.11p) is not a US operating mode: US DSRC operations end 2026-12-14. See `regulatory/fcc/FCC_AUTHORIZATION_CHECKLIST.md` Part 3 for full details.
 
 ### USDOT V2X Deployment Program
 

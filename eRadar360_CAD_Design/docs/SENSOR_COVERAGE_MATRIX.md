@@ -44,8 +44,8 @@
 | | Alert latency | <50 ms (end-to-end) |
 | | Dark current | <10 nA per sensor @ 25°C |
 | | TIA bandwidth | 4.5 GHz (OPA857) |
-| **V2X (TEKTON3)** | DSRC standard | IEEE 802.11p, 5.855–5.925 GHz |
-| | C-V2X standard | 3GPP PC5 Sidelink, Band 47 |
+| **V2X (TEKTON3)** | C-V2X standard (US mode) | 3GPP PC5 Sidelink, Band 47, 5.895–5.925 GHz |
+| | IEEE 802.11p | Supported by the chipset; not a US operating mode |
 | | Range | Up to 1 km (LOS) |
 | | Latency | <10 ms (BSM broadcast) |
 | | Messages | BSM, TIM, SPaT, MAP, EVA |
@@ -122,7 +122,7 @@ OBD-II Port  ──CAN───►│     ┌────────▼──�
 |---------|-----------|----------------|-----------|----------------|
 | 77 GHz FMCW radar | ✅ Dual (front+rear) | ❌ | ❌ | ❌ |
 | 360° laser detection | ✅ 5× InGaAs APD | ✅ 4 sensors | ✅ 4 sensors | ✅ 4 sensors |
-| V2X (DSRC + C-V2X) | ✅ Dual-mode | ❌ | ❌ | ❌ |
+| V2X (C-V2X) | ✅ C-V2X (PC5) | ❌ | ❌ | ❌ |
 | AI NPU (6 TOPS) | ✅ | ❌ | ❌ | ❌ |
 | OBD-II integration | ✅ | ❌ | ❌ | ❌ |
 | GPS/GNSS | ✅ Multi-constellation | ✅ | ✅ | ✅ |

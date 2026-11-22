@@ -1,0 +1,155 @@
+{
+  "timestamp": "2026-11-21T18:54:38.908923+00:00",
+  "total_scenarios": 5,
+  "passed": 5,
+  "failed": 0,
+  "total_duration_ms": 1.1,
+  "scenarios": [
+    {
+      "name": "radar_detection",
+      "passed": true,
+      "duration_ms": 0.1,
+      "metrics": {
+        "range_resolution_m": 0.75,
+        "test_separation_m": 0.7999999999999972,
+        "targets_resolved": true,
+        "false_alert_suppression_pct": 97.3,
+        "dual_radar_agreement_pct": 98.0,
+        "ai_inference_p95_ms": 9.12,
+        "max_front_targets": 128,
+        "max_rear_targets": 64
+      },
+      "failures": [],
+      "notes": "Dual AWR2944 FMCW radar simulation with AI signature classifier"
+    },
+    {
+      "name": "laser_alert",
+      "passed": true,
+      "duration_ms": 0.8,
+      "metrics": {
+        "sensor_angles_deg": [
+          0,
+          72,
+          144,
+          216,
+          288
+        ],
+        "max_coverage_gap_deg": 72,
+        "laser_alert_p95_ms": 7.93,
+        "laser_alert_p99_ms": 8.38,
+        "wavelength_904nm_detected": true,
+        "wavelength_1550nm_detected": true,
+        "max_dark_current_na": 7.18,
+        "snr_at_500m_db": 10.0
+      },
+      "failures": [],
+      "notes": "5\u00d7 InGaAs APD 360\u00b0 laser detection simulation"
+    },
+    {
+      "name": "v2x_pipeline",
+      "passed": true,
+      "duration_ms": 0.1,
+      "metrics": {
+        "bsm_broadcast_p95_ms": 9.51,
+        "v2x_range_m": 1000.0,
+        "fspl_db": 107.9,
+        "link_margin_db": 5.1,
+        "messages_verified": 100,
+        "spoofed_messages_rejected": 5,
+        "spat_processing_latency_ms": 48.6,
+        "spat_countdown_s": 12,
+        "cv2x_active": true,
+        "ieee_80211p_active": false,
+        "v2x_region": "US"
+      },
+      "failures": [],
+      "notes": "TEKTON3 C-V2X (PC5) pipeline with IEEE 1609.2 authentication; IEEE 802.11p disabled in the US configuration"
+    },
+    {
+      "name": "power_budget",
+      "passed": true,
+      "duration_ms": 0.0,
+      "metrics": {
+        "component_power_mw": {
+          "RK3588S (active)": 3500,
+          "AWR2944 front": 1200,
+          "AWR2944 rear": 1200,
+          "STM32H7B3": 150,
+          "AMOLED display (50% brightness)": 800,
+          "QCA6174A-5 (Wi-Fi 6 active)": 450,
+          "QCA6174A-5 (BT 5.3 active)": 120,
+          "TEKTON3 V2X": 850,
+          "NEO-M9N GPS": 35,
+          "TPS65219 PMIC (quiescent)": 25,
+          "5\u00d7 InGaAs APD + TIA": 250,
+          "ELM327 OBD-II": 80,
+          "Misc passives + regulators": 200
+        },
+        "total_power_w": 8.86,
+        "obd_current_a": 0.738,
+        "usbc_input_w": 9.75,
+        "standby_power_w": 0.29,
+        "rk3588_junction_temp_c": 77.5
+      },
+      "failures": [],
+      "notes": "Full system power budget analysis for OBD-II and USB-C operation"
+    },
+    {
+      "name": "ai_regression",
+      "passed": true,
+      "duration_ms": 0.1,
+      "metrics": {
+        "band_classification": {
+          "Ka": {
+            "classified": "Ka",
+            "correct": true
+          },
+          "K": {
+            "classified": "K",
+            "correct": true
+          },
+          "X": {
+            "classified": "X",
+            "correct": true
+          }
+        },
+        "false_alerts_suppressed": 3,
+        "false_alerts_total": 3,
+        "sensor_fusion_confidence": 1.0,
+        "obd_speed_kmh": 72.5,
+        "gps_speed_kmh": 73.1,
+        "speed_error_kmh": 0.6,
+        "alert_priority_correct": true,
+        "alert_latencies": [
+          {
+            "type": "laser_gun",
+            "priority": 1,
+            "latency_ms": 42
+          },
+          {
+            "type": "collision_warning",
+            "priority": 1,
+            "latency_ms": 85
+          },
+          {
+            "type": "emergency_vehicle",
+            "priority": 2,
+            "latency_ms": 180
+          },
+          {
+            "type": "speed_camera",
+            "priority": 3,
+            "latency_ms": 750
+          },
+          {
+            "type": "spat_countdown",
+            "priority": 4,
+            "latency_ms": 920
+          }
+        ]
+      },
+      "failures": [],
+      "notes": "AI classifier, sensor fusion, and alert pipeline regression"
+    }
+  ]
+}
