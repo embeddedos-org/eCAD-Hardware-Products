@@ -18,7 +18,7 @@
       "url": "https://dl.espressif.com/dl/schematics/esp32_devkitc_v4-sch.pdf",
       "verified_revision": null,
       "evidence": {
-        "captured_at": "2026-09-29T07:44:32Z",
+        "captured_at": "2026-11-23T09:30:22Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
         "sha256": "92961687b5fac64b8870ddc2f5e8528351e515b6cafd49e7d1bba4fb974a7349",
@@ -47,10 +47,19 @@
       "evidence": null
     },
     "mechanical": {
-      "available": null,
-      "url": null,
+      "available": true,
+      "url": "https://dl.espressif.com/dl/schematics/esp32_devkitc_v4_dimensions.dxf",
       "verified_revision": null,
-      "evidence": null
+      "evidence": {
+        "captured_at": "2026-11-23T09:30:24Z",
+        "producer_tool_id": "devboard-cad-verifier@0.1.0",
+        "http_status": 200,
+        "sha256": "130450f283a9bc2a47b77d33d2275286c5023aeaf53ca74d83f8a084b5ea60b0",
+        "size_bytes": 4106429,
+        "media_type": "image/vnd.dxf",
+        "detected_format": "dxf",
+        "verification_method": "http_get_magic"
+      }
     }
   },
   "licenses": {
