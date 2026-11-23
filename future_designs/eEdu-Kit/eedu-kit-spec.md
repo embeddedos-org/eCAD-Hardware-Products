@@ -66,8 +66,9 @@ Notes:
 - The BOM names no USB-C charger IC, no crystal/oscillator, no passives, no
   connectors, no PCB, and no printed lab notebook. The $28.50 is a parts sketch,
   not a buildable BOM — see §11.6.
-- The datasheet's "no FPU controversy" parenthetical on the MCU line is carried
-  verbatim; this spec makes no claim about it.
+- The datasheet's "no FPU controversy" parenthetical on the MCU line was removed
+  by this PR (it said nothing checkable — see #93); the MCU line now reads
+  "STM32H723 (Cortex-M7, 550 MHz)".
 
 ## 3. The two-lesson loop (E1)
 
@@ -160,7 +161,9 @@ The datasheet's BOM target "~$25" is wrong. `bom.csv` sums to **$28.50** at
 quantity 1 (recomputed live 2026-11-23: 5.40 + 1.90 + 7.10 + 2.20 + 0.30 +
 2.30 + 1.40 + 4.10 + 3.80). The business plan already says "~$28" at qty 1 —
 the datasheet headline is the outlier, not the BOM. **Corrected headline:
-$28.50 at qty 1.** The business plan's "~$15 at 5k" is a carried estimate, not
+$28.50 at qty 1.** The correction is applied to the datasheet itself in this
+PR (headline + "major parts only" note with the exclusions stated), which is
+what closes #93. The business plan's "~$15 at 5k" is a carried estimate, not
 a BOM fact — no 5k pricing exists in any source; do not quote it as costed.
 
 ### 6.2 Standards pin — PINNED
@@ -327,9 +330,11 @@ explicitly exclude.
 8. **Battery Regulation Art. 11:** tool-secured vs sealed compartment — legal
    read needed (§10).
 9. **UN 38.3:** verify the cell's transport-test summary before bulk shipment (§10).
-10. **RE2 remainder:** this spec executes the RE2 first gate (§6); the datasheet +
-    BOM refresh PR folds §6.1–§6.4 back into `product_datasheet.md` + `bom.csv`
-    (headline $28.50, AMD2 pin, OHL pick once decided, classroom arithmetic).
+10. **RE2 remainder — EXECUTED in this PR, not a follow-up:** the datasheet
+    headline is corrected to $28.50 (qty 1, major parts only) with the
+    exclusions stated, the AMD2 pin is added, and the business plan's BOM
+    lines carry the same qualifier — this closes #93. The CERN OHL pick
+    (§6.4) is still open and is not printed anywhere until decided.
 11. **G1–G5 pilot:** the 15-minute bars and 9/10 rates are PROPOSED until a
     10-teacher pilot measures them (§7).
 12. **RE4:** teacher-dashboard visibility shape — depends on E1/E3 + RE1; not
@@ -350,7 +355,9 @@ explicitly exclude.
 - Growth backlog **RE1** (teacher-runability gate, size S) — executed as the
   acceptance criteria in §7; the gate is specified, not satisfied.
 - Queue item **RE2** (datasheet refresh + AMD2 pin + BOM-headline correction,
-  size S) — first gate executed in §6; remainder is gap 10.
+  size S) — first gate executed in §6 and the refresh itself executed in this
+  PR (datasheet headline + standards pin; business-plan qualifiers), closing
+  #93; only the CERN OHL pick (§6.4) remains open.
 - Growth backlog **RE3** (H723 target contract, size M) — the named open gap,
   §8; not decided here.
 - Growth backlog **RE4** (teacher-dashboard visibility, size M) — future; gap 12.
