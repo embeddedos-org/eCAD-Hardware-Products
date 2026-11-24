@@ -184,6 +184,230 @@ def parse_step_header(payload: bytes) -> Dict[str, Optional[str]]:
     return out
 
 
+def parse_dxf_geometry(payload: bytes) -> Dict[str, Any]:
+    """Parse ASCII DXF payload, validating the ENTITIES section and overall file structure.
+
+    Extracts outline dimensions, dimension annotations, and geometry extents.
+    Raises ValueError if the DXF structure is truncated, malformed, or missing ENTITIES.
+    """
+    try:
+        text = payload.decode("utf-8")
+    except UnicodeDecodeError:
+        text = payload.decode("latin-1", errors="replace")
+
+    text = text.lstrip("\ufeff")
+    lines = [line.strip() for line in text.splitlines()]
+    if len(lines) < 2:
+        raise ValueError("DXF payload is empty or too short")
+
+    # Fast verification that file ends with 0 / EOF
+    has_eof = False
+    for i in range(len(lines) - 1, max(-1, len(lines) - 30), -1):
+        if lines[i] == "EOF" and i > 0 and lines[i - 1] == "0":
+            has_eof = True
+            break
+    if not has_eof:
+        raise ValueError("DXF file is truncated: missing 0 / EOF marker")
+
+    pairs: List[Tuple[int, str]] = []
+    i = 0
+    while i < len(lines) - 1:
+        code_str = lines[i]
+        val_str = lines[i + 1]
+        try:
+            code = int(code_str)
+        except ValueError:
+            raise ValueError(f"invalid DXF group code at line {i + 1}: {code_str!r}")
+        pairs.append((code, val_str))
+        i += 2
+        if code == 0 and val_str == "EOF":
+            break
+
+    # Locate sections: ENTITIES and optionally BLOCKS
+    entities_start = None
+    entities_end = None
+    in_section = False
+    current_sec = None
+    for idx, (code, val) in enumerate(pairs):
+        if code == 0 and val == "SECTION":
+            in_section = True
+        elif in_section and code == 2:
+            current_sec = val
+            if val == "ENTITIES":
+                entities_start = idx + 1
+            in_section = False
+        elif code == 0 and val == "ENDSEC":
+            if current_sec == "ENTITIES":
+                entities_end = idx
+                break
+            current_sec = None
+
+    if entities_start is None:
+        raise ValueError("DXF file missing ENTITIES section")
+    if entities_end is None:
+        raise ValueError("DXF file truncated: ENTITIES section missing ENDSEC")
+
+    dimensions: set[float] = set()
+    outline_points: List[Tuple[float, float]] = []
+    all_points: List[Tuple[float, float]] = []
+    unit: Optional[str] = None
+
+    # Check for unit in header variables
+    for idx, (code, val) in enumerate(pairs[:entities_start]):
+        if code == 9 and val == "$INSUNITS" and idx + 1 < len(pairs):
+            ins_code = pairs[idx + 1][1]
+            if ins_code == "4":
+                unit = "mm"
+            elif ins_code == "1":
+                unit = "in"
+
+    # Scan ENTITIES
+    k = entities_start
+    has_geometry = False
+    while k < entities_end:
+        code, val = pairs[k]
+        if code == 0:
+            etype = val
+            fields: Dict[int, List[str]] = {}
+            k += 1
+            while k < entities_end and pairs[k][0] != 0:
+                c, v = pairs[k]
+                fields.setdefault(c, []).append(v)
+                k += 1
+
+            layer = fields.get(8, ["0"])[0]
+
+            if etype == "DIMENSION":
+                has_geometry = True
+                for m in fields.get(42, []):
+                    try:
+                        dimensions.add(round(float(m), 2))
+                    except ValueError:
+                        pass
+                for t in fields.get(1, []):
+                    clean = re.sub(r"\\[A-Za-z0-9]+;", "", t).strip()
+                    m = re.search(r"[-+]?\d*\.?\d+", clean)
+                    if m:
+                        try:
+                            dimensions.add(round(float(m.group(0)), 2))
+                        except ValueError:
+                            pass
+            elif etype in ("TEXT", "MTEXT"):
+                for t in fields.get(1, []):
+                    if "unit:" in t.lower():
+                        u_m = re.search(r"unit:\s*([a-zA-Z]+)", t, re.IGNORECASE)
+                        if u_m:
+                            unit = u_m.group(1).lower()
+                    clean = re.sub(r"\\[A-Za-z0-9]+;", "", t).strip()
+                    m = re.search(r"^[-+]?\d*\.?\d+$", clean)
+                    if m:
+                        try:
+                            dimensions.add(round(float(m.group(0)), 2))
+                        except ValueError:
+                            pass
+            elif etype in ("LWPOLYLINE", "LINE", "ARC", "CIRCLE", "POLYLINE", "VERTEX"):
+                has_geometry = True
+                xs = [float(x) for x in fields.get(10, []) if re.match(r"^[-+]?\d*\.?\d+", x)]
+                ys = [float(y) for y in fields.get(20, []) if re.match(r"^[-+]?\d*\.?\d+", y)]
+                if etype == "LINE":
+                    xs += [float(x) for x in fields.get(11, []) if re.match(r"^[-+]?\d*\.?\d+", x)]
+                    ys += [float(y) for y in fields.get(21, []) if re.match(r"^[-+]?\d*\.?\d+", y)]
+                for x, y in zip(xs, ys):
+                    all_points.append((x, y))
+                    if layer in ("0", "OUTLINE", "BOARD_OUTLINE", "Edge.Cuts", "EDGE_CUTS"):
+                        outline_points.append((x, y))
+        else:
+            k += 1
+
+    if not has_geometry and not all_points:
+        raise ValueError("DXF ENTITIES section contains no valid geometry entities")
+
+    # Scan BLOCKS for anonymous dimension blocks (*D...) with MTEXT dimensions
+    in_blocks = False
+    for idx, (code, val) in enumerate(pairs):
+        if code == 0 and val == "SECTION" and idx + 1 < len(pairs) and pairs[idx + 1] == (2, "BLOCKS"):
+            in_blocks = True
+        elif in_blocks and code == 0 and val == "ENDSEC":
+            in_blocks = False
+        elif in_blocks and code == 1:
+            clean = re.sub(r"\\[A-Za-z0-9]+;", "", val).strip()
+            if re.match(r"^[-+]?\d*\.?\d+$", clean):
+                try:
+                    dimensions.add(round(float(clean), 2))
+                except ValueError:
+                    pass
+
+    pts = outline_points if outline_points else all_points
+    extents = None
+    outline_dim = None
+    if pts:
+        min_x = min(p[0] for p in pts)
+        max_x = max(p[0] for p in pts)
+        min_y = min(p[1] for p in pts)
+        max_y = max(p[1] for p in pts)
+        w = round(max_x - min_x, 2)
+        h = round(max_y - min_y, 2)
+        extents = {
+            "min_x": round(min_x, 2),
+            "min_y": round(min_y, 2),
+            "max_x": round(max_x, 2),
+            "max_y": round(max_y, 2),
+        }
+        outline_dim = {"width": w, "height": h, "unit": unit or "mm"}
+
+    return {
+        "outline_dimensions": outline_dim,
+        "dimension_annotations": sorted(list(dimensions)),
+        "extents": extents,
+    }
+
+
+def parse_dxf_revision(payload: bytes) -> Optional[str]:
+    """Scan DXF for explicit revision information.
+
+    Checks group 999 comments, header variables ($PROJECTNAME, $REV), and text annotations.
+    Returns None when the DXF genuinely carries no machine-verifiable revision.
+    """
+    text = payload[:65536].decode("latin-1", errors="replace")
+    for match in re.finditer(r"(?:^|[\r\n])\s*999\s*[\r\n]+([^\r\n]+)", text):
+        val = match.group(1).strip()
+        rev_m = re.search(r"\b(?:rev(?:ision)?|v)\s*[:#.-]?\s*([A-Za-z0-9_.-]+)", val, re.IGNORECASE)
+        if rev_m:
+            return rev_m.group(1).strip()
+    for var in ("$PROJECTNAME", "$REV", "$REVISION"):
+        m = re.search(rf"(?:^|[\r\n])\s*9\s*[\r\n]+\s*{re.escape(var)}\s*[\r\n]+\s*1\s*[\r\n]+([^\r\n]+)", text)
+        if m:
+            val = m.group(1).strip()
+            if val:
+                return val
+    return None
+
+
+def check_geometry_contradiction(parsed: Dict[str, Any], expected: Dict[str, Any]) -> Optional[str]:
+    """Return an error string if parsed geometry contradicts expected geometry from record."""
+    exp_outline = expected.get("outline_dimensions")
+    if exp_outline and parsed.get("outline_dimensions"):
+        exp_w = exp_outline.get("width")
+        exp_h = exp_outline.get("height")
+        got_w = parsed["outline_dimensions"].get("width")
+        got_h = parsed["outline_dimensions"].get("height")
+        if exp_w is not None and exp_h is not None and got_w is not None and got_h is not None:
+            direct_match = abs(got_w - exp_w) <= 0.05 and abs(got_h - exp_h) <= 0.05
+            rotated_match = abs(got_w - exp_h) <= 0.05 and abs(got_h - exp_w) <= 0.05
+            if not (direct_match or rotated_match):
+                return (f"outline dimensions ({got_w} x {got_h}) contradict record "
+                        f"({exp_w} x {exp_h})")
+
+    exp_annotations = expected.get("dimension_annotations")
+    if exp_annotations:
+        got_annotations = parsed.get("dimension_annotations") or []
+        for ann in exp_annotations:
+            if not any(abs(ann - g) <= 0.05 for g in got_annotations):
+                return f"expected dimension annotation {ann} not found in annotations {got_annotations}"
+
+    return None
+
+
 # --------------------------------------------------------------------------------------
 # what content is acceptable for each declared format
 # --------------------------------------------------------------------------------------
@@ -397,12 +621,15 @@ class Fetcher:
 
 class Verdict:
     def __init__(self, available: Optional[bool], evidence: Optional[Dict[str, Any]],
-                 reason: str, verified_revision: Optional[str] = None) -> None:
+                 reason: str, verified_revision: Optional[str] = None,
+                 verified_geometry: Optional[Dict[str, Any]] = None) -> None:
         self.available = available
         self.evidence = evidence
         self.reason = reason
-        # Set only when the retrieved file itself names the revision the record claims.
+        # Set only when the retrieved file itself names the revision the record claims,
+        # or an explicit format verdict (e.g. 'revision not machine-verifiable for dxf').
         self.verified_revision = verified_revision
+        self.verified_geometry = verified_geometry
 
 
 def _now() -> str:
@@ -429,7 +656,8 @@ def _archive_member(payload: bytes, format_name: str) -> Optional[str]:
 
 def classify(format_name: str, result: FetchResult,
              absent_on_404: bool = False,
-             claimed_revision: Optional[str] = None) -> Verdict:
+             claimed_revision: Optional[str] = None,
+             expected_geometry: Optional[Dict[str, Any]] = None) -> Verdict:
     """Turn one fetch into a tri-state availability determination plus its evidence.
 
     ``absent_on_404`` must only be set when the URL came from the vendor's own index or
@@ -483,6 +711,7 @@ def classify(format_name: str, result: FetchResult,
     evidence["detected_format"] = detected
     evidence["verification_method"] = "http_get_magic"
 
+    dxf_payload: Optional[bytes] = None
     if detected in _ARCHIVES:
         member = _archive_member(result.payload, format_name)
         if member is None:
@@ -497,21 +726,47 @@ def classify(format_name: str, result: FetchResult,
             if header["step_schema"]:
                 evidence["verification_method"] = "http_get_step_header"
                 evidence["detected_format"] = f"step:{header['step_schema']}"
+        inner_dxf = _dxf_payload_from_archive(result.payload, member)
+        if inner_dxf is not None:
+            dxf_payload = inner_dxf
     elif detected == "step":
         header = parse_step_header(result.payload)
         if header["step_schema"]:
             evidence["verification_method"] = "http_get_step_header"
             evidence["detected_format"] = f"step:{header['step_schema']}"
+    elif detected == "dxf":
+        dxf_payload = result.payload
+
+    verified_geometry: Optional[Dict[str, Any]] = None
+    if dxf_payload is not None:
+        try:
+            verified_geometry = parse_dxf_geometry(dxf_payload)
+        except ValueError as exc:
+            return Verdict(None, None, f"DXF geometry parsing failed: {exc}")
+
+        if expected_geometry:
+            contradiction = check_geometry_contradiction(verified_geometry, expected_geometry)
+            if contradiction:
+                return Verdict(None, None, f"DXF geometry contradicts record: {contradiction}")
+
+        evidence["verification_method"] = "http_get_dxf_geometry"
 
     member = evidence.get("contained_member")
+    probe = _text_probe(result.payload, member)
     revision = None
-    if claimed_revision and revision_corroborated(
-            _text_probe(result.payload, member), member, claimed_revision):
+    if claimed_revision and revision_corroborated(probe, member, claimed_revision):
         revision = claimed_revision
-    suffix = f"; revision '{revision}' corroborated by the file" if revision else ""
+        suffix = f"; revision '{revision}' corroborated by the file"
+    elif dxf_payload is not None:
+        revision = "revision not machine-verifiable for dxf"
+        suffix = "; revision not machine-verifiable for dxf"
+    else:
+        suffix = ""
+
     return Verdict(True, evidence,
                    f"retrieved and content-verified as '{detected}'{suffix}",
-                   verified_revision=revision)
+                   verified_revision=revision,
+                   verified_geometry=verified_geometry)
 
 
 def _text_probe(payload: bytes, member: Optional[str]) -> bytes:
@@ -520,6 +775,9 @@ def _text_probe(payload: bytes, member: Optional[str]) -> bytes:
         inner = _step_payload_from_archive(payload, member)
         if inner is not None:
             return inner
+        inner_dxf = _dxf_payload_from_archive(payload, member)
+        if inner_dxf is not None:
+            return inner_dxf
     return payload[:65536]
 
 
@@ -530,6 +788,16 @@ def _step_payload_from_archive(payload: bytes, member: str) -> Optional[bytes]:
         with zipfile.ZipFile(BytesIO(payload)) as archive:
             with archive.open(member) as handle:
                 return handle.read(65536)
+    except (zipfile.BadZipFile, KeyError, OSError):
+        return None
+
+
+def _dxf_payload_from_archive(payload: bytes, member: str) -> Optional[bytes]:
+    if not member.lower().endswith(".dxf"):
+        return None
+    try:
+        with zipfile.ZipFile(BytesIO(payload)) as archive:
+            return archive.read(member)
     except (zipfile.BadZipFile, KeyError, OSError):
         return None
 
@@ -550,6 +818,9 @@ def revision_corroborated(payload: bytes, member: Optional[str], revision: str) 
     for value in header.values():
         if value:
             haystacks.append(value.lower())
+    dxf_rev = parse_dxf_revision(payload)
+    if dxf_rev:
+        haystacks.append(dxf_rev.lower())
     return any(needle in h.replace(" ", "").replace("_", "-") for h in haystacks)
 
 
@@ -617,9 +888,12 @@ def verify_record(record: Dict[str, Any], fetcher: Fetcher,
     def check(target: Tuple[str, str]) -> Tuple[str, Verdict, bool]:
         name, url = target
         result = fetcher.get(url)
+        entry = record.get("files", {}).get(name, {})
+        expected_geom = entry.get("verified_geometry") or record.get("verified_geometry")
         return (name,
                 classify(name, result, absent_on_404=absent_on_404,
-                         claimed_revision=record.get("revision")),
+                         claimed_revision=record.get("revision"),
+                         expected_geometry=expected_geom),
                 result.from_cache)
 
     if jobs > 1 and len(targets) > 1:
@@ -642,16 +916,28 @@ def apply_outcomes(record: Dict[str, Any], outcomes: Iterable[Tuple[str, Verdict
     changed = 0
     for name, verdict in outcomes:
         entry = record["files"][name]
-        def snapshot() -> Tuple[Any, Any, Any]:
+        def snapshot() -> Tuple[Any, Any, Any, Any]:
             return (entry.get("available"),
                     (entry.get("evidence") or {}).get("sha256"),
-                    entry.get("verified_revision"))
+                    entry.get("verified_revision"),
+                    entry.get("verified_geometry"))
 
         before = snapshot()
+        # Preserve original capture timestamp if evidence digest and method did not change
+        if (entry.get("available") == verdict.available
+                and entry.get("evidence")
+                and verdict.evidence
+                and entry["evidence"].get("sha256") == verdict.evidence.get("sha256")
+                and entry["evidence"].get("verification_method") == verdict.evidence.get("verification_method")):
+            verdict.evidence["captured_at"] = entry["evidence"]["captured_at"]
+
         entry["available"] = verdict.available
         entry["evidence"] = verdict.evidence
         if verdict.verified_revision:
             entry["verified_revision"] = verdict.verified_revision
+        if verdict.verified_geometry:
+            entry["verified_geometry"] = verdict.verified_geometry
+            record["verified_geometry"] = verdict.verified_geometry
         if snapshot() != before:
             changed += 1
     record["record_status"] = derive_status(record)

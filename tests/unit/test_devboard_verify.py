@@ -38,6 +38,8 @@ from devboard_cad.verify import (  # noqa: E402
     derive_status,
     detect_format,
     is_binary_stl,
+    parse_dxf_geometry,
+    parse_dxf_revision,
     parse_step_header,
     revision_corroborated,
 )
@@ -51,6 +53,35 @@ STEP_BODY = (
     b"    'SwSTEP 2.0',\n    'SolidWorks 2021',\n    '' );\n"
     b"FILE_SCHEMA (( 'CONFIG_CONTROL_DESIGN' ));\n"
     b"ENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n"
+)
+GOOD_DXF_BODY = (
+    b"  0\nSECTION\n  2\nHEADER\n  0\nENDSEC\n"
+    b"  0\nSECTION\n  2\nENTITIES\n"
+    b"  0\nLINE\n  8\n0\n 10\n0.0\n 20\n0.0\n 11\n27.94\n 21\n0.0\n"
+    b"  0\nLINE\n  8\n0\n 10\n27.94\n 20\n0.0\n 11\n27.94\n 21\n48.26\n"
+    b"  0\nLINE\n  8\n0\n 10\n27.94\n 20\n48.26\n 11\n0.0\n 21\n48.26\n"
+    b"  0\nLINE\n  8\n0\n 10\n0.0\n 20\n48.26\n 11\n0.0\n 21\n0.0\n"
+    b"  0\nDIMENSION\n  8\n0\n 42\n48.26\n"
+    b"  0\nDIMENSION\n  8\n0\n 42\n27.94\n"
+    b"  0\nDIMENSION\n  8\n0\n 42\n2.54\n"
+    b"  0\nDIMENSION\n  8\n0\n 42\n18.00\n"
+    b"  0\nENDSEC\n"
+    b"  0\nEOF\n"
+)
+TRUNCATED_DXF_HEADER_ONLY = (
+    b"  0\nSECTION\n  2\nHEADER\n  9\n$ACADVER\n  1\nAC1015\n  0\nENDSEC\n"
+)
+CONTRADICTING_DXF_BODY = (
+    b"  0\nSECTION\n  2\nHEADER\n  0\nENDSEC\n"
+    b"  0\nSECTION\n  2\nENTITIES\n"
+    b"  0\nLINE\n  8\n0\n 10\n0.0\n 20\n0.0\n 11\n10.0\n 21\n0.0\n"
+    b"  0\nLINE\n  8\n0\n 10\n10.0\n 20\n0.0\n 11\n10.0\n 21\n20.0\n"
+    b"  0\nLINE\n  8\n0\n 10\n10.0\n 20\n20.0\n 11\n0.0\n 21\n20.0\n"
+    b"  0\nLINE\n  8\n0\n 10\n0.0\n 20\n20.0\n 11\n0.0\n 21\n0.0\n"
+    b"  0\nDIMENSION\n  8\n0\n 42\n10.0\n"
+    b"  0\nDIMENSION\n  8\n0\n 42\n20.0\n"
+    b"  0\nENDSEC\n"
+    b"  0\nEOF\n"
 )
 CLOUDFLARE = (
     b"<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title>"
@@ -211,6 +242,81 @@ class TestClassification(unittest.TestCase):
         record["record_status"] = derive_status(record)
         errors = list(Draft7Validator(schema).iter_errors(record))
         self.assertEqual(errors, [], errors[:1])
+
+    def test_good_dxf_parses_geometry_and_dimension_annotations(self) -> None:
+        verdict = classify("mechanical", _result(GOOD_DXF_BODY))
+        self.assertIs(verdict.available, True)
+        self.assertEqual(verdict.evidence["verification_method"], "http_get_dxf_geometry")
+        self.assertEqual(verdict.verified_revision, "revision not machine-verifiable for dxf")
+        self.assertIn("revision not machine-verifiable for dxf", verdict.reason)
+        self.assertIsNotNone(verdict.verified_geometry)
+        geom = verdict.verified_geometry
+        self.assertEqual(geom["outline_dimensions"]["width"], 27.94)
+        self.assertEqual(geom["outline_dimensions"]["height"], 48.26)
+        self.assertEqual(geom["dimension_annotations"], [2.54, 18.0, 27.94, 48.26])
+
+    def test_header_only_truncated_dxf_fails_verification(self) -> None:
+        """A header-only truncated DXF magic-matched before, but must now fail."""
+        verdict = classify("mechanical", _result(TRUNCATED_DXF_HEADER_ONLY))
+        self.assertIsNone(verdict.available)
+        self.assertIn("DXF geometry parsing failed", verdict.reason)
+
+    def test_dxf_geometry_contradicting_record_fails(self) -> None:
+        """A DXF whose geometry contradicts the expected record geometry fails."""
+        expected = {
+            "outline_dimensions": {"width": 27.94, "height": 48.26, "unit": "mm"},
+            "dimension_annotations": [48.26, 27.94, 2.54, 18.0],
+        }
+        verdict = classify("mechanical", _result(CONTRADICTING_DXF_BODY),
+                           expected_geometry=expected)
+        self.assertIsNone(verdict.available)
+        self.assertIn("contradicts record", verdict.reason)
+
+    def test_dxf_evidence_and_geometry_satisfies_schema(self) -> None:
+        schema = json.loads(
+            (REPO_ROOT / "schemas" / "devboard-cad" / "v1" /
+             "board-record.schema.json").read_text(encoding="utf-8")
+        )
+        record = json.loads(
+            (REPO_ROOT / "tools" / "devboard_cad" / "records" /
+             "espressif__esp32-devkitc-v4.json").read_text(encoding="utf-8")
+        )
+        verdict = classify("mechanical", _result(GOOD_DXF_BODY))
+        record["files"]["mechanical"] = {
+            "available": verdict.available,
+            "url": "https://vendor.invalid/esp32.dxf",
+            "verified_revision": verdict.verified_revision,
+            "evidence": verdict.evidence,
+            "verified_geometry": verdict.verified_geometry,
+        }
+        record["verified_geometry"] = verdict.verified_geometry
+        record["record_status"] = derive_status(record)
+        errors = list(Draft7Validator(schema).iter_errors(record))
+        self.assertEqual(errors, [], errors[:1])
+
+    def test_dxf_corroborates_revision_when_present(self) -> None:
+        dxf_with_rev = (
+            b"  0\nSECTION\n  2\nHEADER\n  999\nRevision: V4\n  0\nENDSEC\n"
+            b"  0\nSECTION\n  2\nENTITIES\n"
+            b"  0\nLINE\n  8\n0\n 10\n0.0\n 20\n0.0\n 11\n10.0\n 21\n10.0\n"
+            b"  0\nENDSEC\n  0\nEOF\n"
+        )
+        self.assertEqual(parse_dxf_revision(dxf_with_rev), "V4")
+        self.assertIsNone(parse_dxf_revision(GOOD_DXF_BODY))
+        verdict = classify("mechanical", _result(dxf_with_rev), claimed_revision="V4")
+        self.assertIs(verdict.available, True)
+        self.assertEqual(verdict.verified_revision, "V4")
+        self.assertIn("revision 'V4' corroborated", verdict.reason)
+
+    def test_esp32_devkitc_cached_dxf_geometry(self) -> None:
+        cache_file = Path("~/.cache/devboard-cad/f3c58e150928a94baa91560f99f3cb4f06cdbbf36124247a234778f3695b9a20.bin").expanduser()
+        if not cache_file.exists():
+            self.skipTest("cached ESP32 DXF not present")
+        geom = parse_dxf_geometry(cache_file.read_bytes())
+        self.assertEqual(geom["outline_dimensions"]["width"], 27.94)
+        self.assertEqual(geom["outline_dimensions"]["height"], 48.26)
+        for expected_ann in (48.26, 27.94, 2.54, 18.00):
+            self.assertIn(expected_ann, geom["dimension_annotations"])
 
 
 class TestFetchCache(unittest.TestCase):
