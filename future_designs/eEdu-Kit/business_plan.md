@@ -11,10 +11,15 @@ Imported $80 dev boards lock low-income classrooms out of embedded-systems educa
 
 | Line | Estimate |
 |---|---|
-| BOM (qty 1) | ~$28 |
-| BOM (qty 5k) | ~$15 |
+| BOM (qty 1, major parts only) | $28.50 |
+| BOM (qty 5k, major parts only) | ~$15 (estimate, not costed) |
 | Curriculum (12-week, video + workbook) | $25 K one-time |
 | Logistics (per classroom delivery) | ~$50/class |
+
+BOM figures are major parts only — they exclude the PCB, power (charger IC,
+regulator), connectors, passives, crystal/oscillator, USB-C cable, and printed
+lab notebook (see `eedu-kit-spec.md` §2, §9). Classroom arithmetic at qty-1
+pricing: 30 × $28.50 + $50 = $905, within the $1K tier.
 
 ## Regulatory path
 

@@ -22,7 +22,7 @@ $1 K — equip one classroom of 30 with kits and curriculum.
 
 ## Hardware sketch
 
-- STM32H723 (Cortex-M7, 550 MHz, no FPU controversy)
+- STM32H723 (Cortex-M7, 550 MHz)
 - 128×64 SSD1306 OLED display
 - BNO086 IMU + DHT22 T/RH + LDR + microphone (AI tutorial-ready)
 - Dual H-bridge motor driver (DRV8833) + servo header
@@ -40,10 +40,20 @@ $1 K — equip one classroom of 30 with kits and curriculum.
 
 ## BOM target
 
-~$25
+$28.50 at quantity 1 — major parts only (see [`bom.csv`](bom.csv)). The total
+excludes the PCB, power (charger IC, regulator), connectors, passives,
+crystal/oscillator, USB-C cable, and printed lab notebook; see
+[`eedu-kit-spec.md`](eedu-kit-spec.md) §2 and §11.5. At 5k volume the business
+plan estimates ~$15 (estimate, not costed).
 
 > Full BOM placeholder lives at [`bom.csv`](bom.csv). Schematics will be
 > added under `kicad/` when the design graduates from concept to draft.
+
+## Standards (design target)
+
+IEC 61010-1:2010 + AMD1:2016 + AMD2:2026 (FDIS, publication pending) — see
+[`eedu-kit-spec.md`](eedu-kit-spec.md) §6.2. RoHS; FCC Part 15B (USB-C only).
+This datasheet certifies nothing.
 
 ## Status
 
