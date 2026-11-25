@@ -15,7 +15,7 @@
 | Parameter | Specification |
 |---|---|
 | **MCU** | NXP i.MX 8M Plus (AI traffic optimization) |
-| **Connectivity** | 4G LTE, Wi-Fi 6, Ethernet, V2X |
+| **Connectivity** | 4G LTE, Wi-Fi 6, Ethernet, V2X (C-V2X, 3GPP PC5 sidelink; US 5.9 GHz band per FCC DA 25-125, ET Docket 19-138) |
 | **Sensors** | Radar vehicle detection, camera AI |
 | **Power** | 230VAC mains + UPS backup |
 | **Communication** | NTCIP 1202, SNMP, MQTT |
