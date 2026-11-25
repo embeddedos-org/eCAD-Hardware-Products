@@ -16,9 +16,9 @@
     "dxf": {
       "available": true,
       "url": "https://pip.raspberrypi.com/documents/RP-008352-DS",
-      "verified_revision": null,
+      "verified_revision": "revision not machine-verifiable for dxf",
       "evidence": {
-        "captured_at": "2026-09-29T07:21:03Z",
+        "captured_at": "2026-11-25T10:17:57Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
         "source_url": "https://pip-assets.raspberrypi.com/categories/576-raspberry-pi-model-b/documents/RP-008352-DS-1-raspberry-pi-b-plus-mechanical-drawing.dxf",
@@ -26,7 +26,19 @@
         "size_bytes": 731090,
         "media_type": "image/vnd.dxf",
         "detected_format": "dxf",
-        "verification_method": "http_get_magic"
+        "verification_method": "http_get_dxf_geometry"
+      },
+      "verified_geometry": {
+        "outline_dimensions": null,
+        "outline_source": "none",
+        "dimension_annotations": [],
+        "extents": {
+          "min_x": -2.33,
+          "min_y": -2.5,
+          "max_x": 87.0,
+          "max_y": 56.0
+        },
+        "extents_of": "all_entities"
       }
     },
     "mechanical": {
@@ -103,5 +115,17 @@
     "direct_gerber_download": null
   },
   "record_status": "partial",
-  "notes": "Candidate URLs curated from the manufacturer's official documentation; availability is decided by verify.py from retrieved bytes. Unlike a repository tree this list is not exhaustive, so formats absent from it are recorded as unknown rather than absent. URLs extracted from raspberrypi/documentation@b47f68f."
+  "notes": "Candidate URLs curated from the manufacturer's official documentation; availability is decided by verify.py from retrieved bytes. Unlike a repository tree this list is not exhaustive, so formats absent from it are recorded as unknown rather than absent. URLs extracted from raspberrypi/documentation@b47f68f.",
+  "verified_geometry": {
+    "outline_dimensions": null,
+    "outline_source": "none",
+    "dimension_annotations": [],
+    "extents": {
+      "min_x": -2.33,
+      "min_y": -2.5,
+      "max_x": 87.0,
+      "max_y": 56.0
+    },
+    "extents_of": "all_entities"
+  }
 }

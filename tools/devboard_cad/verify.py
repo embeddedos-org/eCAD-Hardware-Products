@@ -184,6 +184,16 @@ def parse_step_header(payload: bytes) -> Dict[str, Optional[str]]:
     return out
 
 
+# Layer names that assert "this is the board edge". Layer "0" is deliberately
+# absent: it is the DXF default layer, where sheet borders and title blocks
+# also land, so treating it as the outline reports the paper size as the board.
+OUTLINE_LAYERS = frozenset({
+    "OUTLINE", "BOARD_OUTLINE", "BOARDOUTLINE", "BOARD-OUTLINE",
+    "EDGE.CUTS", "EDGE_CUTS", "EDGECUTS", "EDGE",
+    "DIMENSION_OUTLINE", "PCB_OUTLINE", "CONTOUR", "MECHANICAL", "MECH",
+})
+
+
 def parse_dxf_geometry(payload: bytes) -> Dict[str, Any]:
     """Parse ASCII DXF payload, validating the ENTITIES section and overall file structure.
 
@@ -249,6 +259,7 @@ def parse_dxf_geometry(payload: bytes) -> Dict[str, Any]:
 
     dimensions: set[float] = set()
     outline_points: List[Tuple[float, float]] = []
+    zero_layer_points: List[Tuple[float, float]] = []
     all_points: List[Tuple[float, float]] = []
     unit: Optional[str] = None
 
@@ -314,8 +325,10 @@ def parse_dxf_geometry(payload: bytes) -> Dict[str, Any]:
                     ys += [float(y) for y in fields.get(21, []) if re.match(r"^[-+]?\d*\.?\d+", y)]
                 for x, y in zip(xs, ys):
                     all_points.append((x, y))
-                    if layer in ("0", "OUTLINE", "BOARD_OUTLINE", "Edge.Cuts", "EDGE_CUTS"):
+                    if layer.upper() in OUTLINE_LAYERS:
                         outline_points.append((x, y))
+                    elif layer == "0":
+                        zero_layer_points.append((x, y))
         else:
             k += 1
 
@@ -337,28 +350,62 @@ def parse_dxf_geometry(payload: bytes) -> Dict[str, Any]:
                 except ValueError:
                     pass
 
-    pts = outline_points if outline_points else all_points
-    extents = None
-    outline_dim = None
-    if pts:
-        min_x = min(p[0] for p in pts)
-        max_x = max(p[0] for p in pts)
-        min_y = min(p[1] for p in pts)
-        max_y = max(p[1] for p in pts)
-        w = round(max_x - min_x, 2)
-        h = round(max_y - min_y, 2)
-        extents = {
-            "min_x": round(min_x, 2),
-            "min_y": round(min_y, 2),
-            "max_x": round(max_x, 2),
-            "max_y": round(max_y, 2),
+    def _span(points: List[Tuple[float, float]]) -> Optional[Dict[str, Any]]:
+        if not points:
+            return None
+        min_x = min(p[0] for p in points)
+        max_x = max(p[0] for p in points)
+        min_y = min(p[1] for p in points)
+        max_y = max(p[1] for p in points)
+        return {
+            "min_x": round(min_x, 2), "min_y": round(min_y, 2),
+            "max_x": round(max_x, 2), "max_y": round(max_y, 2),
+            "width": round(max_x - min_x, 2), "height": round(max_y - min_y, 2),
         }
-        outline_dim = {"width": w, "height": h, "unit": unit or "mm"}
+
+    def _corroborated(span: Optional[Dict[str, Any]]) -> bool:
+        """The file's own dimension annotations state both figures."""
+        return bool(span) and span["width"] in dimensions and span["height"] in dimensions
+
+    # The extents of whatever was measured. With an outline layer these are the
+    # board; without one they are every entity in the file, which in a
+    # mechanical drawing includes the sheet border and the title block.
+    outline_span = _span(outline_points)
+    zero_span = _span(zero_layer_points)
+    all_span = _span(all_points)
+    measured = outline_span or all_span
+    extents_of = "outline_layer" if outline_points else "all_entities"
+
+    # Only call a span the board outline when the file itself says so. A board
+    # size guessed from drawing extents is wrong often enough to be useless:
+    # one vendor's silkscreen drawing yields its A3 sheet, 420 x 294 mm.
+    # Layer "0" is the DXF default layer, where some vendors put the board edge
+    # and others put the sheet border, so it counts only when the dimension
+    # annotations corroborate it.
+    if outline_span:
+        outline_source, chosen = "outline_layer", outline_span
+    elif _corroborated(zero_span):
+        outline_source, chosen = "layer_0_corroborated", zero_span
+    elif _corroborated(all_span):
+        outline_source, chosen = "dimension_annotations", all_span
+    else:
+        outline_source, chosen = "none", None
+
+    extents = None
+    if measured:
+        extents = {k: measured[k] for k in ("min_x", "min_y", "max_x", "max_y")}
+
+    outline_dim = None
+    if chosen:
+        outline_dim = {"width": chosen["width"], "height": chosen["height"],
+                       "unit": unit or "mm"}
 
     return {
         "outline_dimensions": outline_dim,
+        "outline_source": outline_source,
         "dimension_annotations": sorted(list(dimensions)),
         "extents": extents,
+        "extents_of": extents_of,
     }
 
 

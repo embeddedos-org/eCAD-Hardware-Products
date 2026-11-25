@@ -308,6 +308,73 @@ class TestClassification(unittest.TestCase):
         self.assertEqual(verdict.verified_revision, "V4")
         self.assertIn("revision 'V4' corroborated", verdict.reason)
 
+    def test_a_drawing_with_no_outline_layer_claims_no_outline(self) -> None:
+        """The extents of a mechanical drawing are not a board size.
+
+        One vendor ships its silkscreen on an A3 sheet, so the extents of every
+        entity are 420 x 294 mm -- the paper. Reporting that as the board
+        outline is worse than reporting nothing, so nothing is what it reports.
+        """
+        sheet = (
+            b"  0\nSECTION\n  2\nENTITIES\n"
+            # The sheet border, on the DXF default layer.
+            b"  0\nLWPOLYLINE\n  8\n0\n 10\n0.0\n 20\n0.0\n"
+            b"  0\nLWPOLYLINE\n  8\n0\n 10\n420.0\n 20\n294.0\n"
+            # The artwork, on a silkscreen layer, as these vendors ship it.
+            b"  0\nLINE\n  8\nSILK_TOP\n 10\n10.0\n 20\n10.0\n 11\n60.0\n 21\n40.0\n"
+            b"  0\nENDSEC\n  0\nEOF\n"
+        )
+        geom = parse_dxf_geometry(sheet)
+        self.assertIsNone(geom["outline_dimensions"])
+        self.assertEqual(geom["outline_source"], "none")
+        self.assertEqual(geom["extents_of"], "all_entities")
+        # The extents are still reported -- they are a true fact about the
+        # file. Only the claim that they are the board is withdrawn.
+        self.assertEqual(geom["extents"], {"min_x": 0.0, "min_y": 0.0,
+                                           "max_x": 420.0, "max_y": 294.0})
+
+    def test_a_named_outline_layer_is_the_board(self) -> None:
+        outlined = (
+            b"  0\nSECTION\n  2\nENTITIES\n"
+            b"  0\nLWPOLYLINE\n  8\n0\n 10\n-5.0\n 20\n-5.0\n"
+            b"  0\nLWPOLYLINE\n  8\nEdge.Cuts\n 10\n0.0\n 20\n0.0\n"
+            b"  0\nLWPOLYLINE\n  8\nEdge.Cuts\n 10\n85.0\n 20\n56.0\n"
+            b"  0\nENDSEC\n  0\nEOF\n"
+        )
+        geom = parse_dxf_geometry(outlined)
+        self.assertEqual(geom["outline_source"], "outline_layer")
+        self.assertEqual(geom["outline_dimensions"]["width"], 85.0)
+        self.assertEqual(geom["outline_dimensions"]["height"], 56.0)
+        # The stray layer-0 point outside the outline must not widen it.
+        self.assertEqual(geom["extents_of"], "outline_layer")
+
+    def test_layer_0_counts_only_when_the_annotations_corroborate_it(self) -> None:
+        """Some vendors put the board edge on layer 0 and others put the sheet
+        border there, so the file's own dimension annotations decide."""
+        body = (
+            b"  0\nSECTION\n  2\nENTITIES\n"
+            b"  0\nLWPOLYLINE\n  8\n0\n 10\n0.0\n 20\n0.0\n"
+            b"  0\nLWPOLYLINE\n  8\n0\n 10\n27.94\n 20\n48.26\n"
+            # Silkscreen overhangs the board, so all-entity extents are taller.
+            b"  0\nLINE\n  8\nSILK_TOP\n 10\n0.0\n 20\n0.0\n 11\n27.94\n 21\n55.25\n"
+            b"%s"
+            b"  0\nENDSEC\n  0\nEOF\n"
+        )
+        annotated = body % (
+            b"  0\nDIMENSION\n  8\nDIM\n  1\n27.94\n"
+            b"  0\nDIMENSION\n  8\nDIM\n  1\n48.26\n"
+        )
+        geom = parse_dxf_geometry(annotated)
+        self.assertEqual(geom["outline_source"], "layer_0_corroborated")
+        self.assertEqual(geom["outline_dimensions"]["width"], 27.94)
+        self.assertEqual(geom["outline_dimensions"]["height"], 48.26)
+
+        # Same geometry, no annotations: the identical layer-0 span is now
+        # unsupported, so no outline is claimed.
+        bare = parse_dxf_geometry(body % b"")
+        self.assertIsNone(bare["outline_dimensions"])
+        self.assertEqual(bare["outline_source"], "none")
+
     def test_esp32_devkitc_cached_dxf_geometry(self) -> None:
         cache_file = Path("~/.cache/devboard-cad/f3c58e150928a94baa91560f99f3cb4f06cdbbf36124247a234778f3695b9a20.bin").expanduser()
         if not cache_file.exists():

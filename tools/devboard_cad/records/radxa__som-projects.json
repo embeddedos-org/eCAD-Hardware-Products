@@ -37,16 +37,58 @@
     "dxf": {
       "available": true,
       "url": "https://raw.githubusercontent.com/radxa/radxa-som-projects/cf5a4b1984fb4321233d2439320bcaea05af4817/c200/radxa-c200/radxa_c200_2d_bot_v1.11.dxf",
-      "verified_revision": null,
+      "verified_revision": "revision not machine-verifiable for dxf",
       "evidence": {
-        "captured_at": "2026-09-29T08:38:59Z",
+        "captured_at": "2026-11-25T10:17:56Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
         "sha256": "1403198831d2f5bee169bfdb614839a958ddcebfcd7a1efb3cae33aad1103588",
         "size_bytes": 24777414,
         "media_type": "text/plain",
         "detected_format": "dxf",
-        "verification_method": "http_get_magic"
+        "verification_method": "http_get_dxf_geometry"
+      },
+      "verified_geometry": {
+        "outline_dimensions": null,
+        "outline_source": "none",
+        "dimension_annotations": [
+          1.0,
+          3.0,
+          5.0,
+          7.0,
+          8.0,
+          10.0,
+          11.0,
+          12.0,
+          13.0,
+          15.0,
+          16.0,
+          18.0,
+          19.0,
+          21.0,
+          22.0,
+          23.0,
+          24.0,
+          26.0,
+          27.0,
+          28.0,
+          29.0,
+          31.0,
+          32.0,
+          33.0,
+          35.0,
+          36.0,
+          37.0,
+          38.0,
+          40.0
+        ],
+        "extents": {
+          "min_x": 0.02,
+          "min_y": -79.01,
+          "max_x": 100.02,
+          "max_y": -0.01
+        },
+        "extents_of": "all_entities"
       }
     },
     "eagle": {
@@ -208,5 +250,47 @@
     "direct_gerber_download": null
   },
   "record_status": "partial",
-  "notes": "File candidates harvested from the manufacturer's official repository radxa/radxa-som-projects pinned at cf5a4b1984fb. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware."
+  "notes": "File candidates harvested from the manufacturer's official repository radxa/radxa-som-projects pinned at cf5a4b1984fb. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware.",
+  "verified_geometry": {
+    "outline_dimensions": null,
+    "outline_source": "none",
+    "dimension_annotations": [
+      1.0,
+      3.0,
+      5.0,
+      7.0,
+      8.0,
+      10.0,
+      11.0,
+      12.0,
+      13.0,
+      15.0,
+      16.0,
+      18.0,
+      19.0,
+      21.0,
+      22.0,
+      23.0,
+      24.0,
+      26.0,
+      27.0,
+      28.0,
+      29.0,
+      31.0,
+      32.0,
+      33.0,
+      35.0,
+      36.0,
+      37.0,
+      38.0,
+      40.0
+    ],
+    "extents": {
+      "min_x": 0.02,
+      "min_y": -79.01,
+      "max_x": 100.02,
+      "max_y": -0.01
+    },
+    "extents_of": "all_entities"
+  }
 }

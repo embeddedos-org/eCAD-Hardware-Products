@@ -43,16 +43,28 @@
     "dxf": {
       "available": true,
       "url": "https://raw.githubusercontent.com/m5stack/M5_Hardware/a240115c94b19ecf647f229c47fa9a8ce46ccdc4/Common/Unit_Type_A/Structures/Unit_Type_A.dxf",
-      "verified_revision": null,
+      "verified_revision": "revision not machine-verifiable for dxf",
       "evidence": {
-        "captured_at": "2026-09-29T08:38:38Z",
+        "captured_at": "2026-11-25T10:17:56Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
         "sha256": "7988e6f792f2878fb432d2605d89b3ce2fb86c10ad0e36183a3cfa7bf9c53b31",
         "size_bytes": 17778,
         "media_type": "text/plain",
         "detected_format": "dxf",
-        "verification_method": "http_get_magic"
+        "verification_method": "http_get_dxf_geometry"
+      },
+      "verified_geometry": {
+        "outline_dimensions": null,
+        "outline_source": "none",
+        "dimension_annotations": [],
+        "extents": {
+          "min_x": -10.3,
+          "min_y": -10.3,
+          "max_x": 10.3,
+          "max_y": 10.3
+        },
+        "extents_of": "all_entities"
       }
     },
     "eagle": {
@@ -244,5 +256,17 @@
     "direct_gerber_download": null
   },
   "record_status": "partial",
-  "notes": "File candidates harvested from the manufacturer's official repository m5stack/M5_Hardware pinned at a240115c94b1. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware. Hardware licence read from the SPDX licence GitHub detects for m5stack/M5_Hardware."
+  "notes": "File candidates harvested from the manufacturer's official repository m5stack/M5_Hardware pinned at a240115c94b1. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware. Hardware licence read from the SPDX licence GitHub detects for m5stack/M5_Hardware.",
+  "verified_geometry": {
+    "outline_dimensions": null,
+    "outline_source": "none",
+    "dimension_annotations": [],
+    "extents": {
+      "min_x": -10.3,
+      "min_y": -10.3,
+      "max_x": 10.3,
+      "max_y": 10.3
+    },
+    "extents_of": "all_entities"
+  }
 }

@@ -43,16 +43,28 @@
     "dxf": {
       "available": true,
       "url": "https://raw.githubusercontent.com/Seeed-Studio/OSHW-WioTerminal/c9192a3c7aeb40c7d3c09e5397f0a531f2847d0c/Design%20Files%20in%20Wio%20Terminal%20Wiki/Wio-Terminal/Wio-Terminal-PCB-V3.0.dxf",
-      "verified_revision": null,
+      "verified_revision": "revision not machine-verifiable for dxf",
       "evidence": {
-        "captured_at": "2026-09-29T07:23:25Z",
+        "captured_at": "2026-11-25T10:17:57Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
         "sha256": "5f238dd626e41b98b29d659c6b0e3d91e909e6fbe73a346a33683c0073d87ff3",
         "size_bytes": 133045,
         "media_type": "text/plain",
         "detected_format": "dxf",
-        "verification_method": "http_get_magic"
+        "verification_method": "http_get_dxf_geometry"
+      },
+      "verified_geometry": {
+        "outline_dimensions": null,
+        "outline_source": "none",
+        "dimension_annotations": [],
+        "extents": {
+          "min_x": 1.36,
+          "min_y": 0.97,
+          "max_x": 69.36,
+          "max_y": 53.47
+        },
+        "extents_of": "all_entities"
       }
     },
     "eagle": {
@@ -217,5 +229,17 @@
     "direct_gerber_download": null
   },
   "record_status": "partial",
-  "notes": "File candidates harvested from the manufacturer's official repository Seeed-Studio/OSHW-WioTerminal pinned at c9192a3c7aeb. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware. Hardware licence read from the SPDX licence GitHub detects for Seeed-Studio/OSHW-WioTerminal."
+  "notes": "File candidates harvested from the manufacturer's official repository Seeed-Studio/OSHW-WioTerminal pinned at c9192a3c7aeb. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware. Hardware licence read from the SPDX licence GitHub detects for Seeed-Studio/OSHW-WioTerminal.",
+  "verified_geometry": {
+    "outline_dimensions": null,
+    "outline_source": "none",
+    "dimension_annotations": [],
+    "extents": {
+      "min_x": 1.36,
+      "min_y": 0.97,
+      "max_x": 69.36,
+      "max_y": 53.47
+    },
+    "extents_of": "all_entities"
+  }
 }

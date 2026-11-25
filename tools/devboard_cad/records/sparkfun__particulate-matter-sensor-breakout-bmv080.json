@@ -44,19 +44,10 @@
       }
     },
     "dxf": {
-      "available": true,
+      "available": null,
       "url": "https://raw.githubusercontent.com/sparkfun/SparkFun_Particulate_Matter_Sensor_Breakout_BMV080/9b743ece12fa7d6a445bf179f87f604dbc85621a/Hardware/HMV080_2D_Dimensional_top_down-Sketch.dxf",
       "verified_revision": null,
-      "evidence": {
-        "captured_at": "2026-09-29T07:21:14Z",
-        "producer_tool_id": "devboard-cad-verifier@0.1.0",
-        "http_status": 200,
-        "sha256": "1c340bf411f44d5e79d6e96123923f3c75b2e8ed0a85497020c0b56ea1bb7247",
-        "size_bytes": 2331,
-        "media_type": "text/plain",
-        "detected_format": "dxf",
-        "verification_method": "http_get_magic"
-      }
+      "evidence": null
     },
     "eagle": {
       "available": false,

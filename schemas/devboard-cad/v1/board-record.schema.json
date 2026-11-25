@@ -592,28 +592,52 @@
       "additionalProperties": false,
       "properties": {
         "outline_dimensions": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "width",
-            "height"
-          ],
-          "properties": {
-            "width": {
-              "type": "number",
-              "minimum": 0
+          "description": "The board outline, present only when the drawing itself supports the claim; see outline_source. Null when the file carries no evidence of which geometry is the board edge -- the extents of a mechanical drawing include its sheet border and title block, so they are not a board size.",
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "width",
+                "height"
+              ],
+              "properties": {
+                "width": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "height": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "unit": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
             },
-            "height": {
-              "type": "number",
-              "minimum": 0
-            },
-            "unit": {
-              "type": [
-                "string",
-                "null"
-              ]
+            {
+              "type": "null"
             }
-          }
+          ]
+        },
+        "outline_source": {
+          "description": "What in the drawing supports outline_dimensions: a layer that names itself the board edge, layer 0 corroborated by the file's own dimension annotations, the annotations alone, or nothing.",
+          "enum": [
+            "outline_layer",
+            "layer_0_corroborated",
+            "dimension_annotations",
+            "none"
+          ]
+        },
+        "extents_of": {
+          "description": "What the extents measure: a named outline layer, or every entity in the file.",
+          "enum": [
+            "outline_layer",
+            "all_entities"
+          ]
         },
         "dimension_annotations": {
           "type": "array",

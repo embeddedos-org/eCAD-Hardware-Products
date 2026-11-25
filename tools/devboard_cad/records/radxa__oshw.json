@@ -41,19 +41,10 @@
       }
     },
     "dxf": {
-      "available": true,
+      "available": null,
       "url": "https://raw.githubusercontent.com/radxa/oshw/788eeb051d01400a959d5243f0adb3a1bd3ebe03/rock_pro/02.DXF/radxa_rock_pro.dxf",
       "verified_revision": null,
-      "evidence": {
-        "captured_at": "2026-09-29T07:20:00Z",
-        "producer_tool_id": "devboard-cad-verifier@0.1.0",
-        "http_status": 200,
-        "sha256": "6f2ac50be02c89a55cd0d14cdbde00c4d6e81e343a630056658e2cbd2cd6ec79",
-        "size_bytes": 3681316,
-        "media_type": "application/octet-stream",
-        "detected_format": "dxf",
-        "verification_method": "http_get_magic"
-      }
+      "evidence": null
     },
     "eagle": {
       "available": null,
