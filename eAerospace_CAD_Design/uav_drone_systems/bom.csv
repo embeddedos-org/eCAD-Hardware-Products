@@ -7,11 +7,11 @@ U5,1,Mid-360,Custom,Livox,Mid-360,Solid-state 360 LiDAR,599.00,599.00,Livox
 U6,3,IMX678,CSP,Sony,IMX678,4K CMOS image sensor,45.00,135.00,Mouser
 U7,1,SX1276,QFN28,Semtech,SX1276IMLTRT,900MHz LoRa transceiver,3.50,3.50,Mouser
 U8,1,EC25-AF,LGA,Quectel,EC25AFFA-512-STD,4G LTE Cat 4 module,18.00,18.00,Mouser
-U9,1,TEKTON3,QFN,Autotalks,TEKTON3,V2X C-V2X transceiver (dual-mode chipset; DSRC not used in the US),120.00,120.00,Digi-Key
+U9,1,TEKTON3-B,BGA-196,Autotalks,TEKTON3-B,C-V2X PC5 transceiver (dual-mode chipset; 802.11p not used in US configurations),18.50,18.50,Digi-Key
 U10,8,TLE9879QXA40,QFN,Infineon,TLE9879QXA40,Motor driver IC,12.50,100.00,Mouser
 U11,1,ATECC608B,UDFN8,Microchip,ATECC608B-MAHDA-T,Crypto co-processor,0.95,0.95,Mouser
 U12,4,INA3221,WSON10,Texas Instruments,INA3221AIRGVR,Triple-ch power monitor,3.20,12.80,Mouser
 J1,1,XT90-S,Through-hole,Amass,XT90-S-M,Battery connector 90A,2.50,2.50,Amazon
 C1,30,100nF,0402,Murata,GRM155R71C104KA88D,100nF decoupling,0.02,0.60,Mouser
 R1,15,10k,0402,Yageo,RC0402FR-0710KL,10kΩ resistor,0.01,0.15,Mouser
-TOTAL,,,,,,,1442.50,,Approximate BOM cost
+TOTAL,,,,,,,1341.00,,Approximate BOM cost
