@@ -49,16 +49,41 @@
     "mechanical": {
       "available": true,
       "url": "https://dl.espressif.com/dl/schematics/esp32_devkitc_v4_dimensions.dxf",
-      "verified_revision": null,
+      "verified_revision": "revision not machine-verifiable for dxf",
       "evidence": {
-        "captured_at": "2026-11-23T09:30:24Z",
+        "captured_at": "2026-11-24T05:08:05Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
         "sha256": "130450f283a9bc2a47b77d33d2275286c5023aeaf53ca74d83f8a084b5ea60b0",
         "size_bytes": 4106429,
         "media_type": "image/vnd.dxf",
         "detected_format": "dxf",
-        "verification_method": "http_get_magic"
+        "verification_method": "http_get_dxf_geometry"
+      },
+      "verified_geometry": {
+        "outline_dimensions": {
+          "width": 27.94,
+          "height": 48.26,
+          "unit": "mm"
+        },
+        "outline_source": "layer_0_corroborated",
+        "dimension_annotations": [
+          1.29,
+          1.3,
+          2.54,
+          6.04,
+          18.0,
+          25.4,
+          27.94,
+          48.26
+        ],
+        "extents": {
+          "min_x": 500.0,
+          "min_y": 399.05,
+          "max_x": 527.94,
+          "max_y": 454.3
+        },
+        "extents_of": "all_entities"
       }
     }
   },
@@ -85,5 +110,30 @@
     "direct_gerber_download": null
   },
   "record_status": "partial",
-  "notes": "Candidate URLs curated from the manufacturer's official documentation; availability is decided by verify.py from retrieved bytes. Unlike a repository tree this list is not exhaustive, so formats absent from it are recorded as unknown rather than absent."
+  "notes": "Candidate URLs curated from the manufacturer's official documentation; availability is decided by verify.py from retrieved bytes. Unlike a repository tree this list is not exhaustive, so formats absent from it are recorded as unknown rather than absent.",
+  "verified_geometry": {
+    "outline_dimensions": {
+      "width": 27.94,
+      "height": 48.26,
+      "unit": "mm"
+    },
+    "outline_source": "layer_0_corroborated",
+    "dimension_annotations": [
+      1.29,
+      1.3,
+      2.54,
+      6.04,
+      18.0,
+      25.4,
+      27.94,
+      48.26
+    ],
+    "extents": {
+      "min_x": 500.0,
+      "min_y": 399.05,
+      "max_x": 527.94,
+      "max_y": 454.3
+    },
+    "extents_of": "all_entities"
+  }
 }

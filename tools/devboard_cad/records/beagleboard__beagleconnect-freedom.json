@@ -58,16 +58,63 @@
     "dxf": {
       "available": true,
       "url": "https://raw.githubusercontent.com/beagleboard/beagleconnect-freedom/3f99c08de7d81991f95eb2c23f30798a129ffdcf/case/mechanical%20design/BeagleConnect_B_PCB_Placement_v2.0.dxf",
-      "verified_revision": null,
+      "verified_revision": "revision not machine-verifiable for dxf",
       "evidence": {
-        "captured_at": "2026-09-29T07:16:02Z",
+        "captured_at": "2026-11-25T10:17:56Z",
         "producer_tool_id": "devboard-cad-verifier@0.1.0",
         "http_status": 200,
         "sha256": "cb42cd048f67f342453edb547e7a9f3ca386a6d4175fbedf3aaadc39c04dfb98",
         "size_bytes": 2623692,
         "media_type": "application/octet-stream",
         "detected_format": "dxf",
-        "verification_method": "http_get_magic"
+        "verification_method": "http_get_dxf_geometry"
+      },
+      "verified_geometry": {
+        "outline_dimensions": null,
+        "outline_source": "none",
+        "dimension_annotations": [
+          0.95,
+          1.0,
+          1.6,
+          2.0,
+          2.3,
+          2.5,
+          3.0,
+          4.0,
+          4.07,
+          4.1,
+          4.3,
+          4.9,
+          5.0,
+          5.5,
+          6.0,
+          7.0,
+          7.1,
+          7.45,
+          7.5,
+          9.9,
+          11.49,
+          11.5,
+          12.5,
+          12.54,
+          21.86,
+          21.9,
+          25.0,
+          25.04,
+          30.0,
+          35.0,
+          43.08,
+          48.01,
+          58.29,
+          68.66
+        ],
+        "extents": {
+          "min_x": -41.14,
+          "min_y": -37.09,
+          "max_x": 378.86,
+          "max_y": 256.91
+        },
+        "extents_of": "all_entities"
       }
     },
     "eagle": {
@@ -256,5 +303,52 @@
     "direct_gerber_download": null
   },
   "record_status": "partial",
-  "notes": "File candidates harvested from the manufacturer's official repository beagleboard/beagleconnect-freedom pinned at 3f99c08de7d8. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware. Hardware licence read from the SPDX licence GitHub detects for beagleboard/beagleconnect-freedom."
+  "notes": "File candidates harvested from the manufacturer's official repository beagleboard/beagleconnect-freedom pinned at 3f99c08de7d8. Availability is decided by verify.py from retrieved bytes, never from this index. Licensing is left unverified until the vendor's terms have been read; a GitHub SPDX tag describes the repository, not necessarily the hardware. Hardware licence read from the SPDX licence GitHub detects for beagleboard/beagleconnect-freedom.",
+  "verified_geometry": {
+    "outline_dimensions": null,
+    "outline_source": "none",
+    "dimension_annotations": [
+      0.95,
+      1.0,
+      1.6,
+      2.0,
+      2.3,
+      2.5,
+      3.0,
+      4.0,
+      4.07,
+      4.1,
+      4.3,
+      4.9,
+      5.0,
+      5.5,
+      6.0,
+      7.0,
+      7.1,
+      7.45,
+      7.5,
+      9.9,
+      11.49,
+      11.5,
+      12.5,
+      12.54,
+      21.86,
+      21.9,
+      25.0,
+      25.04,
+      30.0,
+      35.0,
+      43.08,
+      48.01,
+      58.29,
+      68.66
+    ],
+    "extents": {
+      "min_x": -41.14,
+      "min_y": -37.09,
+      "max_x": 378.86,
+      "max_y": 256.91
+    },
+    "extents_of": "all_entities"
+  }
 }

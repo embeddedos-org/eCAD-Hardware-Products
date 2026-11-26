@@ -88,6 +88,9 @@ def validate(root: Path) -> List[str]:
                 problems.append(
                     f"{path.name}: {name}: unknown must not carry evidence, or 'we have not "
                     f"looked' becomes indistinguishable from 'we looked and it is absent'")
+            if entry.get("available") is None and entry.get("verified_geometry") is not None:
+                problems.append(
+                    f"{path.name}: {name}: unknown must not carry verified_geometry")
 
         problems.extend(_licence_problems(path.name, record))
 
