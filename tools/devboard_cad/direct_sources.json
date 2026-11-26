@@ -286,7 +286,8 @@
       "official_documentation": "https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-devkitc.html",
       "index_ref": null,
       "files": {
-        "schematic": "https://dl.espressif.com/dl/schematics/esp32_devkitc_v4-sch.pdf"
+        "schematic": "https://dl.espressif.com/dl/schematics/esp32_devkitc_v4-sch.pdf",
+        "mechanical": "https://dl.espressif.com/dl/schematics/esp32_devkitc_v4_dimensions.dxf"
       }
     },
     {
